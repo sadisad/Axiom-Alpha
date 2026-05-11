@@ -153,17 +153,34 @@
       <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
-        {"exchanges":[],"dataSource":"SPX500","grouping":"sector","blockSize":"market_cap_basic","blockColor":"Perf.YTD","locale":"en","symbolUrl":"","colorTheme":"dark","hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"isMonoSize":false,"width":"100%","height":"100%"}
+        {"exchanges":[],"dataSource":"SPX500","grouping":"sector","blockSize":"market_cap_basic","blockColor":"Perf.YTD","locale":"en","symbolUrl":"","colorTheme":"dark","hasTopBar":true,"isDataSetEnabled":true,"isZoomEnabled":true,"hasSymbolTooltip":true,"isMonoSize":false,"width":"100%","height":"100%"}
         </script>
       </div>
     </div>
     <!-- Legend -->
-    <div class="hm-legend" style="padding:0.5rem 1.25rem;">
-      <div style="display:flex;align-items:center;gap:0.4rem;">
-        <div class="hm-legend-bar" style="background:linear-gradient(to right, #ef4444, #0d0645, #10b981);"></div>
-        <span id="legend-label">Negative ← → Positive</span>
+    <div style="padding:0.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="hm-legend-bar" style="background:linear-gradient(to right, #dc2626, #b91c1c, #991b1b, #7f1d1d);width:40px;height:10px;border-radius:3px;"></div>
+            <div style="font-size:0.6rem;color:#ef4444;font-weight:700;text-align:right;" id="legend-neg">-50%</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="hm-legend-bar" style="background:linear-gradient(to right, #991b1b, #4a1a6b, #1a1a4e, #0d0645, #064e3b);width:120px;height:10px;border-radius:3px;"></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text-secondary);">
+              <span id="legend-neg-mid">-20%</span><span>0</span><span id="legend-pos-mid">+20%</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="hm-legend-bar" style="background:linear-gradient(to right, #065f46, #047857, #10b981, #34d399);width:40px;height:10px;border-radius:3px;"></div>
+            <div style="font-size:0.6rem;color:#10b981;font-weight:700;" id="legend-pos">+50%</div>
+          </div>
+        </div>
       </div>
-      <span>Block size = Market Cap</span>
+      <div style="display:flex;align-items:center;gap:1rem;font-size:0.72rem;color:var(--text-secondary);">
+        <span>Block size = Market Cap</span>
+        <span>Click block to analyze</span>
+      </div>
     </div>
   </div>
 
@@ -234,8 +251,17 @@ function toggleMonoSize(v,el){
 function updateLegend(){
   var m=currentMetric;
   var pctMetrics=['change','Perf.W','Perf.1M','Perf.3M','Perf.6M','Perf.YTD','Perf.Y','Perf.5Y'];
-  var lbl=(metricLabels[m]||m);
-  document.getElementById('legend-label').textContent=pctMetrics.indexOf(m)>=0?'Negative ← → Positive':'Low ← → High';
+  if(pctMetrics.indexOf(m)>=0){
+    document.getElementById('legend-neg').textContent='-50%';
+    document.getElementById('legend-neg-mid').textContent='-20%';
+    document.getElementById('legend-pos-mid').textContent='+20%';
+    document.getElementById('legend-pos').textContent='+50%';
+  } else {
+    document.getElementById('legend-neg').textContent='Low';
+    document.getElementById('legend-neg-mid').textContent='';
+    document.getElementById('legend-pos-mid').textContent='Mid';
+    document.getElementById('legend-pos').textContent='High';
+  }
 }
 
 function updateMap(){
@@ -253,7 +279,7 @@ function updateMap(){
     "exchanges":[],"dataSource":currentSource,"grouping":currentGrouping,
     "blockSize":"market_cap_basic","blockColor":currentMetric,
     "locale":"en","symbolUrl":"","colorTheme":"dark",
-    "hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,
+    "hasTopBar":true,"isDataSetEnabled":true,"isZoomEnabled":true,
     "hasSymbolTooltip":true,"isMonoSize":monoSize,
     "width":"100%","height":"100%"
   });
