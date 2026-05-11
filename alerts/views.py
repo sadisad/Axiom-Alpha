@@ -178,8 +178,12 @@ def portfolios(request):
     if request.user.is_authenticated:
         uid = request.user.pk
         portfolio_items = []
+        total_value = 0
+        total_cost = 0
+        total_pnl = 0
+        first_symbol = 'SPY'
         positions = get_portfolio(uid)
-        for pos in positions:
+        for idx, pos in enumerate(positions):
             try:
                 process_sym = pos['symbol']
                 if pos.get('market') == 'ID' and not process_sym.endswith('.JK'):
@@ -204,6 +208,11 @@ def portfolios(request):
                     'pnl_pct': round(pnl_pct, 2),
                     'is_positive': pnl >= 0,
                 })
+                total_value += current_value
+                total_cost += cost_basis
+                total_pnl += pnl
+                if idx == 0:
+                    first_symbol = pos['symbol']
             except Exception:
                 portfolio_items.append({
                     'id': pos['id'],
@@ -214,7 +223,20 @@ def portfolios(request):
                     'cost_basis': float(pos['quantity']) * float(pos['buy_price']),
                     'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
                 })
+                total_cost += float(pos['quantity']) * float(pos['buy_price'])
+                if idx == 0:
+                    first_symbol = pos['symbol']
         context['portfolio_items'] = portfolio_items
+        context['total_value'] = round(total_value, 2)
+        context['total_cost'] = round(total_cost, 2)
+        context['total_pnl'] = round(total_pnl, 2)
+        context['total_pnl_pct'] = round((total_pnl / total_cost * 100) if total_cost else 0, 2)
+        context['total_pnl_positive'] = total_pnl >= 0
+        first_mkt = positions[0].get('market', 'US') if positions else 'US'
+        if first_mkt == 'ID':
+            context['chart_symbol'] = f"IDX:{first_symbol}"
+        else:
+            context['chart_symbol'] = first_symbol
     return render(request, 'alerts/portfolios.html', context)
 
 

@@ -24,7 +24,8 @@
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;">
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total Value</div>
-        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">${% widthratio portfolio_items|length 1 1 %}</div>
+        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">${{ total_value }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">Cost ${{ total_cost }}</div>
       </div>
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Positions</div>
@@ -32,8 +33,8 @@
       </div>
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total P&L</div>
-        {% load math_filters %}
-        <div style="font-size:1.6rem; font-weight:800;">—</div>
+        <div style="font-size:1.6rem; font-weight:800; color:{% if total_pnl_positive %}var(--success){% else %}var(--danger){% endif %};">{% if total_pnl_positive %}+{% endif %}${{ total_pnl }}</div>
+        <div style="font-size:0.75rem; color:{% if total_pnl_positive %}var(--success){% else %}var(--danger){% endif %}; margin-top:0.15rem;">{% if total_pnl_positive %}+{% endif %}{{ total_pnl_pct }}%</div>
       </div>
     </div>
 
@@ -87,7 +88,7 @@
         <div class="tradingview-widget-container" style="height:100%; width:100%;">
           <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"AMEX:SPY","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
+          {"symbol":"{% if chart_symbol %}{{ chart_symbol }}{% else %}AMEX:SPY{% endif %}","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
           </script>
         </div>
       </div>
