@@ -3,16 +3,19 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django import forms
 from django.contrib.auth import authenticate
 from .services.valuation import get_fundamental_analysis
 from .firebase_db import (
     FirestoreUser, create_user, get_user_by_username,
+    find_or_create_google_user,
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
     get_portfolio, add_portfolio, remove_portfolio,
 )
 import yfinance as yf
+import json
 import decimal
 
 
@@ -376,3 +379,20 @@ def portfolio_add(request):
 def portfolio_remove(request, pk):
     remove_portfolio(request.user.pk, pk)
     return redirect('dashboard')
+
+
+@csrf_exempt
+def google_auth(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+    try:
+        data = json.loads(request.body)
+        id_token = data.get('id_token', '')
+        if not id_token:
+            return JsonResponse({'error': 'Missing id_token'}, status=400)
+        user = find_or_create_google_user(id_token)
+        user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
+        login(request, user)
+        return JsonResponse({'success': True, 'username': user.username})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

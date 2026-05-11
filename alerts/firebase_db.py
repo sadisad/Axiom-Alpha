@@ -1,6 +1,6 @@
 import os
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth as firebase_auth
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils.crypto import salted_hmac
 
@@ -59,11 +59,13 @@ class FirestoreUser:
         return self.uid
 
     def check_password(self, raw_password):
+        if not self._password:
+            return False
         return check_password(raw_password, self._password)
 
     def get_session_auth_hash(self):
         key_salt = "alerts.firebase_db.FirestoreUser.get_session_auth_hash"
-        return salted_hmac(key_salt, self._password).hexdigest()
+        return salted_hmac(key_salt, self._password or 'google-auth').hexdigest()
 
     @property
     def is_anonymous(self):
@@ -98,6 +100,39 @@ def get_user_by_username(username):
     if doc.exists:
         return FirestoreUser(doc.id, doc.to_dict())
     return None
+
+
+def find_or_create_google_user(id_token):
+    decoded = firebase_auth.verify_id_token(id_token)
+    email = decoded.get('email', '')
+    name = decoded.get('name', '')
+    uid = decoded.get('uid', '')
+    username = email.split('@')[0] if email else uid
+
+    db = _db()
+
+    users_by_email = db.collection('users').where('email', '==', email).limit(1).stream()
+    for doc in users_by_email:
+        data = doc.to_dict()
+        return FirestoreUser(doc.id, data)
+
+    users_by_uid = db.collection('users').where('firebase_uid', '==', uid).limit(1).stream()
+    for doc in users_by_uid:
+        data = doc.to_dict()
+        return FirestoreUser(doc.id, data)
+
+    user_data = {
+        'username': username,
+        'email': email,
+        'password': '',
+        'firebase_uid': uid,
+        'auth_provider': 'google',
+    }
+    if name:
+        user_data['display_name'] = name
+
+    db.collection('users').document(username).set(user_data)
+    return FirestoreUser(username, user_data)
 
 
 def get_watchlist(uid):

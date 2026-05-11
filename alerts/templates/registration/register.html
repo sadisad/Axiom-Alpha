@@ -15,7 +15,12 @@
 .auth-btn{width:100%;padding:0.9rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
 .auth-btn-primary{background:var(--brand-teal);color:#0d0645;}
 .auth-btn-primary:hover{background:var(--brand-teal-light);transform:translateY(-1px);}
+.auth-btn-google{background:white;color:#333;border:1px solid #ddd;}
+.auth-btn-google:hover{background:#f5f5f5;transform:translateY(-1px);}
 .auth-label{font-size:0.78rem;color:var(--brand-teal-light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;}
+.auth-divider{display:flex;align-items:center;gap:1rem;margin:1.25rem 0;color:var(--text-secondary);font-size:0.82rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--surface-border);}
+.auth-error{background:rgba(239,68,68,0.1);border:1px solid var(--danger);padding:0.75rem;border-radius:8px;color:var(--danger);font-size:0.85rem;margin-bottom:1rem;display:none;}
 @media(max-width:768px){.auth-modal{flex-direction:column;margin:1rem;}.auth-left{border-right:none;border-bottom:1px solid rgba(138,203,208,0.1);padding:1.5rem;}}
 </style>
 
@@ -30,19 +35,19 @@
     <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:2rem;">Institutional-grade analysis powered by DCF & relative valuation models.</p>
 
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:rgba(0,200,150,0.15);"><span>⚙️</span></div>
+      <div class="auth-feature-icon" style="background:rgba(0,200,150,0.15);"><span>&#9881;</span></div>
       <div><h4>Strategy-based stock ratings</h4><p>Pick the lens that fits your investment style</p></div>
     </div>
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:rgba(86,182,198,0.15);"><span>📊</span></div>
+      <div class="auth-feature-icon" style="background:rgba(86,182,198,0.15);"><span>&#128202;</span></div>
       <div><h4>Rating-driven portfolios</h4><p>See how strategies perform across US & ID markets</p></div>
     </div>
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:rgba(255,200,0,0.12);"><span>🗺️</span></div>
+      <div class="auth-feature-icon" style="background:rgba(255,200,0,0.12);"><span>&#128506;</span></div>
       <div><h4>Visual stock infographics</h4><p>Heatmaps and dashboards to see the market as a whole</p></div>
     </div>
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:rgba(239,68,68,0.12);"><span>📈</span></div>
+      <div class="auth-feature-icon" style="background:rgba(239,68,68,0.12);"><span>&#128200;</span></div>
       <div><h4>Deep fundamental screener</h4><p>DCF, relative valuation, and quantitative metrics on any stock</p></div>
     </div>
 
@@ -51,9 +56,19 @@
 
   <!-- Right: Register Form -->
   <div class="auth-right">
-    <h3 style="font-size:1.3rem;font-weight:800;color:var(--brand-light);text-align:center;margin-bottom:2rem;">Create account to continue research</h3>
+    <h3 style="font-size:1.3rem;font-weight:800;color:var(--brand-light);text-align:center;margin-bottom:1.5rem;">Create account to continue research</h3>
 
-    <form method="post" style="display:flex;flex-direction:column;gap:1rem;">
+    <div id="register-error" class="auth-error"></div>
+
+    <!-- Google Sign-In -->
+    <button onclick="googleSignIn()" class="auth-btn auth-btn-google" style="margin-bottom:0.75rem;">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.64-.15-3.22-.42-4.74H24v9.03h13.01c-.56 2.98-2.26 5.5-4.78 7.18l7.73 6c4.51-4.18 7.02-10.36 7.02-17.47z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.05 24.05 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="auth-divider">or</div>
+
+    <form id="register-form" method="post" style="display:flex;flex-direction:column;gap:1rem;">
       {% csrf_token %}
 
       {% for field in form %}
@@ -79,4 +94,40 @@
     </p>
   </div>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "{{ FIREBASE_API_KEY }}",
+  authDomain: "{{ FIREBASE_AUTH_DOMAIN }}",
+  projectId: "{{ FIREBASE_PROJECT_ID_JS }}",
+};
+firebase.initializeApp(firebaseConfig);
+
+function googleSignIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).then(function(result) {
+    return result.user.getIdToken();
+  }).then(function(idToken) {
+    fetch('{% url "google_auth" %}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+      body: JSON.stringify({id_token: idToken})
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success) {
+        window.location.href = '{% url "dashboard" %}';
+      } else {
+        var err = document.getElementById('register-error');
+        err.textContent = data.error || 'Google sign-in failed.';
+        err.style.display = 'block';
+      }
+    });
+  }).catch(function(error) {
+    var err = document.getElementById('register-error');
+    err.textContent = error.message || 'Google sign-in failed.';
+    err.style.display = 'block';
+  });
+}
+</script>
 {% endblock %}
