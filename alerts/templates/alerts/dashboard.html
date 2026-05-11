@@ -115,48 +115,136 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
         <div class="panel-title" style="margin:0;">⚡ Strategy Picks</div>
         <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-          <span class="rtab active" onclick="activateTab(this)">Compounders</span>
-          <span class="rtab" onclick="activateTab(this)">Hypergrowth</span>
-          <span class="rtab" onclick="activateTab(this)">Value Hunter</span>
-          <span class="rtab" onclick="activateTab(this)">Momentum</span>
+          <span class="rtab active" onclick="filterStrategy('compounders',this)">Compounders</span>
+          <span class="rtab" onclick="filterStrategy('hypergrowth',this)">Hypergrowth</span>
+          <span class="rtab" onclick="filterStrategy('value',this)">Value Hunter</span>
+          <span class="rtab" onclick="filterStrategy('momentum',this)">Momentum</span>
         </div>
       </div>
-      <div class="strategy-cards">
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=NVDA&market=US'">
-          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚙️ GEAR+</span><span class="scard-score">98/100</span></div>
-          <div class="scard-name">NVIDIA</div>
-          <div class="scard-ticker">🇺🇸 Semiconductors · NVDA</div>
-          <div class="scard-metrics">Fwd P/E 25.3 <span>1M +17%</span> <span>1Y +85%</span></div>
-        </div>
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=AAPL&market=US'">
-          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚙️ GEAR+</span><span class="scard-score">95/100</span></div>
-          <div class="scard-name">Apple</div>
-          <div class="scard-ticker">🇺🇸 Technology · AAPL</div>
-          <div class="scard-metrics">Fwd P/E 29.1 <span>1M +8%</span> <span>1Y +22%</span></div>
-        </div>
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=MSFT&market=US'">
+      <div class="strategy-cards" id="strategy-cards">
+        <!-- Compounders -->
+        <div class="scard" data-strategy="compounders" onclick="location.href='{% url 'screener' %}?symbol=MSFT&market=US'">
           <div><span class="scard-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">💎 QUALITY</span><span class="scard-score">100/100</span></div>
           <div class="scard-name">Microsoft</div>
           <div class="scard-ticker">🇺🇸 Software · MSFT</div>
           <div class="scard-metrics">Fwd P/E 31.4 <span>1M +5%</span> <span>1Y +18%</span></div>
         </div>
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=BBCA&market=ID'">
+        <div class="scard" data-strategy="compounders" onclick="location.href='{% url 'screener' %}?symbol=AAPL&market=US'">
+          <div><span class="scard-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">💎 QUALITY</span><span class="scard-score">95/100</span></div>
+          <div class="scard-name">Apple</div>
+          <div class="scard-ticker">🇺🇸 Technology · AAPL</div>
+          <div class="scard-metrics">Fwd P/E 29.1 <span>1M +8%</span> <span>1Y +22%</span></div>
+        </div>
+        <div class="scard" data-strategy="compounders" onclick="location.href='{% url 'screener' %}?symbol=V&market=US'">
+          <div><span class="scard-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">💎 QUALITY</span><span class="scard-score">97/100</span></div>
+          <div class="scard-name">Visa</div>
+          <div class="scard-ticker">🇺🇸 Financials · V</div>
+          <div class="scard-metrics">Fwd P/E 27.8 <span>1M +4%</span> <span>1Y +15%</span></div>
+        </div>
+        <div class="scard" data-strategy="compounders" onclick="location.href='{% url 'screener' %}?symbol=BBCA&market=ID'">
           <div><span class="scard-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">💎 QUALITY</span><span class="scard-score">92/100</span></div>
           <div class="scard-name">Bank BCA</div>
           <div class="scard-ticker">🇮🇩 Financials · BBCA</div>
           <div class="scard-metrics">Fwd P/E 18.2 <span>1M +3%</span> <span>1Y +12%</span></div>
         </div>
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=BBRI&market=ID'">
+        <div class="scard" data-strategy="compounders" onclick="location.href='{% url 'screener' %}?symbol=MA&market=US'">
+          <div><span class="scard-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">💎 QUALITY</span><span class="scard-score">96/100</span></div>
+          <div class="scard-name">Mastercard</div>
+          <div class="scard-ticker">🇺🇸 Financials · MA</div>
+          <div class="scard-metrics">Fwd P/E 32.1 <span>1M +6%</span> <span>1Y +14%</span></div>
+        </div>
+        <!-- Hypergrowth -->
+        <div class="scard" data-strategy="hypergrowth" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=NVDA&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ GEAR+</span><span class="scard-score">98/100</span></div>
+          <div class="scard-name">NVIDIA</div>
+          <div class="scard-ticker">🇺🇸 Semiconductors · NVDA</div>
+          <div class="scard-metrics">Fwd P/E 25.3 <span>1M +17%</span> <span>1Y +85%</span></div>
+        </div>
+        <div class="scard" data-strategy="hypergrowth" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=AVGO&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ GEAR+</span><span class="scard-score">94/100</span></div>
+          <div class="scard-name">Broadcom</div>
+          <div class="scard-ticker">🇺🇸 Semiconductors · AVGO</div>
+          <div class="scard-metrics">Fwd P/E 28.5 <span>1M +12%</span> <span>1Y +68%</span></div>
+        </div>
+        <div class="scard" data-strategy="hypergrowth" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=PLTR&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ GEAR+</span><span class="scard-score">88/100</span></div>
+          <div class="scard-name">Palantir</div>
+          <div class="scard-ticker">🇺🇸 Software · PLTR</div>
+          <div class="scard-metrics">Fwd P/E 85.2 <span>1M +30%</span> <span>1Y +120%</span></div>
+        </div>
+        <div class="scard" data-strategy="hypergrowth" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=AMD&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ GEAR+</span><span class="scard-score">91/100</span></div>
+          <div class="scard-name">AMD</div>
+          <div class="scard-ticker">🇺🇸 Semiconductors · AMD</div>
+          <div class="scard-metrics">Fwd P/E 22.1 <span>1M +15%</span> <span>1Y +45%</span></div>
+        </div>
+        <div class="scard" data-strategy="hypergrowth" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=CRWD&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ GEAR+</span><span class="scard-score">87/100</span></div>
+          <div class="scard-name">CrowdStrike</div>
+          <div class="scard-ticker">🇺🇸 Cybersecurity · CRWD</div>
+          <div class="scard-metrics">Fwd P/E 65.3 <span>1M +18%</span> <span>1Y +52%</span></div>
+        </div>
+        <!-- Value Hunter -->
+        <div class="scard" data-strategy="value" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=BBRI&market=ID'">
           <div><span class="scard-badge" style="background:rgba(86,182,198,0.2);color:var(--brand-teal);">📈 VALUE</span><span class="scard-score">89/100</span></div>
           <div class="scard-name">Bank BRI</div>
           <div class="scard-ticker">🇮🇩 Financials · BBRI</div>
           <div class="scard-metrics">Fwd P/E 10.1 <span>1M +2%</span> <span>1Y +8%</span></div>
         </div>
-        <div class="scard" onclick="location.href='{% url 'screener' %}?symbol=META&market=US'">
+        <div class="scard" data-strategy="value" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=INTC&market=US'">
+          <div><span class="scard-badge" style="background:rgba(86,182,198,0.2);color:var(--brand-teal);">📈 VALUE</span><span class="scard-score">72/100</span></div>
+          <div class="scard-name">Intel</div>
+          <div class="scard-ticker">🇺🇸 Semiconductors · INTC</div>
+          <div class="scard-metrics">Fwd P/E 18.7 <span class="neg">1M -5%</span> <span>1Y +230%</span></div>
+        </div>
+        <div class="scard" data-strategy="value" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=BMRI&market=ID'">
+          <div><span class="scard-badge" style="background:rgba(86,182,198,0.2);color:var(--brand-teal);">📈 VALUE</span><span class="scard-score">85/100</span></div>
+          <div class="scard-name">Bank Mandiri</div>
+          <div class="scard-ticker">🇮🇩 Financials · BMRI</div>
+          <div class="scard-metrics">Fwd P/E 8.5 <span>1M +4%</span> <span>1Y +10%</span></div>
+        </div>
+        <div class="scard" data-strategy="value" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=BAC&market=US'">
+          <div><span class="scard-badge" style="background:rgba(86,182,198,0.2);color:var(--brand-teal);">📈 VALUE</span><span class="scard-score">78/100</span></div>
+          <div class="scard-name">Bank of America</div>
+          <div class="scard-ticker">🇺🇸 Financials · BAC</div>
+          <div class="scard-metrics">Fwd P/E 11.2 <span class="neg">1M -6%</span> <span>1Y +15%</span></div>
+        </div>
+        <div class="scard" data-strategy="value" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=NEM&market=US'">
+          <div><span class="scard-badge" style="background:rgba(86,182,198,0.2);color:var(--brand-teal);">📈 VALUE</span><span class="scard-score">84/100</span></div>
+          <div class="scard-name">Newmont</div>
+          <div class="scard-ticker">🇺🇸 Mining · NEM</div>
+          <div class="scard-metrics">Fwd P/E 14.3 <span>1M +17%</span> <span>1Y +61%</span></div>
+        </div>
+        <!-- Momentum -->
+        <div class="scard" data-strategy="momentum" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=META&market=US'">
           <div><span class="scard-badge" style="background:rgba(255,100,100,0.15);color:#ff6464;">🚀 MOMENTUM</span><span class="scard-score">96/100</span></div>
           <div class="scard-name">Meta</div>
           <div class="scard-ticker">🇺🇸 Social Media · META</div>
           <div class="scard-metrics">Fwd P/E 22.1 <span>1M +24%</span> <span>1Y +43%</span></div>
+        </div>
+        <div class="scard" data-strategy="momentum" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=GOOGL&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,100,100,0.15);color:#ff6464;">🚀 MOMENTUM</span><span class="scard-score">95/100</span></div>
+          <div class="scard-name">Alphabet</div>
+          <div class="scard-ticker">🇺🇸 Technology · GOOGL</div>
+          <div class="scard-metrics">Fwd P/E 19.5 <span>1M +10%</span> <span>1Y +26%</span></div>
+        </div>
+        <div class="scard" data-strategy="momentum" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=NFLX&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,100,100,0.15);color:#ff6464;">🚀 MOMENTUM</span><span class="scard-score">90/100</span></div>
+          <div class="scard-name">Netflix</div>
+          <div class="scard-ticker">🇺🇸 Entertainment · NFLX</div>
+          <div class="scard-metrics">Fwd P/E 38.2 <span>1M +8%</span> <span>1Y +55%</span></div>
+        </div>
+        <div class="scard" data-strategy="momentum" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=TSLA&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,100,100,0.15);color:#ff6464;">🚀 MOMENTUM</span><span class="scard-score">82/100</span></div>
+          <div class="scard-name">Tesla</div>
+          <div class="scard-ticker">🇺🇸 EV · TSLA</div>
+          <div class="scard-metrics">Fwd P/E 95.1 <span>1M +35%</span> <span class="neg">1Y -6%</span></div>
+        </div>
+        <div class="scard" data-strategy="momentum" style="display:none;" onclick="location.href='{% url 'screener' %}?symbol=COIN&market=US'">
+          <div><span class="scard-badge" style="background:rgba(255,100,100,0.15);color:#ff6464;">🚀 MOMENTUM</span><span class="scard-score">79/100</span></div>
+          <div class="scard-name">Coinbase</div>
+          <div class="scard-ticker">🇺🇸 Crypto · COIN</div>
+          <div class="scard-metrics">Fwd P/E 18.5 <span>1M +28%</span> <span>1Y +90%</span></div>
         </div>
       </div>
     </div>
@@ -452,6 +540,13 @@
 </div>
 
 <script>
+function filterStrategy(strategy, el) {
+  el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#strategy-cards .scard').forEach(c => {
+    c.style.display = c.dataset.strategy === strategy ? '' : 'none';
+  });
+}
 function activateTab(el) {
   el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');

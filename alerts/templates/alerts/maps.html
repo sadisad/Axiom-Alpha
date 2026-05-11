@@ -30,24 +30,68 @@
   <div class="hm-filters" style="display:flex;gap:1.5rem;">
 
     <!-- Left: Select List -->
-    <div class="hm-panel" style="flex:0 0 320px;">
+    <div class="hm-panel" style="flex:0 0 320px;max-height:420px;overflow-y:auto;">
       <div class="hm-title">Select List</div>
-      <select class="hm-select" id="list-select" onchange="rebuildHeatmap()">
-        <option value="SPX500">🇺🇸 S&P 500</option>
-        <option value="NASDAQ100">🇺🇸 Nasdaq 100</option>
-        <option value="DowJones">🇺🇸 Dow Jones 30</option>
-        <option value="Russell2000">🇺🇸 Russell 2000</option>
-        <option value="AllUSA">🇺🇸 All US Stocks</option>
-        <option value="ETFsUS">🇺🇸 ETFs</option>
+      <select class="hm-select" id="list-select" onchange="rebuildHeatmap()" style="width:100%;margin-bottom:0.75rem;">
+        <optgroup label="⭐ TRENDING">
+          <option value="SPX500">🇺🇸 S&P 500</option>
+          <option value="NASDAQ100">🇺🇸 Nasdaq 100</option>
+          <option value="DowJones">🇺🇸 Dow Jones 30</option>
+        </optgroup>
+        <optgroup label="📈 LISTS">
+          <option value="AllUSA">🇺🇸 All US Stocks</option>
+          <option value="Russell2000">🇺🇸 Russell 2000</option>
+          <option value="Russell1000">🇺🇸 Russell 1000</option>
+        </optgroup>
+        <optgroup label="🧭 ETF">
+          <option value="ETFsUS">🇺🇸 ETFs</option>
+        </optgroup>
+        <optgroup label="🌍 COUNTRIES">
+          <option value="AllUSA">🇺🇸 United States</option>
+          <option value="AllChina">🇨🇳 China</option>
+          <option value="AllJapan">🇯🇵 Japan</option>
+          <option value="AllGermany">🇩🇪 Germany</option>
+          <option value="AllIndia">🇮🇳 India</option>
+          <option value="AllUK">🇬🇧 United Kingdom</option>
+          <option value="AllFrance">🇫🇷 France</option>
+          <option value="AllCanada">🇨🇦 Canada</option>
+          <option value="AllSwitzerland">🇨🇭 Switzerland</option>
+          <option value="AllTaiwan">🇹🇼 Taiwan</option>
+          <option value="AllSouthKorea">🇰🇷 South Korea</option>
+          <option value="AllAustralia">🇦🇺 Australia</option>
+          <option value="AllBrazil">🇧🇷 Brazil</option>
+          <option value="AllIndonesia">🇮🇩 Indonesia</option>
+        </optgroup>
+        <optgroup label="💼 SECTORS">
+          <option value="SectorFinancials">💰 Financials</option>
+          <option value="SectorTech">💻 Technology</option>
+          <option value="SectorHealthcare">🏥 Healthcare</option>
+          <option value="SectorConsumer">🛒 Consumer</option>
+          <option value="SectorIndustrials">⚙️ Industrials</option>
+          <option value="SectorEnergy">⛽ Energy</option>
+          <option value="SectorMaterials">⛏️ Materials</option>
+          <option value="SectorRealEstate">🏠 Real Estate</option>
+          <option value="SectorUtilities">⚡ Utilities</option>
+        </optgroup>
+        <optgroup label="💾 INDUSTRY GROUPS">
+          <option value="IndustrySemiconductors">💾 Semiconductors</option>
+          <option value="IndustryBanks">🏦 Banks</option>
+          <option value="IndustrySoftware">💻 Software</option>
+          <option value="IndustryRetail">🛍️ Retail</option>
+          <option value="IndustryAutoComponents">🚗 Automobiles</option>
+          <option value="IndustryTelecom">📱 Telecom</option>
+        </optgroup>
       </select>
-      <div style="margin-top:0.75rem;">
-        <div class="hm-title">Suggestions</div>
-        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-          <span class="hm-pill" onclick="setList('SPX500',this)">S&P 500</span>
-          <span class="hm-pill" onclick="setList('NASDAQ100',this)">Nasdaq 100</span>
-          <span class="hm-pill" onclick="setList('ETFsUS',this)">ETFs</span>
-          <span class="hm-pill" onclick="setList('DowJones',this)">Dow Jones</span>
-        </div>
+      <div class="hm-title">Suggestions</div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="hm-pill" onclick="setList('SPX500')">💾 S&P 500</span>
+        <span class="hm-pill" onclick="setList('NASDAQ100')">💻 Nasdaq 100</span>
+        <span class="hm-pill" onclick="setList('ETFsUS')">🧭 ETFs</span>
+        <span class="hm-pill" onclick="setList('DowJones')">📈 Dow Jones</span>
+        <span class="hm-pill" onclick="setList('Russell2000')">📊 Russell 2000</span>
+        <span class="hm-pill" onclick="setList('AllUSA')">🇺🇸 USA</span>
+        <span class="hm-pill" onclick="setList('AllIndonesia')">🇮🇩 Indonesia</span>
+        <span class="hm-pill" onclick="setList('AllJapan')">🇯🇵 Japan</span>
       </div>
     </div>
 
@@ -123,7 +167,7 @@
 
 <script>
 var currentSource='SPX500',currentMetric='Perf.YTD',monoSize=false;
-var listNames={'SPX500':'S&P 500','NASDAQ100':'Nasdaq 100','DowJones':'Dow Jones 30','Russell2000':'Russell 2000','AllUSA':'All US Stocks','ETFsUS':'ETFs'};
+var listNames={'SPX500':'S&P 500','NASDAQ100':'Nasdaq 100','DowJones':'Dow Jones 30','Russell2000':'Russell 2000','Russell1000':'Russell 1000','AllUSA':'All US Stocks','ETFsUS':'ETFs','AllChina':'China','AllJapan':'Japan','AllGermany':'Germany','AllIndia':'India','AllUK':'United Kingdom','AllFrance':'France','AllCanada':'Canada','AllSwitzerland':'Switzerland','AllTaiwan':'Taiwan','AllSouthKorea':'South Korea','AllAustralia':'Australia','AllBrazil':'Brazil','AllIndonesia':'Indonesia','SectorFinancials':'Financials','SectorTech':'Technology','SectorHealthcare':'Healthcare','SectorConsumer':'Consumer','SectorIndustrials':'Industrials','SectorEnergy':'Energy','SectorMaterials':'Materials','SectorRealEstate':'Real Estate','SectorUtilities':'Utilities','IndustrySemiconductors':'Semiconductors','IndustryBanks':'Banks','IndustrySoftware':'Software','IndustryRetail':'Retail','IndustryAutoComponents':'Automobiles','IndustryTelecom':'Telecom'};
 var metricNames={'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.YTD':'YTD Return','Perf.Y':'1 Year','Perf.5Y':'5 Year','price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','dividend_yield_recent':'Div Yield','price_free_cash_flow_ttm':'FCF Yield','revenue_growth_yoy':'Rev Growth'};
 
 function rebuildHeatmap(){
