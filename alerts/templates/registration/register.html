@@ -106,28 +106,33 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 function googleSignIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).then(function(result) {
-    return result.user.getIdToken();
-  }).then(function(idToken) {
-    fetch('{% url "google_auth" %}', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
-      body: JSON.stringify({id_token: idToken})
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.success) {
-        window.location.href = '{% url "dashboard" %}';
-      } else {
-        var err = document.getElementById('register-error');
-        err.textContent = data.error || 'Google sign-in failed.';
-        err.style.display = 'block';
-      }
+  var provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
+}
+firebase.auth().getRedirectResult().then(function(result) {
+  if (result && result.user) {
+    result.user.getIdToken().then(function(idToken) {
+      fetch('{% url "google_auth" %}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+        body: JSON.stringify({id_token: idToken})
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        if (data.success) {
+          window.location.href = '{% url "dashboard" %}';
+        } else {
+          var err = document.getElementById('register-error');
+          err.textContent = data.error || 'Google sign-in failed.';
+          err.style.display = 'block';
+        }
+      });
     });
-  }).catch(function(error) {
+  }
+}).catch(function(error) {
+  if (error && error.code !== 'auth/no-auth-event') {
     var err = document.getElementById('register-error');
     err.textContent = error.message || 'Google sign-in failed.';
     err.style.display = 'block';
-  });
-}
+  }
+});
 </script>
 {% endblock %}
