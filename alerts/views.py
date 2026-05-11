@@ -138,6 +138,41 @@ def maps(request):
     return render(request, 'alerts/maps.html')
 
 
+def headlines(request):
+    return render(request, 'alerts/headlines.html')
+
+
+def watchtower(request):
+    context = {}
+    if request.user.is_authenticated:
+        uid = request.user.pk
+        watchlist_items = []
+        saved = get_watchlist(uid)
+        for item in saved:
+            try:
+                process_sym = item['symbol']
+                if item.get('market') == 'ID' and not process_sym.endswith('.JK'):
+                    process_sym += '.JK'
+                info = yf.Ticker(process_sym).info
+                price = info.get('currentPrice', info.get('regularMarketPrice', 0))
+                prev_close = info.get('previousClose', price)
+                change = ((price - prev_close) / prev_close * 100) if prev_close and price else 0
+                watchlist_items.append({
+                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                    'name': info.get('shortName', item['symbol']),
+                    'price': f"{price:,.2f}" if price else '-',
+                    'change': round(change, 2),
+                    'is_positive': change >= 0,
+                })
+            except Exception:
+                watchlist_items.append({
+                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                    'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True,
+                })
+        context['watchlist_items'] = watchlist_items
+    return render(request, 'alerts/watchtower.html', context)
+
+
 def dashboard(request):
     watchlist_items = []
     recent_searches = []
