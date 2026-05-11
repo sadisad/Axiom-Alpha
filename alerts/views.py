@@ -77,12 +77,16 @@ class LoginForm(forms.Form):
         })
     )
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')
         if username and password:
-            user = authenticate(request=None, username=username, password=password)
+            user = authenticate(request=self.request, username=username, password=password)
             if user is None:
                 raise forms.ValidationError('Invalid username or password.')
             cleaned_data['user'] = user
@@ -93,9 +97,11 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = LoginForm(request.POST, request=request)
         if form.is_valid():
-            login(request, form.cleaned_data['user'])
+            user = form.cleaned_data['user']
+            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
+            login(request, user)
             return redirect('dashboard')
     else:
         form = LoginForm()
@@ -108,14 +114,17 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1'],
-            )
-            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
-            login(request, user)
-            return redirect('dashboard')
+            try:
+                user = create_user(
+                    username=form.cleaned_data['username'],
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password1'],
+                )
+                user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
+                login(request, user)
+                return redirect('dashboard')
+            except Exception as e:
+                form.add_error(None, f'Account creation failed: {str(e)}')
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
