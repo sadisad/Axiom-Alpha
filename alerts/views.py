@@ -4,10 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django import forms
+from django.contrib.auth import authenticate
 from .services.valuation import get_fundamental_analysis
 from .firebase_db import (
     FirestoreUser, create_user, get_user_by_username,
-    get_watchlist, toggle_watchlist, check_in_watchlist,
+    get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
     get_portfolio, add_portfolio, remove_portfolio,
 )
@@ -57,6 +58,64 @@ class RegisterForm(forms.Form):
         if p1 and p2 and p1 != p2:
             raise forms.ValidationError('Passwords do not match.')
         return cleaned_data
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Enter your username',
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Enter your password',
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+        if username and password:
+            user = authenticate(request=None, username=username, password=password)
+            if user is None:
+                raise forms.ValidationError('Invalid username or password.')
+            cleaned_data['user'] = user
+        return cleaned_data
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            login(request, form.cleaned_data['user'])
+            return redirect('dashboard')
+    else:
+        form = LoginForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1'],
+            )
+            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
+            login(request, user)
+            return redirect('dashboard')
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 def about(request):
@@ -289,7 +348,7 @@ def toggle_watchlist(request):
     market = request.POST.get('market', 'US')
     if not symbol:
         return JsonResponse({'error': 'Symbol is required'}, status=400)
-    result = toggle_watchlist(request.user.pk, symbol, market)
+    result = fw_toggle_watchlist(request.user.pk, symbol, market)
     return JsonResponse({'status': result, 'symbol': symbol})
 
 
@@ -317,20 +376,3 @@ def portfolio_add(request):
 def portfolio_remove(request, pk):
     remove_portfolio(request.user.pk, pk)
     return redirect('dashboard')
-
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1'],
-            )
-            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
-            login(request, user)
-            return redirect('dashboard')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/register.html', {'form': form})

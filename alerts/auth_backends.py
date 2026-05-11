@@ -3,7 +3,9 @@ from .firebase_db import get_user_by_username
 
 
 class FirestoreAuthBackend(BaseBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
+    def authenticate(self, request=None, username=None, password=None, **kwargs):
+        if username is None or password is None:
+            return None
         user = get_user_by_username(username)
         if user and user.check_password(password):
             return user
