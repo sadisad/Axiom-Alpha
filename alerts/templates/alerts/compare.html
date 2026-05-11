@@ -1,0 +1,206 @@
+{% extends 'alerts/base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+    .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    .metric-row {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1.2fr;
+        gap: 0.5rem;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .metric-row:hover { background: rgba(86,182,198,0.06); }
+    .metric-label { color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; }
+    .metric-val { font-weight: 700; color: var(--brand-light); font-size: 0.95rem; text-align: right; }
+    .metric-val.better { color: var(--success); }
+    .metric-val.worse  { color: var(--danger); }
+    .section-header {
+        background: rgba(86,182,198,0.08);
+        border-left: 3px solid var(--brand-teal);
+        padding: 0.5rem 1rem;
+        border-radius: 0 8px 8px 0;
+        margin: 1rem 0 0.25rem 0;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--brand-teal);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .winner-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(16,185,129,0.15);
+        border: 1px solid var(--success);
+        color: var(--success);
+        border-radius: 6px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    @media (max-width: 768px) {
+        .compare-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div style="max-width: 1300px; margin: 0 auto; padding-top: 1rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <h1 style="font-size:2rem; font-weight:800; color:var(--brand-light); margin-bottom:0.25rem;">
+                <i data-lucide="git-compare" style="color:var(--brand-teal); vertical-align:middle;"></i> Stock Comparison
+            </h1>
+            <p style="color:var(--text-secondary);">Side-by-side fundamental analysis of two stocks</p>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'compare' %}" style="margin-bottom:2rem;">
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto; gap:1rem; align-items:center;">
+            <div style="display:flex; gap:0.5rem;">
+                <input type="text" name="s1" value="{{ s1 }}" placeholder="Symbol 1 (e.g. AAPL)"
+                    style="flex:1; padding:0.9rem 1rem; border-radius:10px; border:2px solid var(--surface-border); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:1rem; outline:none;">
+                <select name="m1" style="padding:0 1rem; border-radius:10px; border:2px solid var(--surface-border); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:0.95rem; outline:none;">
+                    <option value="US" {% if m1 == 'US' %}selected{% endif %}>US</option>
+                    <option value="ID" {% if m1 == 'ID' %}selected{% endif %}>ID</option>
+                </select>
+            </div>
+            <span style="color:var(--brand-teal); font-weight:800; font-size:1.2rem; text-align:center; padding:0 0.5rem;">VS</span>
+            <div style="display:flex; gap:0.5rem;">
+                <input type="text" name="s2" value="{{ s2 }}" placeholder="Symbol 2 (e.g. NVDA)"
+                    style="flex:1; padding:0.9rem 1rem; border-radius:10px; border:2px solid var(--surface-border); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:1rem; outline:none;">
+                <select name="m2" style="padding:0 1rem; border-radius:10px; border:2px solid var(--surface-border); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:0.95rem; outline:none;">
+                    <option value="US" {% if m2 == 'US' %}selected{% endif %}>US</option>
+                    <option value="ID" {% if m2 == 'ID' %}selected{% endif %}>ID</option>
+                </select>
+            </div>
+            <button type="submit" class="btn" style="padding:0.9rem 2rem; font-size:1rem;">Compare</button>
+        </div>
+        <div style="display:flex; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap;">
+            <span style="color:var(--text-secondary); font-size:0.85rem; align-self:center;">Quick:</span>
+            <a href="?s1=AAPL&m1=US&s2=MSFT&m2=US" style="font-size:0.82rem; padding:0.3rem 0.75rem; border:1px solid var(--surface-border); border-radius:20px; color:var(--brand-teal); text-decoration:none;">AAPL vs MSFT</a>
+            <a href="?s1=NVDA&m1=US&s2=AMD&m2=US" style="font-size:0.82rem; padding:0.3rem 0.75rem; border:1px solid var(--surface-border); border-radius:20px; color:var(--brand-teal); text-decoration:none;">NVDA vs AMD</a>
+            <a href="?s1=BBCA&m1=ID&s2=BBRI&m2=ID" style="font-size:0.82rem; padding:0.3rem 0.75rem; border:1px solid var(--surface-border); border-radius:20px; color:var(--brand-teal); text-decoration:none;">BBCA vs BBRI</a>
+        </div>
+    </form>
+
+    {% if analysis1 and analysis2 %}
+
+    <!-- Charts Side by Side -->
+    <div class="compare-grid" style="margin-bottom:2rem;">
+        <div class="glass-card" style="padding:0; overflow:hidden; height:350px;">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                { "symbol": "{{ analysis1.tv_symbol }}", "interval": "D", "theme": "dark", "style": "1", "locale": "en", "hide_side_toolbar": true, "allow_symbol_change": false, "save_image": false, "hide_legend": true, "width": "100%", "height": "100%" }
+                </script>
+            </div>
+        </div>
+        <div class="glass-card" style="padding:0; overflow:hidden; height:350px;">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                { "symbol": "{{ analysis2.tv_symbol }}", "interval": "D", "theme": "dark", "style": "1", "locale": "en", "hide_side_toolbar": true, "allow_symbol_change": false, "save_image": false, "hide_legend": true, "width": "100%", "height": "100%" }
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Cards -->
+    <div class="compare-grid" style="margin-bottom:2rem;">
+        <div class="glass-card" style="text-align:center;">
+            {% if analysis1.domain %}
+                <img src="https://logo.clearbit.com/{{ analysis1.domain }}" style="width:48px;height:48px;border-radius:50%;background:white;padding:4px;object-fit:contain;margin-bottom:0.75rem;" onerror="this.onerror=null;this.src='https://www.google.com/s2/favicons?domain={{ analysis1.domain }}&sz=128';">
+            {% endif %}
+            <h2 style="color:var(--brand-teal);font-size:1.6rem;font-weight:800;">{{ analysis1.symbol }}</h2>
+            <p style="color:var(--text-secondary);margin-bottom:0.75rem;">{{ analysis1.company_name }}</p>
+            {% if analysis1.dcf.is_undervalued %}<span class="winner-badge">✓ Undervalued by DCF</span>{% endif %}
+        </div>
+        <div class="glass-card" style="text-align:center;">
+            {% if analysis2.domain %}
+                <img src="https://logo.clearbit.com/{{ analysis2.domain }}" style="width:48px;height:48px;border-radius:50%;background:white;padding:4px;object-fit:contain;margin-bottom:0.75rem;" onerror="this.onerror=null;this.src='https://www.google.com/s2/favicons?domain={{ analysis2.domain }}&sz=128';">
+            {% endif %}
+            <h2 style="color:var(--warning);font-size:1.6rem;font-weight:800;">{{ analysis2.symbol }}</h2>
+            <p style="color:var(--text-secondary);margin-bottom:0.75rem;">{{ analysis2.company_name }}</p>
+            {% if analysis2.dcf.is_undervalued %}<span class="winner-badge">✓ Undervalued by DCF</span>{% endif %}
+        </div>
+    </div>
+
+    <!-- Metrics Table -->
+    <div class="glass-card">
+        <h2 style="color:var(--brand-light);margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;">
+            <i data-lucide="table-2" style="color:var(--brand-teal);"></i> Side-by-Side Metrics
+        </h2>
+        <div style="display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:0.5rem;padding:0.5rem 1rem;margin-bottom:0.5rem;border-bottom:1px solid var(--surface-border);">
+            <span style="color:var(--text-secondary);font-size:0.85rem;font-weight:700;text-transform:uppercase;">Metric</span>
+            <span style="color:var(--brand-teal);font-weight:700;text-align:right;">{{ s1 }}</span>
+            <span style="color:var(--warning);font-weight:700;text-align:right;">{{ s2 }}</span>
+        </div>
+
+        <div class="section-header">💰 Valuation</div>
+        {% with keys="Market Cap,Ent. Value,P/E,Fwd P/E,PEG,P/S,P/B,Div Yield" %}
+        {% for key in keys|split:"," %}
+        <div class="metric-row">
+            <span class="metric-label">{{ key }}</span>
+            <span class="metric-val">{{ analysis1.metrics|get_item:key|default:"-" }}</span>
+            <span class="metric-val">{{ analysis2.metrics|get_item:key|default:"-" }}</span>
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        <div class="section-header">📈 Profitability</div>
+        {% with keys="Revenue,Net Income,ROA,ROE,Gross Mgn,Oper Mgn,Profit Mgn" %}
+        {% for key in keys|split:"," %}
+        <div class="metric-row">
+            <span class="metric-label">{{ key }}</span>
+            <span class="metric-val">{{ analysis1.metrics|get_item:key|default:"-" }}</span>
+            <span class="metric-val">{{ analysis2.metrics|get_item:key|default:"-" }}</span>
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        <div class="section-header">📊 Price Action</div>
+        {% with keys="52W High,52W Low,Beta,Target Px,Volume,Avg Vol,Employees" %}
+        {% for key in keys|split:"," %}
+        <div class="metric-row">
+            <span class="metric-label">{{ key }}</span>
+            <span class="metric-val">{{ analysis1.metrics|get_item:key|default:"-" }}</span>
+            <span class="metric-val">{{ analysis2.metrics|get_item:key|default:"-" }}</span>
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        <div class="section-header">🔢 DCF Valuation</div>
+        <div class="metric-row">
+            <span class="metric-label">Current Price</span>
+            <span class="metric-val">${{ analysis1.dcf.current_price|default:"-" }}</span>
+            <span class="metric-val">${{ analysis2.dcf.current_price|default:"-" }}</span>
+        </div>
+        <div class="metric-row">
+            <span class="metric-label">Intrinsic Value (DCF)</span>
+            <span class="metric-val {% if analysis1.dcf.is_undervalued %}better{% else %}worse{% endif %}">${{ analysis1.dcf.intrinsic_value|default:"-" }}</span>
+            <span class="metric-val {% if analysis2.dcf.is_undervalued %}better{% else %}worse{% endif %}">${{ analysis2.dcf.intrinsic_value|default:"-" }}</span>
+        </div>
+        <div class="metric-row">
+            <span class="metric-label">Upside %</span>
+            <span class="metric-val {% if analysis1.dcf.upside_percent > 0 %}better{% else %}worse{% endif %}">{{ analysis1.dcf.upside_percent|default:"-" }}%</span>
+            <span class="metric-val {% if analysis2.dcf.upside_percent > 0 %}better{% else %}worse{% endif %}">{{ analysis2.dcf.upside_percent|default:"-" }}%</span>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="glass-card" style="text-align:center; padding:4rem 2rem;">
+        <i data-lucide="git-compare" style="width:64px;height:64px;color:var(--brand-teal);margin-bottom:1.5rem;opacity:0.5;"></i>
+        <h2 style="color:var(--brand-light);margin-bottom:0.75rem;">Compare Any Two Stocks</h2>
+        <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">Enter two stock symbols above to get a comprehensive side-by-side analysis.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

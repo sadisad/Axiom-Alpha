@@ -1,0 +1,180 @@
+{% extends 'alerts/base.html' %}
+
+{% block content %}
+<style>
+.hm-page{display:flex;flex-direction:column;gap:1.5rem;}
+.hm-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1.25rem;}
+.hm-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.5rem;}
+.hm-pill{padding:0.35rem 0.8rem;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid rgba(138,203,208,0.2);color:var(--text-secondary);background:transparent;transition:all 0.2s;font-family:'Outfit',sans-serif;}
+.hm-pill:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.hm-pill.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
+.hm-tab{padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.2s;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;gap:0.3rem;}
+.hm-tab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.hm-tab.active{background:rgba(0,200,150,0.15);color:#00c896;border-color:rgba(0,200,150,0.3);}
+.hm-select{padding:0.6rem 1.25rem;border-radius:10px;border:1px solid var(--surface-border);background:rgba(23,12,121,0.6);color:var(--brand-light);font-size:1rem;font-weight:700;outline:none;cursor:pointer;font-family:'Outfit',sans-serif;}
+@media(max-width:768px){.hm-filters{flex-direction:column !important;}}
+</style>
+
+<div class="hm-page">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h1 style="font-size:1.8rem;font-weight:800;color:var(--brand-light);">Heatmap</h1>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block;box-shadow:0 0 8px var(--success);"></span>
+      <span style="font-size:0.85rem;color:var(--text-secondary);">Live data</span>
+    </div>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="hm-filters" style="display:flex;gap:1.5rem;">
+
+    <!-- Left: Select List -->
+    <div class="hm-panel" style="flex:0 0 320px;">
+      <div class="hm-title">Select List</div>
+      <select class="hm-select" id="list-select" onchange="rebuildHeatmap()">
+        <option value="SPX500">🇺🇸 S&P 500</option>
+        <option value="NASDAQ100">🇺🇸 Nasdaq 100</option>
+        <option value="DowJones">🇺🇸 Dow Jones 30</option>
+        <option value="Russell2000">🇺🇸 Russell 2000</option>
+        <option value="AllUSA">🇺🇸 All US Stocks</option>
+        <option value="ETFsUS">🇺🇸 ETFs</option>
+      </select>
+      <div style="margin-top:0.75rem;">
+        <div class="hm-title">Suggestions</div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="hm-pill" onclick="setList('SPX500',this)">S&P 500</span>
+          <span class="hm-pill" onclick="setList('NASDAQ100',this)">Nasdaq 100</span>
+          <span class="hm-pill" onclick="setList('ETFsUS',this)">ETFs</span>
+          <span class="hm-pill" onclick="setList('DowJones',this)">Dow Jones</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Select Metric -->
+    <div class="hm-panel" style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="hm-title" style="margin:0;">Select Metric</div>
+          <select class="hm-select" id="metric-display" style="font-size:0.85rem;padding:0.4rem 0.8rem;" onchange="setMetric(this.value)">
+            <option value="change">Daily Change</option>
+            <option value="Perf.W">1 Week Return</option>
+            <option value="Perf.1M">1 Month Return</option>
+            <option value="Perf.YTD" selected>YTD Return</option>
+            <option value="Perf.Y">1 Year Return</option>
+            <option value="Perf.5Y">5 Year Return</option>
+            <option value="price_earnings_ttm">P/E</option>
+            <option value="price_earnings_growth_ttm">PEG</option>
+            <option value="dividend_yield_recent">Dividend Yield</option>
+            <option value="price_free_cash_flow_ttm">FCF Yield</option>
+            <option value="revenue_growth_yoy">Revenue Growth</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.4rem;align-items:center;">
+          <button class="hm-pill" onclick="toggleMonoSize(false)" id="btn-mcap" style="background:rgba(255,255,255,0.05);">Top by MCap</button>
+          <button class="hm-pill" onclick="toggleMonoSize(true)" id="btn-equal">Equal Size</button>
+        </div>
+      </div>
+
+      <!-- Category Tabs -->
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <button class="hm-tab active" onclick="showCategory('quick',this)">⚡ Quick Picks</button>
+        <button class="hm-tab" onclick="showCategory('returns',this)">📈 Returns</button>
+        <button class="hm-tab" onclick="showCategory('valuation',this)">💰 Valuation</button>
+        <button class="hm-tab" onclick="showCategory('growth',this)">🌱 Growth</button>
+        <button class="hm-tab" onclick="showCategory('quality',this)">💎 Quality</button>
+      </div>
+
+      <!-- Metric Pills -->
+      <div id="metric-pills" style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="hm-pill" onclick="setMetric('change',this)">Daily Change</span>
+        <span class="hm-pill" onclick="setMetric('Perf.W',this)">1 Week</span>
+        <span class="hm-pill" onclick="setMetric('Perf.1M',this)">1 Month</span>
+        <span class="hm-pill active" onclick="setMetric('Perf.YTD',this)">YTD Return</span>
+        <span class="hm-pill" onclick="setMetric('Perf.Y',this)">1 Year</span>
+        <span class="hm-pill" onclick="setMetric('Perf.5Y',this)">5 Year</span>
+        <span class="hm-pill" onclick="setMetric('price_earnings_ttm',this)">P/E</span>
+        <span class="hm-pill" onclick="setMetric('price_earnings_growth_ttm',this)">PEG</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heatmap Display -->
+  <div class="hm-panel" style="padding:0;overflow:hidden;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid rgba(138,203,208,0.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+      <div>
+        <span style="font-size:1.1rem;font-weight:800;color:var(--brand-light);" id="map-title">🇺🇸 S&P 500 · YTD Return ↓</span>
+      </div>
+      <div style="display:flex;gap:0.4rem;">
+        <button class="hm-pill active" id="view-heatmap" onclick="setView('heatmap',this)">Heatmap</button>
+        <button class="hm-pill" id="view-bars" onclick="setView('bars',this)">Bars</button>
+      </div>
+    </div>
+    <div style="height:70vh;min-height:500px;" id="heatmap-container">
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+        {"exchanges":[],"dataSource":"SPX500","grouping":"sector","blockSize":"market_cap_basic","blockColor":"Perf.YTD","locale":"en","symbolUrl":"","colorTheme":"dark","hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"isMonoSize":false,"width":"100%","height":"100%"}
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentSource='SPX500',currentMetric='Perf.YTD',monoSize=false;
+var listNames={'SPX500':'S&P 500','NASDAQ100':'Nasdaq 100','DowJones':'Dow Jones 30','Russell2000':'Russell 2000','AllUSA':'All US Stocks','ETFsUS':'ETFs'};
+var metricNames={'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.YTD':'YTD Return','Perf.Y':'1 Year','Perf.5Y':'5 Year','price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','dividend_yield_recent':'Div Yield','price_free_cash_flow_ttm':'FCF Yield','revenue_growth_yoy':'Rev Growth'};
+
+function rebuildHeatmap(){
+  currentSource=document.getElementById('list-select').value;
+  updateMap();
+}
+function setList(src,el){
+  currentSource=src;
+  document.getElementById('list-select').value=src;
+  updateMap();
+}
+function setMetric(m,el){
+  currentMetric=m;
+  document.getElementById('metric-display').value=m;
+  if(el){document.querySelectorAll('#metric-pills .hm-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');}
+  updateMap();
+}
+function toggleMonoSize(v){
+  monoSize=v;
+  document.getElementById('btn-mcap').classList.toggle('active',!v);
+  document.getElementById('btn-equal').classList.toggle('active',v);
+  updateMap();
+}
+function setView(v,el){
+  document.querySelectorAll('#view-heatmap,#view-bars').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  updateMap();
+}
+function showCategory(cat,el){
+  document.querySelectorAll('.hm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  var pills={'quick':['change','Perf.W','Perf.1M','Perf.YTD','Perf.Y','Perf.5Y','price_earnings_ttm','price_earnings_growth_ttm'],
+    'returns':['Perf.W','Perf.1M','Perf.3M','Perf.6M','Perf.YTD','Perf.Y','Perf.5Y'],
+    'valuation':['price_earnings_ttm','price_earnings_growth_ttm','price_book_fq','price_sales_ttm','enterprise_value_ebitda_ttm'],
+    'growth':['revenue_growth_yoy','earnings_per_share_growth_ttm','revenue_growth_3y'],
+    'quality':['return_on_equity','return_on_assets','gross_margin','operating_margin']};
+  var names={'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.3M':'3 Month','Perf.6M':'6 Month','Perf.YTD':'YTD','Perf.Y':'1 Year','Perf.5Y':'5 Year',
+    'price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','price_book_fq':'P/B','price_sales_ttm':'P/S','enterprise_value_ebitda_ttm':'EV/EBITDA',
+    'revenue_growth_yoy':'Rev Growth 1Y','earnings_per_share_growth_ttm':'EPS Growth','revenue_growth_3y':'Rev Growth 3Y',
+    'return_on_equity':'ROE','return_on_assets':'ROA','gross_margin':'Gross Margin','operating_margin':'Oper Margin','dividend_yield_recent':'Div Yield','price_free_cash_flow_ttm':'FCF Yield'};
+  var html='';(pills[cat]||[]).forEach(function(m){
+    html+='<span class="hm-pill'+(m===currentMetric?' active':'')+'" onclick="setMetric(\''+m+'\',this)">'+((names[m]||m))+'</span>';
+  });
+  document.getElementById('metric-pills').innerHTML=html;
+}
+function updateMap(){
+  document.getElementById('map-title').textContent='🇺🇸 '+(listNames[currentSource]||currentSource)+' · '+(metricNames[currentMetric]||currentMetric)+' ↓';
+  var c=document.getElementById('heatmap-container');
+  c.innerHTML='<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+  var s=document.createElement('script');s.type='text/javascript';s.src='https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';s.async=true;
+  s.textContent=JSON.stringify({"exchanges":[],"dataSource":currentSource,"grouping":"sector","blockSize":"market_cap_basic","blockColor":currentMetric,"locale":"en","symbolUrl":"","colorTheme":"dark","hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"isMonoSize":monoSize,"width":"100%","height":"100%"});
+  c.querySelector('.tradingview-widget-container').appendChild(s);
+}
+</script>
+{% endblock %}

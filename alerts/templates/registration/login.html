@@ -1,0 +1,98 @@
+{% extends 'alerts/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.auth-modal{display:flex;max-width:850px;margin:3rem auto;background:rgba(15,10,60,0.85);border:1px solid rgba(138,203,208,0.2);border-radius:18px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.6);}
+.auth-left{flex:1;padding:2.5rem;background:rgba(23,12,121,0.4);border-right:1px solid rgba(138,203,208,0.1);display:flex;flex-direction:column;justify-content:center;}
+.auth-right{flex:1;padding:2.5rem;display:flex;flex-direction:column;justify-content:center;}
+.auth-feature{display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1.5rem;}
+.auth-feature-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;}
+.auth-feature h4{font-size:0.95rem;color:var(--brand-light);margin-bottom:0.2rem;}
+.auth-feature p{font-size:0.8rem;color:var(--text-secondary);line-height:1.4;}
+.auth-input{width:100%;padding:0.85rem 1rem;border-radius:10px;border:1px solid var(--surface-border);background:rgba(0,0,0,0.25);color:var(--brand-light);outline:none;font-size:0.95rem;font-family:'Outfit',sans-serif;transition:all 0.2s;}
+.auth-input:focus{border-color:var(--brand-teal);box-shadow:0 0 0 3px rgba(86,182,198,0.15);}
+.auth-btn{width:100%;padding:0.9rem;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
+.auth-btn-primary{background:var(--brand-teal);color:#0d0645;}
+.auth-btn-primary:hover{background:var(--brand-teal-light);transform:translateY(-1px);}
+.auth-btn-outline{background:transparent;border:1px solid var(--surface-border);color:var(--brand-light);}
+.auth-btn-outline:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.auth-label{font-size:0.78rem;color:var(--brand-teal-light);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.35rem;}
+@media(max-width:768px){.auth-modal{flex-direction:column;margin:1rem;}.auth-left{border-right:none;border-bottom:1px solid rgba(138,203,208,0.1);padding:1.5rem;}}
+</style>
+
+<div class="auth-modal">
+  <!-- Left: Features -->
+  <div class="auth-left">
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;">
+      <img src="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}" alt="" style="height:28px;">
+      <span style="font-size:1.2rem;font-weight:800;color:var(--brand-light);">Axiom Alpha</span>
+    </div>
+    <h2 style="font-size:1.5rem;font-weight:800;color:var(--brand-light);margin-bottom:0.3rem;">Find your next great investment</h2>
+    <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:2rem;">Institutional-grade analysis powered by DCF & relative valuation models.</p>
+
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:rgba(0,200,150,0.15);"><span>⚙️</span></div>
+      <div>
+        <h4>Strategy-based stock ratings</h4>
+        <p>Pick the lens that fits your investment style</p>
+      </div>
+    </div>
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:rgba(86,182,198,0.15);"><span>📊</span></div>
+      <div>
+        <h4>Rating-driven portfolios</h4>
+        <p>See how strategies perform across US & ID markets</p>
+      </div>
+    </div>
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:rgba(255,200,0,0.12);"><span>🗺️</span></div>
+      <div>
+        <h4>Visual stock infographics</h4>
+        <p>Heatmaps and dashboards to see the market as a whole</p>
+      </div>
+    </div>
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:rgba(239,68,68,0.12);"><span>📈</span></div>
+      <div>
+        <h4>Deep fundamental screener</h4>
+        <p>DCF, relative valuation, and quantitative metrics on any stock</p>
+      </div>
+    </div>
+
+    <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:1rem;line-height:1.4;">Axiom Alpha does not provide investment advice. Investing involves risk, including possible loss of capital.</p>
+  </div>
+
+  <!-- Right: Login Form -->
+  <div class="auth-right">
+    <h3 style="font-size:1.3rem;font-weight:800;color:var(--brand-light);text-align:center;margin-bottom:2rem;">Log in to continue research</h3>
+
+    <form method="post" style="display:flex;flex-direction:column;gap:1.25rem;">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div style="background:rgba(239,68,68,0.1);border:1px solid var(--danger);padding:0.75rem;border-radius:8px;color:var(--danger);font-size:0.85rem;">
+        Invalid username or password. Please try again.
+      </div>
+      {% endif %}
+
+      <div>
+        <div class="auth-label">Username</div>
+        <input type="text" name="username" id="id_username" required class="auth-input" placeholder="Enter your username">
+      </div>
+      <div>
+        <div class="auth-label">Password</div>
+        <input type="password" name="password" id="id_password" required class="auth-input" placeholder="Enter your password">
+      </div>
+
+      <button type="submit" class="auth-btn auth-btn-primary" style="margin-top:0.5rem;">
+        <i data-lucide="log-in" style="width:16px;height:16px;"></i> Sign In
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.5rem;color:var(--text-secondary);font-size:0.88rem;">
+      Don't have an account? <a href="{% url 'register' %}" style="color:var(--brand-teal);text-decoration:none;font-weight:700;">Sign up</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

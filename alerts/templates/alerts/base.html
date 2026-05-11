@@ -1,0 +1,398 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom Alpha | Pro Trading</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'alerts/images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* User Palette */
+            --brand-dark: #170C79;
+            --brand-light: #EFE3CA;
+            --brand-teal: #56B6C6;
+            --brand-teal-light: #8ACBD0;
+
+            /* Functional Colors */
+            --bg-color: #0d0645; /* Darker shade of brand-dark for depth */
+            --surface: #170C79;
+            --surface-hover: rgba(86, 182, 198, 0.1);
+            --surface-border: rgba(138, 203, 208, 0.2);
+            --text-primary: #EFE3CA;
+            --text-secondary: #8ACBD0;
+            --accent: #56B6C6;
+            --accent-glow: rgba(86, 182, 198, 0.5);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(86, 182, 198, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(23, 12, 121, 0.5), transparent 25%);
+        }
+
+        /* Glassmorphism Header */
+        header {
+            background: rgba(23, 12, 121, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--surface-border);
+            padding: 1rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--brand-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-img {
+            height: 28px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            color: var(--brand-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        nav a:hover, nav a.active {
+            opacity: 1;
+            color: var(--brand-teal-light);
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            padding: 3rem;
+            max-width: 1500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(23, 12, 121, 0.4);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--brand-teal), var(--brand-teal-light));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(86, 182, 198, 0.2);
+            border-color: var(--brand-teal-light);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--brand-teal);
+            color: var(--bg-color);
+            border: 2px solid var(--brand-teal);
+            padding: 0.85rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: transparent;
+            color: var(--brand-teal);
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--brand-teal-light);
+            border: 2px solid var(--surface-border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--brand-teal-light);
+            color: var(--brand-light);
+        }
+
+        /* SaaS Upgrade Badge */
+        .pro-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Micro-animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .badge.success { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* ===== MOBILE HAMBURGER ===== */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            background: none;
+            border: none;
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--brand-light);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            background: rgba(13, 6, 69, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--surface-border);
+            padding: 1rem 1.5rem;
+            gap: 0.75rem;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav a {
+            color: var(--brand-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--surface-border);
+        }
+        .mobile-nav a:last-child { border-bottom: none; }
+
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        @media (max-width: 900px) {
+            header { padding: 1rem 1.5rem; }
+            main { padding: 1.5rem; }
+            nav { display: none; }
+            .hamburger { display: flex; }
+            .dashboard-grid { grid-template-columns: 1fr !important; }
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 0.75rem 1rem; }
+            main { padding: 1rem; }
+            .glass-card { padding: 1.25rem; border-radius: 14px; }
+            h1 { font-size: 1.8rem !important; }
+            h2 { font-size: 1.3rem !important; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+            footer { flex-direction: column; padding: 1.5rem 1rem; text-align: center; }
+        }
+
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Live Ticker Tape -->
+    <div style="border-bottom: 1px solid var(--surface-border);">
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+          {
+          "symbols": [
+            {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500"},
+            {"proName": "FOREXCOM:NSXUSD", "title": "US 100"},
+            {"proName": "FX_IDC:EURUSD", "title": "EUR to USD"},
+            {"proName": "BITSTAMP:BTCUSD", "title": "Bitcoin"},
+            {"proName": "FOREXCOM:DJI", "title": "Dow Jones"},
+            {"proName": "FX_IDC:USDIDR", "title": "USD/IDR"},
+            {"proName": "NASDAQ:NVDA", "title": "NVIDIA"},
+            {"proName": "NASDAQ:AAPL", "title": "Apple"},
+            {"proName": "NASDAQ:MSFT", "title": "Microsoft"},
+            {"proName": "IDX:BBCA", "title": "Bank BCA"}
+          ],
+          "showSymbolLogo": true,
+          "isTransparent": true,
+          "displayMode": "adaptive",
+          "colorTheme": "dark",
+          "locale": "en"
+          }
+          </script>
+        </div>
+        <!-- TradingView Widget END -->
+    </div>
+
+    <header>
+        <!-- Logo and Brand -->
+        <a href="{% url 'dashboard' %}" class="logo" style="text-decoration: none;">
+            <img src="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}" alt="Axiom Alpha" class="logo-img">
+            <span style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;">Axiom Alpha</span>
+            <span class="pro-badge">PRO</span>
+        </a>
+        <nav>
+            <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}style="color: var(--brand-teal); border-bottom: 2px solid var(--brand-teal); padding-bottom: 2px;"{% endif %}>Dashboard</a>
+            <a href="{% url 'maps' %}" {% if request.resolver_match.url_name == 'maps' %}style="color: var(--brand-teal); border-bottom: 2px solid var(--brand-teal); padding-bottom: 2px;"{% endif %}>Maps</a>
+            <a href="{% url 'compare' %}" {% if request.resolver_match.url_name == 'compare' %}style="color: var(--brand-teal); border-bottom: 2px solid var(--brand-teal); padding-bottom: 2px;"{% endif %}>Compare</a>
+            <a href="{% url 'screener' %}" {% if request.resolver_match.url_name == 'screener' %}style="color: var(--brand-teal); border-bottom: 2px solid var(--brand-teal); padding-bottom: 2px;"{% endif %}>Deep Screener</a>
+            
+            <div style="width: 1px; height: 24px; background: var(--surface-border); margin: 0 1rem;"></div>
+            
+            {% if user.is_authenticated %}
+                <span style="color: var(--brand-teal); font-weight: 600; font-size: 0.95rem;">Welcome, {{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline" style="padding: 0.5rem 1.25rem;">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" style="font-weight: 600;">Log In</a>
+                <a href="{% url 'register' %}" style="padding: 0.5rem 1.5rem; border-radius: 20px; background: linear-gradient(135deg, #56B6C6, #56B6C6); color: white; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(16,185,129,0.3);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(16,185,129,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(16,185,129,0.3)'">Get Started</a>
+            {% endif %}
+        </nav>
+        <!-- Hamburger for mobile -->
+        <button class="hamburger" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <!-- Mobile Nav Dropdown -->
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="{% url 'dashboard' %}">📊 Dashboard</a>
+        <a href="{% url 'maps' %}">🗺️ Maps</a>
+        <a href="{% url 'compare' %}">⚖️ Compare</a>
+        <a href="{% url 'screener' %}">🔍 Deep Screener</a>
+        {% if user.is_authenticated %}
+            <span style="color: var(--brand-teal); font-weight: 600; padding: 0.5rem 0;">Welcome, {{ user.username }}</span>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" style="background: none; border: 1px solid var(--surface-border); color: var(--brand-light); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; width: 100%;">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Log In</a>
+            <a href="{% url 'register' %}">Sign Up</a>
+        {% endif %}
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--surface-border); padding: 2rem 3rem; margin-top: 3rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <img src="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}" alt="Axiom Alpha" style="height: 20px; width: auto;">
+            <span style="color: var(--text-secondary); font-size: 0.85rem;">&copy; 2026 Axiom Alpha. Institutional-Grade Analysis.</span>
+        </div>
+        <div style="display: flex; gap: 1.5rem;">
+            <a href="{% url 'dashboard' %}" style="color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Dashboard</a>
+            <a href="{% url 'maps' %}" style="color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Maps</a>
+            <a href="{% url 'compare' %}" style="color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Compare</a>
+            <a href="{% url 'screener' %}" style="color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Deep Screener</a>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobile-nav');
+            const btn = document.getElementById('hamburger-btn');
+            nav.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
+
