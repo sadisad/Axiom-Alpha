@@ -2,159 +2,154 @@
 
 {% block content %}
 <style>
-.hm-page{display:flex;flex-direction:column;gap:1.5rem;}
-.hm-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1.25rem;}
-.hm-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.5rem;}
-.hm-pill{padding:0.35rem 0.8rem;border-radius:20px;font-size:0.8rem;font-weight:600;cursor:pointer;border:1px solid rgba(138,203,208,0.2);color:var(--text-secondary);background:transparent;transition:all 0.2s;font-family:'Outfit',sans-serif;}
+.hm-page{display:flex;flex-direction:column;gap:1rem;}
+.hm-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1rem 1.25rem;}
+
+/* Top bar */
+.hm-topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.hm-title-row{display:flex;align-items:center;gap:0.75rem;}
+.hm-title-row h1{font-size:1.4rem;font-weight:800;color:var(--brand-light);margin:0;}
+
+/* Universe dropdown */
+.hm-universe-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.85rem;border-radius:8px;border:1px solid rgba(138,203,208,0.25);background:rgba(23,12,121,0.6);color:var(--brand-light);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.15s;}
+.hm-universe-btn:hover{border-color:var(--brand-teal);background:rgba(86,182,198,0.08);}
+.hm-universe-dd{display:none;position:absolute;top:100%;left:0;margin-top:6px;width:260px;max-height:420px;overflow-y:auto;background:rgba(15,10,60,0.98);border:1px solid rgba(138,203,208,0.2);border-radius:10px;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.hm-universe-dd.open{display:block;}
+.hm-sec{padding:0.3rem 0.75rem;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-top:0.4rem;}
+.hm-opt{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.75rem;font-size:0.82rem;color:var(--text-secondary);cursor:pointer;transition:all 0.12s;border:none;background:none;width:100%;text-align:left;font-family:'Outfit',sans-serif;}
+.hm-opt:hover{background:rgba(86,182,198,0.1);color:var(--brand-light);}
+.hm-opt.active{color:var(--brand-teal);background:rgba(86,182,198,0.08);}
+.hm-opt .cnt{margin-left:auto;font-size:0.7rem;color:#555;}
+
+/* Metric tabs row */
+.hm-metric-row{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.hm-metric-row .hm-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-right:0.25rem;white-space:nowrap;}
+.hm-pill{padding:0.3rem 0.7rem;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1px solid rgba(138,203,208,0.2);color:var(--text-secondary);background:transparent;transition:all 0.15s;font-family:'Outfit',sans-serif;}
 .hm-pill:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
 .hm-pill.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
-.hm-tab{padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.2s;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;gap:0.3rem;}
+.hm-tab{padding:0.35rem 0.85rem;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.12);color:var(--text-secondary);background:transparent;transition:all 0.15s;font-family:'Outfit',sans-serif;display:inline-flex;align-items:center;gap:0.3rem;}
 .hm-tab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
-.hm-tab.active{background:rgba(0,200,150,0.15);color:#00c896;border-color:rgba(0,200,150,0.3);}
-.hm-select{padding:0.6rem 1.25rem;border-radius:10px;border:1px solid var(--surface-border);background:rgba(23,12,121,0.6);color:var(--brand-light);font-size:1rem;font-weight:700;outline:none;cursor:pointer;font-family:'Outfit',sans-serif;}
-@media(max-width:768px){.hm-filters{flex-direction:column !important;}}
+.hm-tab.active{background:rgba(0,200,150,0.12);color:#00c896;border-color:rgba(0,200,150,0.3);}
+
+/* View toggle */
+.hm-view-toggle{display:flex;gap:0.3rem;margin-left:auto;}
+
+/* Legend */
+.hm-legend{display:flex;align-items:center;gap:1.5rem;padding:0.5rem 0 0.25rem;font-size:0.72rem;color:var(--text-secondary);}
+.hm-legend-bar{width:140px;height:10px;border-radius:5px;}
+
+/* Heatmap container */
+.hm-map-wrap{position:relative;}
+
+@media(max-width:900px){
+  .hm-topbar{flex-direction:column;align-items:stretch;}
+  .hm-metric-row{flex-wrap:wrap;}
+  .hm-view-toggle{margin-left:0;}
+}
 </style>
 
 <div class="hm-page">
 
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h1 style="font-size:1.8rem;font-weight:800;color:var(--brand-light);">Heatmap</h1>
-    <div style="display:flex;align-items:center;gap:0.5rem;">
-      <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block;box-shadow:0 0 8px var(--success);"></span>
-      <span style="font-size:0.85rem;color:var(--text-secondary);">Live data</span>
-    </div>
-  </div>
-
-  <!-- Filters Row -->
-  <div class="hm-filters" style="display:flex;gap:1.5rem;">
-
-    <!-- Left: Select List -->
-    <div class="hm-panel" style="flex:0 0 320px;max-height:420px;overflow-y:auto;">
-      <div class="hm-title">Select List</div>
-      <select class="hm-select" id="list-select" onchange="rebuildHeatmap()" style="width:100%;margin-bottom:0.75rem;">
-        <optgroup label="⭐ TRENDING">
-          <option value="SPX500">🇺🇸 S&P 500</option>
-          <option value="NASDAQ100">🇺🇸 Nasdaq 100</option>
-          <option value="DowJones">🇺🇸 Dow Jones 30</option>
-        </optgroup>
-        <optgroup label="📈 LISTS">
-          <option value="AllUSA">🇺🇸 All US Stocks</option>
-          <option value="Russell2000">🇺🇸 Russell 2000</option>
-          <option value="Russell1000">🇺🇸 Russell 1000</option>
-        </optgroup>
-        <optgroup label="🧭 ETF">
-          <option value="ETFsUS">🇺🇸 ETFs</option>
-        </optgroup>
-        <optgroup label="🌍 COUNTRIES">
-          <option value="AllUSA">🇺🇸 United States</option>
-          <option value="AllChina">🇨🇳 China</option>
-          <option value="AllJapan">🇯🇵 Japan</option>
-          <option value="AllGermany">🇩🇪 Germany</option>
-          <option value="AllIndia">🇮🇳 India</option>
-          <option value="AllUK">🇬🇧 United Kingdom</option>
-          <option value="AllFrance">🇫🇷 France</option>
-          <option value="AllCanada">🇨🇦 Canada</option>
-          <option value="AllSwitzerland">🇨🇭 Switzerland</option>
-          <option value="AllTaiwan">🇹🇼 Taiwan</option>
-          <option value="AllSouthKorea">🇰🇷 South Korea</option>
-          <option value="AllAustralia">🇦🇺 Australia</option>
-          <option value="AllBrazil">🇧🇷 Brazil</option>
-          <option value="AllIndonesia">🇮🇩 Indonesia</option>
-        </optgroup>
-        <optgroup label="💼 SECTORS">
-          <option value="SectorFinancials">💰 Financials</option>
-          <option value="SectorTech">💻 Technology</option>
-          <option value="SectorHealthcare">🏥 Healthcare</option>
-          <option value="SectorConsumer">🛒 Consumer</option>
-          <option value="SectorIndustrials">⚙️ Industrials</option>
-          <option value="SectorEnergy">⛽ Energy</option>
-          <option value="SectorMaterials">⛏️ Materials</option>
-          <option value="SectorRealEstate">🏠 Real Estate</option>
-          <option value="SectorUtilities">⚡ Utilities</option>
-        </optgroup>
-        <optgroup label="💾 INDUSTRY GROUPS">
-          <option value="IndustrySemiconductors">💾 Semiconductors</option>
-          <option value="IndustryBanks">🏦 Banks</option>
-          <option value="IndustrySoftware">💻 Software</option>
-          <option value="IndustryRetail">🛍️ Retail</option>
-          <option value="IndustryAutoComponents">🚗 Automobiles</option>
-          <option value="IndustryTelecom">📱 Telecom</option>
-        </optgroup>
-      </select>
-      <div class="hm-title">Suggestions</div>
-      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-        <span class="hm-pill" onclick="setList('SPX500')">💾 S&P 500</span>
-        <span class="hm-pill" onclick="setList('NASDAQ100')">💻 Nasdaq 100</span>
-        <span class="hm-pill" onclick="setList('ETFsUS')">🧭 ETFs</span>
-        <span class="hm-pill" onclick="setList('DowJones')">📈 Dow Jones</span>
-        <span class="hm-pill" onclick="setList('Russell2000')">📊 Russell 2000</span>
-        <span class="hm-pill" onclick="setList('AllUSA')">🇺🇸 USA</span>
-        <span class="hm-pill" onclick="setList('AllIndonesia')">🇮🇩 Indonesia</span>
-        <span class="hm-pill" onclick="setList('AllJapan')">🇯🇵 Japan</span>
-      </div>
-    </div>
-
-    <!-- Right: Select Metric -->
-    <div class="hm-panel" style="flex:1;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <div class="hm-title" style="margin:0;">Select Metric</div>
-          <select class="hm-select" id="metric-display" style="font-size:0.85rem;padding:0.4rem 0.8rem;" onchange="setMetric(this.value)">
-            <option value="change">Daily Change</option>
-            <option value="Perf.W">1 Week Return</option>
-            <option value="Perf.1M">1 Month Return</option>
-            <option value="Perf.YTD" selected>YTD Return</option>
-            <option value="Perf.Y">1 Year Return</option>
-            <option value="Perf.5Y">5 Year Return</option>
-            <option value="price_earnings_ttm">P/E</option>
-            <option value="price_earnings_growth_ttm">PEG</option>
-            <option value="dividend_yield_recent">Dividend Yield</option>
-            <option value="price_free_cash_flow_ttm">FCF Yield</option>
-            <option value="revenue_growth_yoy">Revenue Growth</option>
-          </select>
+  <!-- Top Bar: Title + Universe Selector -->
+  <div class="hm-panel">
+    <div class="hm-topbar">
+      <div class="hm-title-row">
+        <h1>Heatmap</h1>
+        <div style="position:relative;" id="universe-dd-wrap">
+          <button class="hm-universe-btn" onclick="toggleUniverseDD()" id="universe-btn">
+            <span id="universe-label">🇺🇸 S&P 500</span>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="hm-universe-dd" id="universe-dd">
+            <div class="hm-sec">Trending</div>
+            <button class="hm-opt active" onclick="pickUniverse('SPX500','🇺🇸 S&P 500',this)">💾 Semiconductors</button>
+            <button class="hm-opt" onclick="pickUniverse('SPX500','🇺🇸 S&P 500',this)">⭐ Magnificent 7</button>
+            <div class="hm-sec">Lists</div>
+            <button class="hm-opt" onclick="pickUniverse('SPX500','🇺🇸 S&P 500',this)">🇺🇸 S&P 500 <span class="cnt">500</span></button>
+            <button class="hm-opt" onclick="pickUniverse('NASDAQ100','💻 NASDAQ 100',this)">💻 NASDAQ 100 <span class="cnt">99</span></button>
+            <button class="hm-opt" onclick="pickUniverse('DowJones','📈 Dow Jones',this)">📈 Dow Jones 30</button>
+            <button class="hm-opt" onclick="pickUniverse('Russell2000','📊 Russell 2000',this)">📊 Russell 2000</button>
+            <button class="hm-opt" onclick="pickUniverse('Russell1000','📊 Russell 1000',this)">📊 Russell 1000</button>
+            <button class="hm-opt" onclick="pickUniverse('AllUSA','🇺🇸 All US Stocks',this)">🇺🇸 All US Stocks</button>
+            <div class="hm-sec">Countries</div>
+            <button class="hm-opt" onclick="pickUniverse('AllUSA','🇺🇸 United States',this)">🇺🇸 United States</button>
+            <button class="hm-opt" onclick="pickUniverse('AllChina','🇨🇳 China',this)">🇨🇳 China</button>
+            <button class="hm-opt" onclick="pickUniverse('AllJapan','🇯🇵 Japan',this)">🇯🇵 Japan</button>
+            <button class="hm-opt" onclick="pickUniverse('AllGermany','🇩🇪 Germany',this)">🇩🇪 Germany</button>
+            <button class="hm-opt" onclick="pickUniverse('AllIndia','🇮🇳 India',this)">🇮🇳 India</button>
+            <button class="hm-opt" onclick="pickUniverse('AllUK','🇬🇧 United Kingdom',this)">🇬🇧 United Kingdom</button>
+            <button class="hm-opt" onclick="pickUniverse('AllFrance','🇫🇷 France',this)">🇫🇷 France</button>
+            <button class="hm-opt" onclick="pickUniverse('AllCanada','🇨🇦 Canada',this)">🇨🇦 Canada</button>
+            <button class="hm-opt" onclick="pickUniverse('AllSwitzerland','🇨🇭 Switzerland',this)">🇨🇭 Switzerland</button>
+            <button class="hm-opt" onclick="pickUniverse('AllTaiwan','🇹🇼 Taiwan',this)">🇹🇼 Taiwan</button>
+            <button class="hm-opt" onclick="pickUniverse('AllSouthKorea','🇰🇷 South Korea',this)">🇰🇷 South Korea</button>
+            <button class="hm-opt" onclick="pickUniverse('AllAustralia','🇦🇺 Australia',this)">🇦🇺 Australia</button>
+            <button class="hm-opt" onclick="pickUniverse('AllBrazil','🇧🇷 Brazil',this)">🇧🇷 Brazil</button>
+            <button class="hm-opt" onclick="pickUniverse('AllIndonesia','🇮🇩 Indonesia',this)">🇮🇩 Indonesia</button>
+            <div class="hm-sec">Sectors</div>
+            <button class="hm-opt" onclick="pickUniverse('SectorFinancials','💰 Financials',this)">💰 Financials</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorTech','💻 Technology',this)">💻 Technology</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorHealthcare','🏥 Healthcare',this)">🏥 Healthcare</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorConsumer','🛒 Consumer',this)">🛒 Consumer</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorIndustrials','⚙️ Industrials',this)">⚙️ Industrials</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorEnergy','⛽ Energy',this)">⛽ Energy</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorMaterials','⛏️ Materials',this)">⛏️ Materials</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorRealEstate','🏠 Real Estate',this)">🏠 Real Estate</button>
+            <button class="hm-opt" onclick="pickUniverse('SectorUtilities','⚡ Utilities',this)">⚡ Utilities</button>
+            <div class="hm-sec">Industry</div>
+            <button class="hm-opt" onclick="pickUniverse('IndustrySemiconductors','💾 Semiconductors',this)">💾 Semiconductors</button>
+            <button class="hm-opt" onclick="pickUniverse('IndustryBanks','🏦 Banks',this)">🏦 Banks</button>
+            <button class="hm-opt" onclick="pickUniverse('IndustrySoftware','💻 Software',this)">💻 Software</button>
+            <button class="hm-opt" onclick="pickUniverse('IndustryRetail','🛍️ Retail',this)">🛍️ Retail</button>
+            <button class="hm-opt" onclick="pickUniverse('IndustryAutoComponents','🚗 Automobiles',this)">🚗 Automobiles</button>
+            <button class="hm-opt" onclick="pickUniverse('IndustryTelecom','📱 Telecom',this)">📱 Telecom</button>
+            <div class="hm-sec">ETF</div>
+            <button class="hm-opt" onclick="pickUniverse('ETFsUS','🧭 US ETFs',this)">🧭 US ETFs</button>
+          </div>
         </div>
-        <div style="display:flex;gap:0.4rem;align-items:center;">
-          <button class="hm-pill" onclick="toggleMonoSize(false)" id="btn-mcap" style="background:rgba(255,255,255,0.05);">Top by MCap</button>
-          <button class="hm-pill" onclick="toggleMonoSize(true)" id="btn-equal">Equal Size</button>
+        <div style="display:flex;align-items:center;gap:0.4rem;">
+          <span style="width:7px;height:7px;background:var(--success);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--success);"></span>
+          <span style="font-size:0.78rem;color:var(--text-secondary);">Live</span>
         </div>
       </div>
 
-      <!-- Category Tabs -->
-      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-        <button class="hm-tab active" onclick="showCategory('quick',this)">⚡ Quick Picks</button>
-        <button class="hm-tab" onclick="showCategory('returns',this)">📈 Returns</button>
-        <button class="hm-tab" onclick="showCategory('valuation',this)">💰 Valuation</button>
-        <button class="hm-tab" onclick="showCategory('growth',this)">🌱 Growth</button>
-        <button class="hm-tab" onclick="showCategory('quality',this)">💎 Quality</button>
-      </div>
-
-      <!-- Metric Pills -->
-      <div id="metric-pills" style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-        <span class="hm-pill" onclick="setMetric('change',this)">Daily Change</span>
-        <span class="hm-pill" onclick="setMetric('Perf.W',this)">1 Week</span>
-        <span class="hm-pill" onclick="setMetric('Perf.1M',this)">1 Month</span>
-        <span class="hm-pill active" onclick="setMetric('Perf.YTD',this)">YTD Return</span>
-        <span class="hm-pill" onclick="setMetric('Perf.Y',this)">1 Year</span>
-        <span class="hm-pill" onclick="setMetric('Perf.5Y',this)">5 Year</span>
-        <span class="hm-pill" onclick="setMetric('price_earnings_ttm',this)">P/E</span>
-        <span class="hm-pill" onclick="setMetric('price_earnings_growth_ttm',this)">PEG</span>
+      <!-- View toggle -->
+      <div class="hm-view-toggle">
+        <button class="hm-tab active" id="view-sector" onclick="setGrouping('sector',this)">Sector</button>
+        <button class="hm-tab" id="view-industry" onclick="setGrouping('industry',this)">Industry</button>
+        <button class="hm-tab" id="view-equal" onclick="toggleMonoSize(true,this)">Equal Size</button>
       </div>
     </div>
   </div>
 
-  <!-- Heatmap Display -->
-  <div class="hm-panel" style="padding:0;overflow:hidden;">
-    <div style="padding:1rem 1.25rem;border-bottom:1px solid rgba(138,203,208,0.1);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
-      <div>
-        <span style="font-size:1.1rem;font-weight:800;color:var(--brand-light);" id="map-title">🇺🇸 S&P 500 · YTD Return ↓</span>
-      </div>
-      <div style="display:flex;gap:0.4rem;">
-        <button class="hm-pill active" id="view-heatmap" onclick="setView('heatmap',this)">Heatmap</button>
-        <button class="hm-pill" id="view-bars" onclick="setView('bars',this)">Bars</button>
+  <!-- Metric Row -->
+  <div class="hm-panel" style="padding:0.6rem 1rem;">
+    <div class="hm-metric-row">
+      <span class="hm-label">Metric</span>
+      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;" id="metric-pills">
+        <button class="hm-pill" onclick="setMetric('change',this)">Daily</button>
+        <button class="hm-pill" onclick="setMetric('Perf.W',this)">1W</button>
+        <button class="hm-pill" onclick="setMetric('Perf.1M',this)">1M</button>
+        <button class="hm-pill active" onclick="setMetric('Perf.YTD',this)">YTD</button>
+        <button class="hm-pill" onclick="setMetric('Perf.Y',this)">1Y</button>
+        <button class="hm-pill" onclick="setMetric('Perf.5Y',this)">5Y</button>
+        <span style="width:1px;height:22px;background:rgba(138,203,208,0.15);margin:0 0.25rem;"></span>
+        <button class="hm-pill" onclick="setMetric('price_earnings_ttm',this)">P/E</button>
+        <button class="hm-pill" onclick="setMetric('price_earnings_growth_ttm',this)">PEG</button>
+        <button class="hm-pill" onclick="setMetric('dividend_yield_recent',this)">Div Yield</button>
+        <button class="hm-pill" onclick="setMetric('price_free_cash_flow_ttm',this)">FCF Yield</button>
+        <button class="hm-pill" onclick="setMetric('revenue_growth_yoy',this)">Rev Growth</button>
       </div>
     </div>
-    <div style="height:70vh;min-height:500px;" id="heatmap-container">
+  </div>
+
+  <!-- Heatmap -->
+  <div class="hm-panel hm-map-wrap" style="padding:0;overflow:hidden;">
+    <div style="padding:0.75rem 1.25rem;border-bottom:1px solid rgba(138,203,208,0.1);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:1rem;font-weight:800;color:var(--brand-light);" id="map-title">🇺🇸 S&P 500 · YTD Return</span>
+      <span style="font-size:0.72rem;color:var(--text-secondary);">Click any block to analyze</span>
+    </div>
+    <div style="height:72vh;min-height:480px;" id="heatmap-container">
       <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
@@ -162,62 +157,106 @@
         </script>
       </div>
     </div>
+    <!-- Legend -->
+    <div class="hm-legend" style="padding:0.5rem 1.25rem;">
+      <div style="display:flex;align-items:center;gap:0.4rem;">
+        <div class="hm-legend-bar" style="background:linear-gradient(to right, #ef4444, #0d0645, #10b981);"></div>
+        <span id="legend-label">Negative ← → Positive</span>
+      </div>
+      <span>Block size = Market Cap</span>
+    </div>
   </div>
+
 </div>
 
 <script>
-var currentSource='SPX500',currentMetric='Perf.YTD',monoSize=false;
-var listNames={'SPX500':'S&P 500','NASDAQ100':'Nasdaq 100','DowJones':'Dow Jones 30','Russell2000':'Russell 2000','Russell1000':'Russell 1000','AllUSA':'All US Stocks','ETFsUS':'ETFs','AllChina':'China','AllJapan':'Japan','AllGermany':'Germany','AllIndia':'India','AllUK':'United Kingdom','AllFrance':'France','AllCanada':'Canada','AllSwitzerland':'Switzerland','AllTaiwan':'Taiwan','AllSouthKorea':'South Korea','AllAustralia':'Australia','AllBrazil':'Brazil','AllIndonesia':'Indonesia','SectorFinancials':'Financials','SectorTech':'Technology','SectorHealthcare':'Healthcare','SectorConsumer':'Consumer','SectorIndustrials':'Industrials','SectorEnergy':'Energy','SectorMaterials':'Materials','SectorRealEstate':'Real Estate','SectorUtilities':'Utilities','IndustrySemiconductors':'Semiconductors','IndustryBanks':'Banks','IndustrySoftware':'Software','IndustryRetail':'Retail','IndustryAutoComponents':'Automobiles','IndustryTelecom':'Telecom'};
-var metricNames={'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.YTD':'YTD Return','Perf.Y':'1 Year','Perf.5Y':'5 Year','price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','dividend_yield_recent':'Div Yield','price_free_cash_flow_ttm':'FCF Yield','revenue_growth_yoy':'Rev Growth'};
+var currentSource='SPX500', currentMetric='Perf.YTD', currentGrouping='sector', monoSize=false;
 
-function rebuildHeatmap(){
-  currentSource=document.getElementById('list-select').value;
-  updateMap();
+var metricLabels={
+  'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.YTD':'YTD Return','Perf.Y':'1 Year','Perf.5Y':'5 Year',
+  'price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','dividend_yield_recent':'Div Yield',
+  'price_free_cash_flow_ttm':'FCF Yield','revenue_growth_yoy':'Rev Growth'
+};
+
+var sourceLabels={
+  'SPX500':'S&P 500','NASDAQ100':'Nasdaq 100','DowJones':'Dow Jones 30','Russell2000':'Russell 2000','Russell1000':'Russell 1000',
+  'AllUSA':'All US Stocks','ETFsUS':'US ETFs',
+  'AllChina':'China','AllJapan':'Japan','AllGermany':'Germany','AllIndia':'India','AllUK':'United Kingdom',
+  'AllFrance':'France','AllCanada':'Canada','AllSwitzerland':'Switzerland','AllTaiwan':'Taiwan',
+  'AllSouthKorea':'South Korea','AllAustralia':'Australia','AllBrazil':'Brazil','AllIndonesia':'Indonesia',
+  'SectorFinancials':'Financials','SectorTech':'Technology','SectorHealthcare':'Healthcare','SectorConsumer':'Consumer',
+  'SectorIndustrials':'Industrials','SectorEnergy':'Energy','SectorMaterials':'Materials','SectorRealEstate':'Real Estate','SectorUtilities':'Utilities',
+  'IndustrySemiconductors':'Semiconductors','IndustryBanks':'Banks','IndustrySoftware':'Software',
+  'IndustryRetail':'Retail','IndustryAutoComponents':'Automobiles','IndustryTelecom':'Telecom'
+};
+
+function toggleUniverseDD(){
+  var dd=document.getElementById('universe-dd');
+  dd.classList.toggle('open');
 }
-function setList(src,el){
+document.addEventListener('click',function(e){
+  var w=document.getElementById('universe-dd-wrap');
+  if(w&&!w.contains(e.target)){document.getElementById('universe-dd').classList.remove('open');}
+});
+
+function pickUniverse(src,label,el){
   currentSource=src;
-  document.getElementById('list-select').value=src;
+  document.getElementById('universe-label').textContent=label;
+  document.querySelectorAll('.hm-opt').forEach(function(o){o.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('universe-dd').classList.remove('open');
   updateMap();
 }
+
 function setMetric(m,el){
   currentMetric=m;
-  document.getElementById('metric-display').value=m;
-  if(el){document.querySelectorAll('#metric-pills .hm-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');}
+  document.querySelectorAll('#metric-pills .hm-pill').forEach(function(p){p.classList.remove('active');});
+  el.classList.add('active');
+  updateLegend();
   updateMap();
 }
-function toggleMonoSize(v){
+
+function setGrouping(g,el){
+  currentGrouping=g;
+  document.querySelectorAll('.hm-view-toggle .hm-tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  monoSize=false;
+  updateMap();
+}
+
+function toggleMonoSize(v,el){
   monoSize=v;
-  document.getElementById('btn-mcap').classList.toggle('active',!v);
-  document.getElementById('btn-equal').classList.toggle('active',v);
-  updateMap();
-}
-function setView(v,el){
-  document.querySelectorAll('#view-heatmap,#view-bars').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.hm-view-toggle .hm-tab').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');
   updateMap();
 }
-function showCategory(cat,el){
-  document.querySelectorAll('.hm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  var pills={'quick':['change','Perf.W','Perf.1M','Perf.YTD','Perf.Y','Perf.5Y','price_earnings_ttm','price_earnings_growth_ttm'],
-    'returns':['Perf.W','Perf.1M','Perf.3M','Perf.6M','Perf.YTD','Perf.Y','Perf.5Y'],
-    'valuation':['price_earnings_ttm','price_earnings_growth_ttm','price_book_fq','price_sales_ttm','enterprise_value_ebitda_ttm'],
-    'growth':['revenue_growth_yoy','earnings_per_share_growth_ttm','revenue_growth_3y'],
-    'quality':['return_on_equity','return_on_assets','gross_margin','operating_margin']};
-  var names={'change':'Daily Change','Perf.W':'1 Week','Perf.1M':'1 Month','Perf.3M':'3 Month','Perf.6M':'6 Month','Perf.YTD':'YTD','Perf.Y':'1 Year','Perf.5Y':'5 Year',
-    'price_earnings_ttm':'P/E','price_earnings_growth_ttm':'PEG','price_book_fq':'P/B','price_sales_ttm':'P/S','enterprise_value_ebitda_ttm':'EV/EBITDA',
-    'revenue_growth_yoy':'Rev Growth 1Y','earnings_per_share_growth_ttm':'EPS Growth','revenue_growth_3y':'Rev Growth 3Y',
-    'return_on_equity':'ROE','return_on_assets':'ROA','gross_margin':'Gross Margin','operating_margin':'Oper Margin','dividend_yield_recent':'Div Yield','price_free_cash_flow_ttm':'FCF Yield'};
-  var html='';(pills[cat]||[]).forEach(function(m){
-    html+='<span class="hm-pill'+(m===currentMetric?' active':'')+'" onclick="setMetric(\''+m+'\',this)">'+((names[m]||m))+'</span>';
-  });
-  document.getElementById('metric-pills').innerHTML=html;
+
+function updateLegend(){
+  var m=currentMetric;
+  var pctMetrics=['change','Perf.W','Perf.1M','Perf.3M','Perf.6M','Perf.YTD','Perf.Y','Perf.5Y'];
+  var lbl=(metricLabels[m]||m);
+  document.getElementById('legend-label').textContent=pctMetrics.indexOf(m)>=0?'Negative ← → Positive':'Low ← → High';
 }
+
 function updateMap(){
-  document.getElementById('map-title').textContent='🇺🇸 '+(listNames[currentSource]||currentSource)+' · '+(metricNames[currentMetric]||currentMetric)+' ↓';
+  var srcLabel=sourceLabels[currentSource]||currentSource;
+  var metLabel=metricLabels[currentMetric]||currentMetric;
+  document.getElementById('map-title').textContent=srcLabel+' · '+metLabel;
+
   var c=document.getElementById('heatmap-container');
   c.innerHTML='<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
-  var s=document.createElement('script');s.type='text/javascript';s.src='https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';s.async=true;
-  s.textContent=JSON.stringify({"exchanges":[],"dataSource":currentSource,"grouping":"sector","blockSize":"market_cap_basic","blockColor":currentMetric,"locale":"en","symbolUrl":"","colorTheme":"dark","hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"isMonoSize":monoSize,"width":"100%","height":"100%"});
+  var s=document.createElement('script');
+  s.type='text/javascript';
+  s.src='https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';
+  s.async=true;
+  s.textContent=JSON.stringify({
+    "exchanges":[],"dataSource":currentSource,"grouping":currentGrouping,
+    "blockSize":"market_cap_basic","blockColor":currentMetric,
+    "locale":"en","symbolUrl":"","colorTheme":"dark",
+    "hasTopBar":false,"isDataSetEnabled":false,"isZoomEnabled":true,
+    "hasSymbolTooltip":true,"isMonoSize":monoSize,
+    "width":"100%","height":"100%"
+  });
   c.querySelector('.tradingview-widget-container').appendChild(s);
 }
 </script>
