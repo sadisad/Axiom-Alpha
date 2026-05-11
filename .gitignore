@@ -31,4 +31,5 @@ media/
 
 # Secrets
 .env
+.env.local
 *.key

@@ -1,13 +1,66 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django import forms
 from .services.valuation import get_fundamental_analysis
-from .models import Watchlist, SearchHistory, Portfolio
+from .firebase_db import (
+    FirestoreUser, create_user, get_user_by_username,
+    get_watchlist, toggle_watchlist, check_in_watchlist,
+    add_search_history, get_search_history,
+    get_portfolio, add_portfolio, remove_portfolio,
+)
 import yfinance as yf
 import decimal
+
+
+class RegisterForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Choose a username',
+        })
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Enter your email',
+        })
+    )
+    password1 = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Create a password',
+        })
+    )
+    password2 = forms.CharField(
+        label='Password confirmation',
+        widget=forms.PasswordInput(attrs={
+            'class': 'auth-input',
+            'placeholder': 'Confirm your password',
+        })
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if get_user_by_username(username):
+            raise forms.ValidationError('This username is already taken.')
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get('password1')
+        p2 = cleaned_data.get('password2')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError('Passwords do not match.')
+        return cleaned_data
+
+
+def about(request):
+    return render(request, 'alerts/about.html')
 
 
 def maps(request):
@@ -20,57 +73,51 @@ def dashboard(request):
     portfolio_items = []
 
     if request.user.is_authenticated:
-        # --- Watchlist ---
-        saved = Watchlist.objects.filter(user=request.user)
+        uid = request.user.pk
+
+        saved = get_watchlist(uid)
         for item in saved:
             try:
-                process_sym = item.symbol
-                if item.market == 'ID' and not process_sym.endswith('.JK'):
+                process_sym = item['symbol']
+                if item.get('market') == 'ID' and not process_sym.endswith('.JK'):
                     process_sym += '.JK'
                 info = yf.Ticker(process_sym).info
                 price = info.get('currentPrice', info.get('regularMarketPrice', 0))
                 prev_close = info.get('previousClose', price)
                 change = ((price - prev_close) / prev_close * 100) if prev_close and price else 0
                 watchlist_items.append({
-                    'symbol': item.symbol, 'market': item.market,
-                    'name': info.get('shortName', item.symbol),
+                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                    'name': info.get('shortName', item['symbol']),
                     'price': f"{price:,.2f}" if price else '-',
                     'change': round(change, 2),
                     'is_positive': change >= 0,
                 })
             except Exception:
                 watchlist_items.append({
-                    'symbol': item.symbol, 'market': item.market,
-                    'name': item.symbol, 'price': '-', 'change': 0, 'is_positive': True,
+                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                    'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True,
                 })
 
-        # --- Recent Searches ---
-        seen = set()
-        for s in SearchHistory.objects.filter(user=request.user)[:20]:
-            if s.symbol not in seen:
-                seen.add(s.symbol)
-                recent_searches.append(s)
-                if len(recent_searches) >= 6:
-                    break
+        recent_searches = get_search_history(uid, limit=6)
 
-        # --- Portfolio ---
-        for pos in Portfolio.objects.filter(user=request.user):
+        positions = get_portfolio(uid)
+        for pos in positions:
             try:
-                process_sym = pos.symbol
-                if pos.market == 'ID' and not process_sym.endswith('.JK'):
+                process_sym = pos['symbol']
+                if pos.get('market') == 'ID' and not process_sym.endswith('.JK'):
                     process_sym += '.JK'
                 info = yf.Ticker(process_sym).info
                 current_price = info.get('currentPrice', info.get('regularMarketPrice', 0)) or 0
-                buy_price = float(pos.buy_price)
-                qty = float(pos.quantity)
+                buy_price = float(pos['buy_price'])
+                qty = float(pos['quantity'])
                 cost_basis = buy_price * qty
                 current_value = current_price * qty
                 pnl = current_value - cost_basis
                 pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
                 portfolio_items.append({
-                    'id': pos.id,
-                    'symbol': pos.symbol, 'market': pos.market,
-                    'name': pos.company_name or info.get('shortName', pos.symbol),
+                    'id': pos['id'],
+                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                    'name': pos.get('company_name', '') or info.get('shortName', pos['symbol']),
                     'quantity': qty, 'buy_price': buy_price,
                     'current_price': round(current_price, 2),
                     'current_value': round(current_value, 2),
@@ -80,10 +127,10 @@ def dashboard(request):
                 })
             except Exception:
                 portfolio_items.append({
-                    'id': pos.id,
-                    'symbol': pos.symbol, 'market': pos.market,
-                    'name': pos.company_name or pos.symbol,
-                    'quantity': float(pos.quantity), 'buy_price': float(pos.buy_price),
+                    'id': pos['id'],
+                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                    'name': pos.get('company_name', '') or pos['symbol'],
+                    'quantity': float(pos['quantity']), 'buy_price': float(pos['buy_price']),
                     'current_price': 0, 'current_value': 0,
                     'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
                 })
@@ -121,7 +168,7 @@ def dashboard(request):
         {'symbol': 'WFC', 'name': 'Wells Farg', 'pct': '-6'},
         {'symbol': 'COP', 'name': 'ConocoPh', 'pct': '-8'},
     ]
-    # Score color helper
+
     def sc(v):
         if v >= 80: return ('rgba(0,200,150,0.18)', '#00c896')
         if v >= 50: return ('rgba(255,200,0,0.15)', '#ffc800')
@@ -131,7 +178,7 @@ def dashboard(request):
     for t, n, m, g, q, v, mo, r, s in [
         ('MU','Micron',842,95,97,67,99,26,98),
         ('NVDA','NVIDIA',5228,99,100,28,97,97,97),
-        ('V','Visa',601,76,100,32,18,92,97),
+        ('V','Visa',601,76,100,32,18,92,96),
         ('MSFT','Microsoft',3084,97,99,32,44,70,96),
         ('MA','Mastercard',438,77,100,27,26,92,96),
         ('NEM','Newmont',324,56,98,84,62,61,96),
@@ -188,21 +235,13 @@ def screener(request):
                 tv_symbol = f"IDX:{tv_symbol}"
             analysis['tv_symbol'] = tv_symbol
 
-            # Save search history (keep last 50 per user)
-            clean_symbol = symbol.upper().strip().replace('.JK', '')
-            SearchHistory.objects.create(
-                user=request.user,
-                symbol=clean_symbol,
-                market=market,
-                company_name=analysis.get('company_name', '')
-            )
-            # Trim history to 50 entries
-            ids = list(SearchHistory.objects.filter(user=request.user).values_list('id', flat=True)[50:])
-            if ids:
-                SearchHistory.objects.filter(id__in=ids).delete()
+            if request.user.is_authenticated:
+                clean_symbol = symbol.upper().strip().replace('.JK', '')
+                add_search_history(request.user.pk, clean_symbol, market, analysis.get('company_name', ''))
 
-        clean_symbol = symbol.upper().strip().replace('.JK', '')
-        in_watchlist = Watchlist.objects.filter(user=request.user, symbol=clean_symbol).exists()
+        if request.user.is_authenticated:
+            clean_symbol = symbol.upper().strip().replace('.JK', '')
+            in_watchlist = check_in_watchlist(request.user.pk, clean_symbol)
 
     return render(request, 'alerts/screener.html', {
         'symbol': symbol.replace('.JK', ''),
@@ -250,11 +289,8 @@ def toggle_watchlist(request):
     market = request.POST.get('market', 'US')
     if not symbol:
         return JsonResponse({'error': 'Symbol is required'}, status=400)
-    obj, created = Watchlist.objects.get_or_create(user=request.user, symbol=symbol, defaults={'market': market})
-    if not created:
-        obj.delete()
-        return JsonResponse({'status': 'removed', 'symbol': symbol})
-    return JsonResponse({'status': 'added', 'symbol': symbol})
+    result = toggle_watchlist(request.user.pk, symbol, market)
+    return JsonResponse({'status': result, 'symbol': symbol})
 
 
 @login_required
@@ -267,12 +303,9 @@ def portfolio_add(request):
     company_name = request.POST.get('company_name', '')
 
     try:
-        Portfolio.objects.create(
-            user=request.user,
-            symbol=symbol, market=market,
-            company_name=company_name,
-            quantity=decimal.Decimal(quantity),
-            buy_price=decimal.Decimal(buy_price),
+        add_portfolio(
+            request.user.pk, symbol, market, company_name,
+            decimal.Decimal(quantity), decimal.Decimal(buy_price),
         )
     except Exception:
         pass
@@ -282,18 +315,22 @@ def portfolio_add(request):
 @login_required
 @require_POST
 def portfolio_remove(request, pk):
-    pos = get_object_or_404(Portfolio, pk=pk, user=request.user)
-    pos.delete()
+    remove_portfolio(request.user.pk, pk)
     return redirect('dashboard')
 
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1'],
+            )
+            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
             login(request, user)
             return redirect('dashboard')
     else:
-        form = UserCreationForm()
+        form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})

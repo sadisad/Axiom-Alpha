@@ -1,0 +1,136 @@
+{% extends 'alerts/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+.ab-hero{text-align:center;padding:4rem 2rem;position:relative;}
+.ab-hero h1{font-size:3.2rem;font-weight:800;color:var(--brand-light);line-height:1.15;margin-bottom:1rem;}
+.ab-hero p{font-size:1.15rem;color:var(--text-secondary);max-width:600px;margin:0 auto 2rem;}
+.ab-pill{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1.25rem;border:1px solid rgba(138,203,208,0.25);border-radius:30px;font-size:0.88rem;font-weight:600;color:var(--brand-light);background:rgba(23,12,121,0.5);margin-bottom:2rem;}
+.ab-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.85rem 2rem;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.3s;font-family:'Outfit',sans-serif;border:none;cursor:pointer;}
+.ab-btn-primary{background:var(--brand-teal);color:#0d0645;}
+.ab-btn-primary:hover{background:var(--brand-teal-light);transform:translateY(-2px);}
+.ab-btn-outline{border:1px solid var(--surface-border);color:var(--brand-light);background:transparent;}
+.ab-btn-outline:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.ab-section{padding:3rem 0;}
+.ab-section-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--brand-teal);text-align:center;margin-bottom:0.5rem;}
+.ab-section h2{font-size:2rem;font-weight:800;color:var(--brand-light);text-align:center;margin-bottom:2.5rem;}
+.ab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1100px;margin:0 auto;}
+.ab-card{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1.75rem;transition:all 0.3s;}
+.ab-card:hover{border-color:var(--brand-teal);transform:translateY(-4px);}
+.ab-card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem;}
+.ab-card h3{font-size:1.1rem;font-weight:700;color:var(--brand-light);margin-bottom:0.5rem;}
+.ab-card p{font-size:0.88rem;color:var(--text-secondary);line-height:1.6;}
+.ab-strategies{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:2rem;}
+.ab-strat{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:20px;font-size:0.85rem;font-weight:600;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);}
+.ab-strat .dot{width:8px;height:8px;border-radius:50%;}
+.ab-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;max-width:1100px;margin:0 auto;}
+.ab-step{text-align:center;padding:1.5rem;}
+.ab-step-num{width:40px;height:40px;border-radius:50%;background:rgba(86,182,198,0.15);color:var(--brand-teal);font-weight:800;font-size:1.1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+.ab-step h4{font-size:1rem;font-weight:700;color:var(--brand-light);margin-bottom:0.4rem;}
+.ab-step p{font-size:0.82rem;color:var(--text-secondary);}
+.ab-cta{text-align:center;padding:4rem 2rem;background:rgba(15,10,60,0.5);border:1px solid rgba(138,203,208,0.1);border-radius:18px;margin:2rem 0;}
+@media(max-width:768px){.ab-grid,.ab-steps{grid-template-columns:1fr;}.ab-hero h1{font-size:2.2rem;}}
+</style>
+
+<!-- Hero -->
+<div class="ab-hero">
+  <div class="ab-pill">📊 Institutional-Grade Analysis. Multi-Strategy Scoring. 4,000+ Stocks.</div>
+  <h1>Find Great Stocks.<br>Invest with Confidence.</h1>
+  <p>Axiom Alpha's models analyze thousands of stocks across US and Indonesia markets so you can focus on what matters.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="{% url 'dashboard' %}" class="ab-btn ab-btn-primary">Open Terminal</a>
+    <a href="#how-it-works" class="ab-btn ab-btn-outline">See How It Works</a>
+  </div>
+</div>
+
+<!-- Strategy Bar -->
+<div style="text-align:center;padding:2rem 0;border-top:1px solid rgba(138,203,208,0.08);border-bottom:1px solid rgba(138,203,208,0.08);">
+  <div style="font-size:0.72rem;color:var(--text-secondary);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem;">Multi-factor scoring across global markets</div>
+  <div class="ab-strategies">
+    <div class="ab-strat"><div class="dot" style="background:#ffc800;"></div> GEAR+</div>
+    <div class="ab-strat"><div class="dot" style="background:#00c896;"></div> Quality Compounders</div>
+    <div class="ab-strat"><div class="dot" style="background:#ff6464;"></div> Momentum Surge</div>
+    <div class="ab-strat"><div class="dot" style="background:#56B6C6;"></div> Smart Value</div>
+    <div class="ab-strat"><div class="dot" style="background:#a855f7;"></div> Deep Value</div>
+    <div class="ab-strat"><div class="dot" style="background:#f97316;"></div> Growth Rocket</div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="ab-section">
+  <div class="ab-section-title">Features</div>
+  <h2>Everything you need to analyze stocks</h2>
+  <div class="ab-grid">
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(0,200,150,0.12);">⚙️</div>
+      <h3>Strategy-Based Ratings</h3>
+      <p>Each stock is scored against multiple investment strategies — from compounders to momentum plays. Find stocks that match your style.</p>
+    </div>
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(86,182,198,0.12);">📊</div>
+      <h3>Deep Fundamental Screener</h3>
+      <p>Run DCF and Relative Valuation models on any US or IDX stock. Get instant fair value calculations and upside potential.</p>
+    </div>
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(255,200,0,0.1);">🗺️</div>
+      <h3>Visual Market Heatmaps</h3>
+      <p>See the entire market at a glance. Filter by returns, valuation, growth metrics, and quality factors across 60+ industries.</p>
+    </div>
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(255,100,100,0.1);">📈</div>
+      <h3>Trending Portfolios</h3>
+      <p>Track algorithmic portfolios across strategies. See which approaches are outperforming in the current market regime.</p>
+    </div>
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(168,85,247,0.1);">🔍</div>
+      <h3>Stock Comparison</h3>
+      <p>Compare multiple stocks side-by-side with synchronized charts and fundamental metrics. Make informed relative decisions.</p>
+    </div>
+    <div class="ab-card">
+      <div class="ab-card-icon" style="background:rgba(249,115,22,0.1);">⭐</div>
+      <h3>Personal Watchlist</h3>
+      <p>Track your favorite stocks with real-time price updates and delta indicators. Never miss an opportunity.</p>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works -->
+<div class="ab-section" id="how-it-works">
+  <div class="ab-section-title">Workflow</div>
+  <h2>How Axiom Alpha Works</h2>
+  <div class="ab-steps">
+    <div class="ab-step">
+      <div class="ab-step-num">1</div>
+      <h4>Discover</h4>
+      <p>Browse the Hub dashboard for top-rated stocks, trending portfolios, and market movers.</p>
+    </div>
+    <div class="ab-step">
+      <div class="ab-step-num">2</div>
+      <h4>Analyze</h4>
+      <p>Run the Deep Screener for DCF fair value, relative valuation, and quantitative metrics.</p>
+    </div>
+    <div class="ab-step">
+      <div class="ab-step-num">3</div>
+      <h4>Compare</h4>
+      <p>Use side-by-side comparison to evaluate multiple candidates before making a decision.</p>
+    </div>
+    <div class="ab-step">
+      <div class="ab-step-num">4</div>
+      <h4>Track</h4>
+      <p>Add to your watchlist and portfolio. Monitor your positions with real-time data.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="ab-cta">
+  <h2 style="font-size:2rem;font-weight:800;color:var(--brand-light);margin-bottom:0.5rem;">Ready to start analyzing?</h2>
+  <p style="color:var(--text-secondary);margin-bottom:2rem;font-size:1.05rem;">Join Axiom Alpha Terminal and get institutional-grade analysis for free.</p>
+  <a href="{% url 'register' %}" class="ab-btn ab-btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem;">Get Started — It's Free</a>
+</div>
+
+<div style="text-align:center;padding:2rem;font-size:0.78rem;color:var(--text-secondary);line-height:1.6;">
+  <p>Axiom Alpha does not provide investment advice. Investing involves risk, including possible loss of capital.</p>
+  <p style="margin-top:0.5rem;">Data is provided for informational purposes only and should not be considered as financial advice.</p>
+</div>
+{% endblock %}
