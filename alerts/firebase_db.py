@@ -13,10 +13,13 @@ def _init():
     global _app, _creds_dict
     if _app:
         return _app
+    project_id = os.environ.get('FIREBASE_PROJECT_ID', '')
+    if not project_id:
+        raise RuntimeError('FIREBASE_PROJECT_ID env var is missing')
     private_key = os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n')
     _creds_dict = {
         'type': 'service_account',
-        'project_id': os.environ.get('FIREBASE_PROJECT_ID', ''),
+        'project_id': project_id,
         'private_key_id': os.environ.get('FIREBASE_PRIVATE_KEY_ID', ''),
         'private_key': private_key,
         'client_email': os.environ.get('FIREBASE_CLIENT_EMAIL', ''),
