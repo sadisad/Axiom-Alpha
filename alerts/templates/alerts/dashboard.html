@@ -58,6 +58,11 @@
 .wl-table td { padding:0.65rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.03); }
 .wl-table tr:hover td { background:rgba(86,182,198,0.05); }
 
+/* Universe dropdown */
+.um-item { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 0.75rem; font-size:0.82rem; color:var(--text-secondary); text-decoration:none; transition:all 0.12s; }
+.um-item:hover { background:rgba(86,182,198,0.1); color:var(--brand-light); }
+.um-count { margin-left:auto; font-size:0.72rem; color:#555; }
+
 @media(max-width:768px){
   .hub-row { grid-template-columns:1fr !important; }
   .returns-grid { grid-template-columns:1fr; }
@@ -67,24 +72,70 @@
 
 <div class="hub">
 
-  <!-- Row 1: Market Pulse Header -->
+  <!-- Row 1: Hub Header -->
   <div class="panel">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
       <div>
-        <div style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem;">Market Intelligence</div>
         <h1 style="font-size:1.6rem; font-weight:800; color:var(--brand-light); margin:0;">Axiom Alpha Terminal</h1>
-      </div>
-      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-        <a href="{% url 'screener' %}" class="btn" style="padding:0.6rem 1.4rem;"><i data-lucide="search" style="width:14px;height:14px;"></i> Screener</a>
-        <a href="{% url 'compare' %}" class="btn btn-outline" style="padding:0.6rem 1.4rem;"><i data-lucide="git-compare" style="width:14px;height:14px;"></i> Compare</a>
-        <a href="{% url 'maps' %}" class="btn btn-outline" style="padding:0.6rem 1.4rem;"><i data-lucide="map" style="width:14px;height:14px;"></i> Maps</a>
       </div>
     </div>
   </div>
 
-  <!-- Row 2: Gauge Scores + Key Stats -->
+  <!-- Row 2: Market Scores with Universe Dropdown -->
   <div class="panel">
-    <div class="panel-title">📊 Market Scores — S&P 500 Universe</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <div class="panel-title" style="margin:0;">📊 Market Scores</div>
+        <div style="position:relative;" id="universe-dropdown">
+          <button onclick="toggleUniverse()" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.3rem 0.75rem; border-radius:6px; border:1px solid rgba(138,203,208,0.25); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:0.78rem; font-weight:700; cursor:pointer; font-family:'Outfit',sans-serif;">
+            <span id="universe-label">S&P 500</span>
+            <i data-lucide="chevron-down" style="width:12px;height:12px;"></i>
+          </button>
+          <div id="universe-menu" style="display:none; position:absolute; top:100%; left:0; margin-top:4px; width:280px; max-height:400px; overflow-y:auto; background:rgba(15,10,60,0.98); border:1px solid rgba(138,203,208,0.2); border-radius:10px; padding:0.5rem 0; z-index:200; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.25rem;">Trending</div>
+            <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="um-item">💾 Semiconductors <span class="um-count">102</span></a>
+            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">🖥️ Technology Hardware <span class="um-count">147</span></a>
+            <a href="{% url 'screener' %}?symbol=QCOM&market=US" class="um-item">📡 Communications Equipment <span class="um-count">25</span></a>
+            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">📟 Electronic Equipment <span class="um-count">85</span></a>
+            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">⭐ Magnificent 7 <span class="um-count">7</span></a>
+            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Lists</div>
+            <a href="{% url 'screener' %}?symbol=MSFT&market=US" class="um-item">📈 US Mid Caps <span class="um-count">1,000</span></a>
+            <a href="#" class="um-item">🌏 Asia Large Cap <span class="um-count">502</span></a>
+            <a href="#" class="um-item">🌐 Developed Markets Large Cap <span class="um-count">502</span></a>
+            <a href="#" class="um-item">🌍 Emerging Markets Large Cap <span class="um-count">502</span></a>
+            <a href="{% url 'screener' %}?symbol=SPY&market=US" class="um-item">🇺🇸 S&P 500 <span class="um-count">500</span></a>
+            <a href="#" class="um-item">🌍 Global Large Cap <span class="um-count">500</span></a>
+            <a href="#" class="um-item">🇪🇺 Europe Large Cap <span class="um-count">500</span></a>
+            <a href="#" class="um-item">🌎 World Large Cap (ex USA) <span class="um-count">500</span></a>
+            <a href="{% url 'portfolios' %}" class="um-item">📊 All Portfolios <span class="um-count">233</span></a>
+            <a href="#" class="um-item">💰 US Dividend Aristocrats <span class="um-count">123</span></a>
+            <a href="#" class="um-item">🇺🇸 USA Mega Cap <span class="um-count">100</span></a>
+            <a href="#" class="um-item">💻 NASDAQ 100 <span class="um-count">99</span></a>
+            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Countries</div>
+            <a href="#" class="um-item">🇺🇸 United States <span class="um-count">2,013</span></a>
+            <a href="#" class="um-item">🇨🇳 China <span class="um-count">332</span></a>
+            <a href="#" class="um-item">🇯🇵 Japan <span class="um-count">160</span></a>
+            <a href="#" class="um-item">🇩🇪 Germany <span class="um-count">142</span></a>
+            <a href="#" class="um-item">🇮🇳 India <span class="um-count">141</span></a>
+            <a href="#" class="um-item">🇬🇧 United Kingdom <span class="um-count">136</span></a>
+            <a href="#" class="um-item">🇫🇷 France <span class="um-count">88</span></a>
+            <a href="#" class="um-item">🇨🇦 Canada <span class="um-count">86</span></a>
+            <a href="#" class="um-item">🇨🇭 Switzerland <span class="um-count">82</span></a>
+            <a href="#" class="um-item">🇹🇼 Taiwan <span class="um-count">63</span></a>
+            <a href="#" class="um-item">🇮🇩 Indonesia <span class="um-count">17</span></a>
+            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Sectors</div>
+            <a href="#" class="um-item">💰 Financials <span class="um-count">731</span></a>
+            <a href="#" class="um-item">⚙️ Industrials <span class="um-count">676</span></a>
+            <a href="#" class="um-item">💻 Technology <span class="um-count">673</span></a>
+            <a href="#" class="um-item">🛒 Consumer <span class="um-count">608</span></a>
+            <a href="#" class="um-item">🏥 Healthcare <span class="um-count">427</span></a>
+            <a href="#" class="um-item">⛏️ Materials <span class="um-count">250</span></a>
+            <a href="#" class="um-item">🏠 Real Estate <span class="um-count">167</span></a>
+            <a href="#" class="um-item">⚡ Utilities <span class="um-count">164</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="gauge-row">
       {% for g in gauges %}
       <div class="gauge">
@@ -551,5 +602,15 @@ function activateTab(el) {
   el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
 }
+function toggleUniverse() {
+  var m = document.getElementById('universe-menu');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('universe-dropdown');
+  if (dd && !dd.contains(e.target)) {
+    document.getElementById('universe-menu').style.display = 'none';
+  }
+});
 </script>
 {% endblock %}
