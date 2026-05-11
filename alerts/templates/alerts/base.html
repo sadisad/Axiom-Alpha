@@ -251,6 +251,7 @@
                 <div class="topnav-divider"></div>
                 <a href="{% url 'screener' %}" class="topnav-link {% if request.resolver_match.url_name == 'screener' %}active{% endif %}"><i data-lucide="radar" style="width:15px;height:15px;"></i> Radar</a>
                 <a href="{% url 'compare' %}" class="topnav-link {% if request.resolver_match.url_name == 'compare' %}active{% endif %}"><i data-lucide="git-compare" style="width:15px;height:15px;"></i> Compare</a>
+                <a href="{% url 'portfolios' %}" class="topnav-link {% if request.resolver_match.url_name == 'portfolios' %}active{% endif %}"><i data-lucide="briefcase" style="width:15px;height:15px;"></i> Portfolios</a>
                 <a href="{% url 'maps' %}" class="topnav-link {% if request.resolver_match.url_name == 'maps' %}active{% endif %}"><i data-lucide="grid-3x3" style="width:15px;height:15px;"></i> Heatmap</a>
                 <a href="{% url 'headlines' %}" class="topnav-link {% if request.resolver_match.url_name == 'headlines' %}active{% endif %}"><i data-lucide="newspaper" style="width:15px;height:15px;"></i> Headlines</a>
                 <a href="{% url 'watchtower' %}" class="topnav-link {% if request.resolver_match.url_name == 'watchtower' %}active{% endif %}"><i data-lucide="bell" style="width:15px;height:15px;"></i> Alerts</a>
@@ -279,6 +280,7 @@
         <a href="{% url 'dashboard' %}"><i data-lucide="layout-dashboard" style="width:16px;height:16px;"></i> Hub</a>
         <a href="{% url 'screener' %}"><i data-lucide="radar" style="width:16px;height:16px;"></i> Radar</a>
         <a href="{% url 'compare' %}"><i data-lucide="git-compare" style="width:16px;height:16px;"></i> Compare</a>
+        <a href="{% url 'portfolios' %}"><i data-lucide="briefcase" style="width:16px;height:16px;"></i> Portfolios</a>
         <a href="{% url 'maps' %}"><i data-lucide="grid-3x3" style="width:16px;height:16px;"></i> Heatmap</a>
         <a href="{% url 'headlines' %}"><i data-lucide="newspaper" style="width:16px;height:16px;"></i> Headlines</a>
         <a href="{% url 'watchtower' %}"><i data-lucide="bell" style="width:16px;height:16px;"></i> Alerts</a>
@@ -304,6 +306,7 @@
             <a href="{% url 'dashboard' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Hub</a>
             <a href="{% url 'screener' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Radar</a>
             <a href="{% url 'compare' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Compare</a>
+            <a href="{% url 'portfolios' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Portfolios</a>
             <a href="{% url 'maps' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Heatmap</a>
             <a href="{% url 'headlines' %}" style="color:var(--text-secondary); text-decoration:none; transition:color 0.2s;" onmouseover="this.style.color='var(--brand-teal)'" onmouseout="this.style.color='var(--text-secondary)'">Headlines</a>
         </div>

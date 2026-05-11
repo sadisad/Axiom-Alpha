@@ -10,6 +10,7 @@ urlpatterns = [
     path('compare/', views.compare, name='compare'),
     path('headlines/', views.headlines, name='headlines'),
     path('watchtower/', views.watchtower, name='watchtower'),
+    path('portfolios/', views.portfolios, name='portfolios'),
     path('toggle-watchlist/', views.toggle_watchlist, name='toggle_watchlist'),
     path('portfolio/add/', views.portfolio_add, name='portfolio_add'),
     path('portfolio/remove/<str:pk>/', views.portfolio_remove, name='portfolio_remove'),

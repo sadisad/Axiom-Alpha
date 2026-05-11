@@ -1,0 +1,143 @@
+{% extends 'alerts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="max-width:1100px; margin:0 auto;">
+  <div class="panel" style="margin-bottom:1.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h2 style="font-size:1.4rem; font-weight:800; color:var(--brand-light); margin-bottom:0.25rem;">Portfolios</h2>
+        <p style="color:var(--text-secondary); font-size:0.85rem;">Track your holdings and monitor performance</p>
+      </div>
+      {% if user.is_authenticated %}
+      <button onclick="document.getElementById('add-portfolio-modal').style.display='flex'" class="btn btn-outline" style="padding:0.5rem 1.25rem; font-size:0.85rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Position
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if user.is_authenticated %}
+    {% if portfolio_items %}
+
+    <!-- Summary -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;">
+      <div class="panel" style="text-align:center;">
+        <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total Value</div>
+        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">${% widthratio portfolio_items|length 1 1 %}</div>
+      </div>
+      <div class="panel" style="text-align:center;">
+        <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Positions</div>
+        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">{{ portfolio_items|length }}</div>
+      </div>
+      <div class="panel" style="text-align:center;">
+        <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total P&L</div>
+        {% load math_filters %}
+        <div style="font-size:1.6rem; font-weight:800;">—</div>
+      </div>
+    </div>
+
+    <!-- Holdings Table -->
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem; min-width:700px;">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(138,203,208,0.12);">
+            <th style="padding:0.75rem 1rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Symbol</th>
+            <th style="padding:0.75rem 1rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Name</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Qty</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Avg Cost</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Price</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Mkt Value</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">P&L</th>
+            <th style="padding:0.75rem 1rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pos in portfolio_items %}
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.03); transition:background 0.15s;" onmouseover="this.style.background='rgba(86,182,198,0.05)'" onmouseout="this.style.background='transparent'">
+            <td style="padding:0.65rem 1rem;">
+              <a href="{% url 'screener' %}?symbol={{ pos.symbol }}&market={{ pos.market }}" style="text-decoration:none; font-weight:700; color:var(--brand-light);">{{ pos.symbol }}</a>
+              <span style="font-size:0.7rem; color:var(--text-secondary); margin-left:0.25rem;">{{ pos.market }}</span>
+            </td>
+            <td style="padding:0.65rem 1rem; color:var(--text-secondary);">{{ pos.name }}</td>
+            <td style="padding:0.65rem 1rem; text-align:right; color:var(--brand-light); font-weight:600;">{{ pos.quantity }}</td>
+            <td style="padding:0.65rem 1rem; text-align:right; color:var(--brand-light);">${{ pos.buy_price }}</td>
+            <td style="padding:0.65rem 1rem; text-align:right; color:var(--brand-light); font-weight:600;">${{ pos.current_price }}</td>
+            <td style="padding:0.65rem 1rem; text-align:right; color:var(--brand-light); font-weight:700;">${{ pos.current_value }}</td>
+            <td style="padding:0.65rem 1rem; text-align:right; font-weight:800; color:{% if pos.is_positive %}var(--success){% else %}var(--danger){% endif %};">
+              {% if pos.is_positive %}+{% endif %}${{ pos.pnl }} ({{ pos.pnl_pct }}%)
+            </td>
+            <td style="padding:0.65rem 1rem; text-align:right;">
+              <form method="post" action="{% url 'portfolio_remove' pos.id %}" style="display:inline;">{% csrf_token %}
+                <button type="submit" style="background:none; border:1px solid rgba(239,68,68,0.3); color:var(--danger); padding:0.25rem 0.6rem; border-radius:6px; font-size:0.72rem; cursor:pointer; font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='none'">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TradingView Mini Chart -->
+    <div class="panel" style="margin-top:1.5rem; padding:0; overflow:hidden; height:400px;">
+      <div style="padding:1rem 1.25rem 0.5rem; border-bottom:1px solid rgba(138,203,208,0.1);">
+        <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary);">Portfolio Performance</div>
+      </div>
+      <div style="height:350px;">
+        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+          <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          {"symbol":"AMEX:SPY","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
+          </script>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="panel" style="text-align:center; padding:3rem;">
+      <i data-lucide="briefcase" style="width:48px; height:48px; color:var(--text-secondary); opacity:0.3; margin-bottom:1rem;"></i>
+      <h3 style="color:var(--brand-light); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem;">No positions yet</h3>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">Add your first stock position to start tracking performance</p>
+      <button onclick="document.getElementById('add-portfolio-modal').style.display='flex'" class="btn" style="padding:0.7rem 1.5rem; font-size:0.9rem;">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Position
+      </button>
+    </div>
+    {% endif %}
+  {% else %}
+  <div class="panel" style="text-align:center; padding:3rem;">
+    <i data-lucide="lock" style="width:48px; height:48px; color:var(--text-secondary); opacity:0.3; margin-bottom:1rem;"></i>
+    <h3 style="color:var(--brand-light); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem;">Log in to track your portfolio</h3>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">Create a free account to add positions and monitor P&L</p>
+    <div style="display:flex; gap:0.75rem; justify-content:center;">
+      <a href="{% url 'login' %}" class="btn btn-outline" style="padding:0.7rem 1.5rem; font-size:0.9rem;">Log In</a>
+      <a href="{% url 'register' %}" class="btn" style="padding:0.7rem 1.5rem; font-size:0.9rem;">Get Started</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Add Portfolio Modal -->
+<div id="add-portfolio-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center;">
+  <div class="panel" style="width:100%; max-width:440px; padding:2rem; position:relative;">
+    <h3 style="color:var(--brand-light); margin-bottom:1.5rem;">Add Position</h3>
+    <form method="POST" action="{% url 'portfolio_add' %}">
+      {% csrf_token %}
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Symbol</label>
+          <input type="text" name="symbol" placeholder="AAPL" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
+        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Market</label>
+          <select name="market" style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"><option value="US">US</option><option value="ID">ID</option></select></div>
+        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Quantity</label>
+          <input type="number" name="quantity" placeholder="10" step="0.01" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
+        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Buy Price</label>
+          <input type="number" name="buy_price" placeholder="150.00" step="0.0001" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
+      </div>
+      <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+        <button type="button" onclick="document.getElementById('add-portfolio-modal').style.display='none'" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn">Add</button>
+      </div>
+    </form>
+    <button onclick="document.getElementById('add-portfolio-modal').style.display='none'" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-secondary); font-size:1.4rem; cursor:pointer;">&times;</button>
+  </div>
+</div>
+{% endblock %}

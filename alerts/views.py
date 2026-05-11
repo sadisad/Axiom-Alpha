@@ -173,6 +173,51 @@ def watchtower(request):
     return render(request, 'alerts/watchtower.html', context)
 
 
+def portfolios(request):
+    context = {}
+    if request.user.is_authenticated:
+        uid = request.user.pk
+        portfolio_items = []
+        positions = get_portfolio(uid)
+        for pos in positions:
+            try:
+                process_sym = pos['symbol']
+                if pos.get('market') == 'ID' and not process_sym.endswith('.JK'):
+                    process_sym += '.JK'
+                info = yf.Ticker(process_sym).info
+                current_price = info.get('currentPrice', info.get('regularMarketPrice', 0)) or 0
+                buy_price = float(pos['buy_price'])
+                qty = float(pos['quantity'])
+                cost_basis = buy_price * qty
+                current_value = current_price * qty
+                pnl = current_value - cost_basis
+                pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
+                portfolio_items.append({
+                    'id': pos['id'],
+                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                    'name': pos.get('company_name', '') or info.get('shortName', pos['symbol']),
+                    'quantity': qty, 'buy_price': buy_price,
+                    'current_price': round(current_price, 2),
+                    'current_value': round(current_value, 2),
+                    'cost_basis': round(cost_basis, 2),
+                    'pnl': round(pnl, 2),
+                    'pnl_pct': round(pnl_pct, 2),
+                    'is_positive': pnl >= 0,
+                })
+            except Exception:
+                portfolio_items.append({
+                    'id': pos['id'],
+                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                    'name': pos.get('company_name', '') or pos['symbol'],
+                    'quantity': float(pos['quantity']), 'buy_price': float(pos['buy_price']),
+                    'current_price': 0, 'current_value': 0,
+                    'cost_basis': float(pos['quantity']) * float(pos['buy_price']),
+                    'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
+                })
+        context['portfolio_items'] = portfolio_items
+    return render(request, 'alerts/portfolios.html', context)
+
+
 def dashboard(request):
     watchlist_items = []
     recent_searches = []
