@@ -26,11 +26,11 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --nav-bg: #111;
-            --nav-border: #222;
-            --nav-hover: #1a1a1a;
-            --nav-text: #b0b0b0;
-            --nav-text-active: #3bd576;
+            --nav-bg: rgba(23,12,121,0.95);
+            --nav-border: rgba(138,203,208,0.15);
+            --nav-hover: rgba(86,182,198,0.1);
+            --nav-text: #8ACBD0;
+            --nav-text-active: #56B6C6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
@@ -91,15 +91,15 @@
             padding: 0 0.75rem 0 2.2rem;
             border-radius: 8px;
             border: 1px solid var(--nav-border);
-            background: #1a1a1a;
-            color: #dbdbdb;
+            background: rgba(13,6,69,0.6);
+            color: var(--brand-light);
             font-size: 14px;
             outline: none;
             transition: all 0.2s;
             font-family: 'Outfit', sans-serif;
         }
-        .topnav-search input::placeholder { color: #666; }
-        .topnav-search input:focus { border-color: var(--brand-teal); background: #1f1f1f; }
+        .topnav-search input::placeholder { color: rgba(138,203,208,0.4); }
+        .topnav-search input:focus { border-color: var(--brand-teal); background: rgba(13,6,69,0.9); }
         .topnav-search-icon {
             position: absolute;
             left: 10px;
@@ -129,8 +129,8 @@
             white-space: nowrap;
             height: 34px;
         }
-        .topnav-link:hover { background: var(--nav-hover); color: #ddd; }
-        .topnav-link.active { color: var(--nav-text-active); }
+        .topnav-link:hover { background: var(--nav-hover); color: var(--brand-light); }
+        .topnav-link.active { color: var(--brand-teal); }
         .topnav-divider { width: 1px; height: 20px; background: var(--nav-border); margin: 0 0.4rem; flex-shrink: 0; }
         .topnav-auth-btn {
             display: inline-flex;
@@ -146,7 +146,7 @@
             height: 34px;
         }
         .topnav-auth-login { color: var(--nav-text); background: transparent; border: 1px solid var(--nav-border); }
-        .topnav-auth-login:hover { border-color: #555; color: #eee; }
+        .topnav-auth-login:hover { border-color: var(--brand-teal); color: var(--brand-light); }
         .topnav-auth-signup { background: var(--brand-teal); color: #0d0645; }
         .topnav-auth-signup:hover { background: var(--brand-teal-light); transform: translateY(-1px); }
         .topnav-user {
@@ -155,7 +155,7 @@
             gap: 0.5rem;
             padding: 0.35rem 0.75rem;
             border-radius: 20px;
-            background: var(--nav-hover);
+            background: rgba(86,182,198,0.1);
             border: 1px solid var(--nav-border);
             font-size: 13px;
             color: var(--brand-teal);
@@ -165,13 +165,13 @@
         .topnav-user button {
             background: none;
             border: none;
-            color: #888;
+            color: var(--text-secondary);
             font-size: 12px;
             cursor: pointer;
             padding: 0 0.25rem;
             font-family: 'Outfit', sans-serif;
         }
-        .topnav-user button:hover { color: #ccc; }
+        .topnav-user button:hover { color: var(--brand-light); }
 
         /* Mobile nav */
         .topnav-mobile {
