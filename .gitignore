@@ -28,6 +28,7 @@ Thumbs.db
 *.log
 local_settings.py
 media/
+staticfiles/
 
 # Secrets
 .env
