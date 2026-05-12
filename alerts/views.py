@@ -141,6 +141,10 @@ def maps(request):
     return render(request, 'alerts/maps.html')
 
 
+def radar(request):
+    return render(request, 'alerts/radar.html')
+
+
 def headlines(request):
     return render(request, 'alerts/headlines.html')
 
