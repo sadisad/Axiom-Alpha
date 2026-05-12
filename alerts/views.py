@@ -1,15 +1,14 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
+
 from django import forms
-from django.contrib.auth import authenticate
 from .services.valuation import get_fundamental_analysis
+from .models import WatchlistItem, SearchHistory, PortfolioItem
 from .firebase_db import (
-    FirestoreUser, create_user, get_user_by_username,
-    find_or_create_google_user,
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
     get_portfolio, add_portfolio, remove_portfolio,
@@ -17,6 +16,9 @@ from .firebase_db import (
 import yfinance as yf
 import json
 import decimal
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RegisterForm(forms.Form):
@@ -50,9 +52,15 @@ class RegisterForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data['username']
-        if get_user_by_username(username):
+        if User.objects.filter(username=username).exists():
             raise forms.ValidationError('This username is already taken.')
         return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('This email is already registered.')
+        return email
 
     def clean(self):
         cleaned_data = super().clean()
@@ -100,7 +108,6 @@ def login_view(request):
         form = LoginForm(request.POST, request=request)
         if form.is_valid():
             user = form.cleaned_data['user']
-            user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
             login(request, user)
             return redirect('dashboard')
     else:
@@ -114,17 +121,13 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            try:
-                user = create_user(
-                    username=form.cleaned_data['username'],
-                    email=form.cleaned_data['email'],
-                    password=form.cleaned_data['password1'],
-                )
-                user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
-                login(request, user)
-                return redirect('dashboard')
-            except Exception as e:
-                form.add_error(None, f'Account creation failed: {str(e)}')
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1'],
+            )
+            login(request, user)
+            return redirect('dashboard')
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -350,7 +353,7 @@ def dashboard(request):
     top_rated = []
     for t, n, m, g, q, v, mo, r, s in [
         ('MU','Micron',842,95,97,67,99,26,98),
-        ('NVDA','NVIDIA',5228,99,100,28,97,97,97),
+        ('NVDA','Nvidia',5228,99,100,28,97,97,97),
         ('V','Visa',601,76,100,32,18,92,96),
         ('MSFT','Microsoft',3084,97,99,32,44,70,96),
         ('MA','Mastercard',438,77,100,27,26,92,96),
@@ -490,20 +493,3 @@ def portfolio_add(request):
 def portfolio_remove(request, pk):
     remove_portfolio(request.user.pk, pk)
     return redirect('dashboard')
-
-
-@csrf_exempt
-def google_auth(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST only'}, status=405)
-    try:
-        data = json.loads(request.body)
-        id_token = data.get('id_token', '')
-        if not id_token:
-            return JsonResponse({'error': 'Missing id_token'}, status=400)
-        user = find_or_create_google_user(id_token)
-        user.backend = 'alerts.auth_backends.FirestoreAuthBackend'
-        login(request, user)
-        return JsonResponse({'success': True, 'username': user.username})
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
