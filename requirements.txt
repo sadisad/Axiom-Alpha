@@ -3,3 +3,5 @@ whitenoise
 yfinance
 requests
 python-dotenv
+dj-database-url
+psycopg2-binary
