@@ -32,7 +32,7 @@
 .scard-metrics span.neg { color:var(--danger); }
 
 /* Returns table */
-.returns-tabs { display:flex; gap:0.3rem; }
+.returns-tabs { display:flex; gap:0.3rem; flex-wrap:wrap; }
 .rtab { padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem; font-weight:700; cursor:pointer; border:1px solid rgba(138,203,208,0.15); color:var(--text-secondary); background:transparent; transition:all 0.15s; }
 .rtab.active { background:var(--brand-teal); color:#0d0645; border-color:var(--brand-teal); }
 .returns-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
@@ -76,6 +76,9 @@
 .tv-overlay { position:absolute; bottom:0; left:0; right:0; height:36px; background:linear-gradient(transparent, #0d0645 70%); z-index:10; pointer-events:none; }
 iframe[src*="tradingview"] { margin-bottom: -32px; }
 
+.um-dd{position:relative;display:inline-block;}
+.um-menu-mobile{max-width:calc(100vw - 2rem) !important;width:max-content !important;min-width:220px;}
+
 @media(max-width:768px){
   .hub-row { grid-template-columns:1fr !important; }
   .returns-grid { grid-template-columns:1fr; }
@@ -90,6 +93,8 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
   #returns-movers-grid,
   #market-overview-grid { grid-template-columns:1fr !important; }
   .modal-form-grid { grid-template-columns:1fr !important; }
+  .um-menu-mobile { left:-0.5rem !important; }
+  .tv-mobile-height { height:260px !important; }
 }
 @media(max-width:480px){
   .gauge-row { flex-wrap:wrap; justify-content:center; }

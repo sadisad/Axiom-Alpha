@@ -61,7 +61,7 @@
 .tv-overlay{position:absolute;bottom:0;left:0;right:0;height:32px;background:linear-gradient(transparent,#0d0645 70%);z-index:10;pointer-events:none;}
 
 @media(max-width:900px){.sc-2col{grid-template-columns:1fr !important;}}
-@media(max-width:600px){.sc-panel{padding:0.65rem 0.75rem;}.m-grid{grid-template-columns:1fr;}.stock-hdr h1{font-size:1.1rem;}.factor-name{width:55px;font-size:0.65rem;}}
+@media(max-width:600px){.sc-panel{padding:0.65rem 0.75rem;}.m-grid{grid-template-columns:1fr;}.stock-hdr h1{font-size:1.1rem;}.factor-name{width:55px;font-size:0.65rem;}.sc-dcf-grid{grid-template-columns:1fr !important;}.tv-mobile-height{height:280px !important;}}
 </style>
 
 <div class="sc">
@@ -189,7 +189,7 @@
       {% if analysis.dcf.error %}
       <p style="color:var(--warning);font-size:0.82rem;">{{ analysis.dcf.error }}</p>
       {% else %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.65rem;">
+      <div class="sc-dcf-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.65rem;">
         <div style="background:rgba(0,0,0,0.2);padding:0.7rem;border-radius:8px;">
           <div style="font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Current Price</div>
           <div style="font-size:1.25rem;font-weight:900;color:var(--brand-light);margin-top:0.1rem;">${{ analysis.dcf.current_price }}</div>
