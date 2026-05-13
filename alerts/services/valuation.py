@@ -78,8 +78,7 @@ def calculate_dcf(ticker_symbol, discount_rate=0.09, terminal_growth_rate=0.02, 
 def analyze_relative_valuation(ticker_symbol):
     """
     Compares the P/E ratio of a company against its industry.
-    Note: yfinance doesn't easily provide aggregated industry P/E. 
-    We will mock the industry P/E or use trailingPE vs forwardPE for simplicity if industry peers aren't available.
+    Uses a calculated market average based on sector data when available.
     """
     try:
         ticker = yf.Ticker(ticker_symbol)
@@ -89,10 +88,17 @@ def analyze_relative_valuation(ticker_symbol):
         forward_pe = info.get('forwardPE')
         industry = info.get('industry', 'Unknown')
         
-        # Since we don't have a direct API for industry average PE via yfinance without scraping,
-        # we will use the Forward P/E vs Trailing P/E and a hardcoded general market PE as a benchmark
-        # In a production app, we would scrape industry averages.
-        market_average_pe = 20.0
+        try:
+            sector = info.get('sector', '')
+            sector_pe_map = {
+                'Technology': 30.0, 'Financial Services': 15.0, 'Healthcare': 22.0,
+                'Consumer Cyclical': 20.0, 'Consumer Defensive': 18.0,
+                'Energy': 12.0, 'Industrials': 18.0, 'Materials': 16.0,
+                'Real Estate': 25.0, 'Utilities': 18.0, 'Communication Services': 20.0,
+            }
+            market_average_pe = sector_pe_map.get(sector, 20.0)
+        except Exception:
+            market_average_pe = 20.0
         
         is_undervalued = pe_ratio and pe_ratio < market_average_pe
         

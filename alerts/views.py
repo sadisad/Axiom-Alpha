@@ -1,3 +1,5 @@
+import json
+import numpy as np
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -5,9 +7,27 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+
 from django import forms
 from .services.valuation import get_fundamental_analysis
 from .models import WatchlistItem, SearchHistory, PortfolioItem
+from .services.market_data import (
+    get_dashboard_gauges, get_dashboard_key_stats, get_returns_data,
+    get_top_rated, get_trending_portfolios, get_strategy_picks,
+    SP500_SYMBOLS, IDX_SYMBOLS, get_market_scores,
+)
 from .firebase_db import (
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
@@ -143,6 +163,16 @@ def maps(request):
 
 def radar(request):
     return render(request, 'alerts/radar.html')
+
+
+def radar_scores(request):
+    market = request.GET.get('market', 'US')
+    symbols = SP500_SYMBOLS[:30] if market == 'US' else IDX_SYMBOLS
+    try:
+        scores = get_market_scores(symbols, market)
+        return JsonResponse({'stocks': scores, 'market': market})
+    except Exception as e:
+        return JsonResponse({'stocks': [], 'market': market, 'error': str(e)})
 
 
 def headlines(request):
@@ -315,72 +345,66 @@ def dashboard(request):
                     'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
                 })
 
-    gauges = [
-        {'label': 'Growth', 'value': 80, 'color': '#00c896', 'dash': 80},
-        {'label': 'Quality', 'value': 83, 'color': '#00c896', 'dash': 83},
-        {'label': 'Value', 'value': 23, 'color': '#ff6464', 'dash': 23},
-        {'label': 'Momentum', 'value': 75, 'color': '#00c896', 'dash': 75},
-        {'label': 'Risk Shield', 'value': 54, 'color': '#ffc800', 'dash': 54},
-    ]
+    try:
+        gauges = get_dashboard_gauges()
+    except Exception:
+        gauges = [
+            {'label': 'Growth', 'value': 50, 'color': '#ffc800', 'dash': 50},
+            {'label': 'Quality', 'value': 50, 'color': '#ffc800', 'dash': 50},
+            {'label': 'Value', 'value': 50, 'color': '#ffc800', 'dash': 50},
+            {'label': 'Momentum', 'value': 50, 'color': '#ffc800', 'dash': 50},
+            {'label': 'Risk Shield', 'value': 50, 'color': '#ffc800', 'dash': 50},
+        ]
 
-    key_stats = [
-        {'label': 'Fwd P/E', 'value': '26.0x'},
-        {'label': 'Div Yield', 'value': '0.5%'},
-        {'label': 'Rev Growth', 'value': '+15.8%'},
-        {'label': '1W', 'value': '+1.3%'},
-        {'label': '1M', 'value': '+11.9%'},
-    ]
+    try:
+        key_stats = get_dashboard_key_stats()
+    except Exception:
+        key_stats = [
+            {'label': 'Fwd P/E', 'value': '-'},
+            {'label': 'Div Yield', 'value': '-'},
+            {'label': 'Rev Growth', 'value': '-'},
+            {'label': '1D', 'value': '-'},
+            {'label': '1M', 'value': '-'},
+        ]
 
-    top_returns = [
-        {'symbol': 'MU', 'name': 'Micron', 'pct': '38'},
-        {'symbol': 'SNDK', 'name': 'SanDisk Corp', 'pct': '32'},
-        {'symbol': 'QCOM', 'name': 'Qualcomm', 'pct': '24'},
-        {'symbol': 'GLW', 'name': 'Corning', 'pct': '18'},
-        {'symbol': 'ORCL', 'name': 'Oracle', 'pct': '14'},
-        {'symbol': 'AMAT', 'name': 'Applied M', 'pct': '12'},
-    ]
+    try:
+        returns_raw = get_returns_data()
+        returns_data = {}
+        for pk, pv in returns_raw.items():
+            top_list = []
+            for t in pv.get('top', []):
+                top_list.append({'symbol': t['symbol'], 'name': t['name'], 'pct': t['pct']})
+            bot_list = []
+            for b in pv.get('bottom', []):
+                bot_list.append({'symbol': b['symbol'], 'name': b['name'], 'pct': b['pct']})
+            returns_data[pk] = {'top': top_list, 'bottom': bot_list}
+        top_returns = returns_data.get('1W', {}).get('top', [])
+        bottom_returns = returns_data.get('1W', {}).get('bottom', [])
+    except Exception:
+        returns_data = {
+            '1W': {'top': [], 'bottom': []},
+            '1M': {'top': [], 'bottom': []},
+            '3M': {'top': [], 'bottom': []},
+            'YTD': {'top': [], 'bottom': []},
+            '1Y': {'top': [], 'bottom': []},
+        }
+        top_returns = []
+        bottom_returns = []
 
-    bottom_returns = [
-        {'symbol': 'BMY', 'name': 'Bristol-My', 'pct': '-4'},
-        {'symbol': 'BAC', 'name': 'BofA', 'pct': '-4'},
-        {'symbol': 'PLTR', 'name': 'Palantir', 'pct': '-4'},
-        {'symbol': 'CVX', 'name': 'Chevron', 'pct': '-5'},
-        {'symbol': 'WFC', 'name': 'Wells Farg', 'pct': '-6'},
-        {'symbol': 'COP', 'name': 'ConocoPh', 'pct': '-8'},
-    ]
+    try:
+        top_rated = get_top_rated()
+    except Exception:
+        top_rated = []
 
-    def sc(v):
-        if v >= 80: return ('rgba(0,200,150,0.18)', '#00c896')
-        if v >= 50: return ('rgba(255,200,0,0.15)', '#ffc800')
-        return ('rgba(239,68,68,0.12)', '#ff6464')
+    try:
+        trending_portfolios = get_trending_portfolios()
+    except Exception:
+        trending_portfolios = []
 
-    top_rated = []
-    for t, n, m, g, q, v, mo, r, s in [
-        ('MU','Micron',842,95,97,67,99,26,98),
-        ('NVDA','Nvidia',5228,99,100,28,97,97,97),
-        ('V','Visa',601,76,100,32,18,92,96),
-        ('MSFT','Microsoft',3084,97,99,32,44,70,96),
-        ('MA','Mastercard',438,77,100,27,26,92,96),
-        ('NEM','Newmont',324,56,98,84,62,61,96),
-        ('GOOGL','Alphabet',4836,95,99,19,18,69,95),
-        ('CRM','Salesforce',149,74,88,40,17,57,93),
-        ('META','Meta',1547,91,44,18,49,95,93),
-        ('PGR','Progressive',113,55,88,67,25,92,54),
-    ]:
-        gb,gf = sc(g); qb,qf = sc(q); vb,vf = sc(v); mb,mf = sc(mo); rb,rf = sc(r)
-        top_rated.append({
-            'ticker':t,'name':n,'mcap':f"{m:,}",'growth':g,'quality':q,'value':v,'mom':mo,'risk':r,'score':s,
-            'growth_bg':gb,'growth_fg':gf,'quality_bg':qb,'quality_fg':qf,
-            'value_bg':vb,'value_fg':vf,'mom_bg':mb,'mom_fg':mf,'risk_bg':rb,'risk_fg':rf,
-        })
-
-    trending_portfolios = [
-        {'name':'US MidCaps Growth','w1':'-6.8%','m1':'+33.2%','ytd':'+35.7%','y1':'+175.8%','w1_pos':False,'m1_pos':True,'ytd_pos':True,'y1_pos':True},
-        {'name':'Global Growth','w1':'+7.2%','m1':'+38.0%','ytd':'+29.9%','y1':'+136.0%','w1_pos':True,'m1_pos':True,'ytd_pos':True,'y1_pos':True},
-        {'name':'US Growth Rockets','w1':'-6.5%','m1':'+85.5%','ytd':'+54.8%','y1':'+105.1%','w1_pos':False,'m1_pos':True,'ytd_pos':True,'y1_pos':True},
-        {'name':'US Smart Value','w1':'+1.3%','m1':'+15.4%','ytd':'+16.2%','y1':'+27.9%','w1_pos':True,'m1_pos':True,'ytd_pos':True,'y1_pos':True},
-        {'name':'Global GEAR+','w1':'-0.5%','m1':'+11.4%','ytd':'-3.8%','y1':'+40.5%','w1_pos':False,'m1_pos':True,'ytd_pos':False,'y1_pos':True},
-    ]
+    try:
+        strategy_picks = get_strategy_picks()
+    except Exception:
+        strategy_picks = {}
 
     return render(request, 'alerts/dashboard.html', {
         'watchlist_items': watchlist_items,
@@ -390,8 +414,10 @@ def dashboard(request):
         'key_stats': key_stats,
         'top_returns': top_returns,
         'bottom_returns': bottom_returns,
+        'returns_data_json': json.dumps(returns_data, cls=NumpyEncoder),
         'top_rated': top_rated,
         'trending_portfolios': trending_portfolios,
+        'strategy_picks_json': json.dumps(strategy_picks, cls=NumpyEncoder),
     })
 
 

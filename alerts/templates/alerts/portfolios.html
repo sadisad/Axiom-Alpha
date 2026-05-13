@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block content %}
+<style>
+@media(max-width:768px){
+  .summary-grid{grid-template-columns:1fr !important;}
+  .portfolio-table-wrap{overflow-x:auto;}
+}
+@media(max-width:480px){
+  .portfolio-table-wrap table{font-size:0.78rem;}
+}
+</style>
 <div style="max-width:1100px; margin:0 auto;">
   <div class="panel" style="margin-bottom:1.5rem;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
@@ -21,7 +30,7 @@
     {% if portfolio_items %}
 
     <!-- Summary -->
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;">
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;" class="summary-grid">
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total Value</div>
         <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">${{ total_value }}</div>
@@ -39,7 +48,7 @@
     </div>
 
     <!-- Holdings Table -->
-    <div class="panel" style="padding:0; overflow:hidden;">
+    <div class="panel portfolio-table-wrap" style="padding:0; overflow:hidden;">
       <table style="width:100%; border-collapse:collapse; font-size:0.85rem; min-width:700px;">
         <thead>
           <tr style="border-bottom:1px solid rgba(138,203,208,0.12);">
@@ -118,7 +127,7 @@
 </div>
 
 <!-- Add Portfolio Modal -->
-<div id="add-portfolio-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center;">
+<div id="add-portfolio-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center; padding:1rem; overflow-y:auto;">
   <div class="panel" style="width:100%; max-width:440px; padding:2rem; position:relative;">
     <h3 style="color:var(--brand-light); margin-bottom:1.5rem;">Add Position</h3>
     <form method="POST" action="{% url 'portfolio_add' %}">

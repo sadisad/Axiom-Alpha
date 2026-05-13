@@ -48,6 +48,14 @@
     }
     @media (max-width: 768px) {
         .compare-grid { grid-template-columns: 1fr; }
+        .compare-form-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+        .compare-form-grid .btn { width: 100%; }
+        .metric-row { grid-template-columns: 1fr 1fr; font-size: 0.85rem; }
+        .metric-label { font-size: 0.82rem; }
+    }
+    @media (max-width: 600px) {
+        .metric-row { grid-template-columns: 1fr; gap: 0.15rem; }
+        .metric-val { text-align: left; }
     }
 </style>
 
@@ -63,7 +71,7 @@
 
     <!-- Search Form -->
     <form method="GET" action="{% url 'compare' %}" style="margin-bottom:2rem;">
-        <div style="display:grid; grid-template-columns:1fr auto 1fr auto; gap:1rem; align-items:center;">
+        <div style="display:grid; grid-template-columns:1fr auto 1fr auto; gap:1rem; align-items:center;" class="compare-form-grid">
             <div style="display:flex; gap:0.5rem;">
                 <input type="text" name="s1" value="{{ s1 }}" placeholder="Symbol 1 (e.g. AAPL)"
                     style="flex:1; padding:0.9rem 1rem; border-radius:10px; border:2px solid var(--surface-border); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:1rem; outline:none;">

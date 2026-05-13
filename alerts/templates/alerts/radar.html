@@ -46,6 +46,13 @@
 .company-name{max-width:80px;}
 .radar-search input{width:160px;}
 }
+@media(max-width:480px){
+.radar-hero h1{font-size:1.2rem;}
+.radar-hero p{font-size:0.85rem;}
+.stab{padding:0.35rem 0.6rem;font-size:0.75rem;}
+.market-toggle button{padding:0.3rem 0.6rem;font-size:0.75rem;}
+.radar-search input{width:100%;}
+}
 </style>
 
 <div class="radar-page">
@@ -104,48 +111,9 @@
 </div>
 
 <script>
-const usStocks = [
-  {t:'MU',n:'Micron',mc:'$84B',g:95,q:97,v:67,m:99,r:26,s:98},
-  {t:'NVDA',n:'NVIDIA',mc:'$5.2T',g:99,q:100,v:28,m:97,r:97,s:97},
-  {t:'V',n:'Visa',mc:'$601B',g:76,q:100,v:32,m:18,r:92,s:96},
-  {t:'MSFT',n:'Microsoft',mc:'$3.1T',g:97,q:99,v:32,m:44,r:70,s:96},
-  {t:'MA',n:'Mastercard',mc:'$438B',g:77,q:100,v:27,m:26,r:92,s:96},
-  {t:'NEM',n:'Newmont',mc:'$324B',g:56,q:98,v:84,m:62,r:61,s:96},
-  {t:'GOOGL',n:'Alphabet',mc:'$4.8T',g:95,q:99,v:19,m:18,r:69,s:95},
-  {t:'CRM',n:'Salesforce',mc:'$149B',g:74,q:88,v:40,m:17,r:57,s:93},
-  {t:'META',n:'Meta',mc:'$1.5T',g:91,q:44,v:18,m:49,r:95,s:93},
-  {t:'PGR',n:'Progressive',mc:'$113B',g:55,q:88,v:67,m:25,r:92,s:54},
-  {t:'AVGO',n:'Broadcom',mc:'$789B',g:93,q:82,v:35,m:85,r:40,s:91},
-  {t:'COST',n:'Costco',mc:'$480B',g:70,q:95,v:48,m:30,r:88,s:90},
-  {t:'LLY',n:'Eli Lilly',mc:'$725B',g:90,q:94,v:40,m:72,r:65,s:89},
-  {t:'AMD',n:'AMD',mc:'$178B',g:88,q:65,v:25,m:92,r:38,s:85},
-  {t:'AMZN',n:'Amazon',mc:'$2.1T',g:82,q:78,v:35,m:65,r:50,s:82},
-  {t:'AAPL',n:'Apple',mc:'$3.4T',g:45,q:96,v:22,m:38,r:98,s:78},
-  {t:'TSLA',n:'Tesla',mc:'$950B',g:72,q:42,v:15,m:96,r:24,s:65},
-  {t:'JPM',n:'JPMorgan',mc:'$640B',g:35,q:90,v:58,m:30,r:95,s:72},
-  {t:'BRK.B',n:'Berkshire',mc:'$1.1T',g:20,q:98,v:65,m:12,r:96,s:68},
-  {t:'XOM',n:'ExxonMobil',mc:'$480B',g:15,q:72,v:80,m:25,r:55,s:50},
-  {t:'WMT',n:'Walmart',mc:'$680B',g:30,q:92,v:42,m:25,r:90,s:74},
-  {t:'UNH',n:'UnitedHealth',mc:'$500B',g:48,q:88,v:45,m:22,r:85,s:70},
-  {t:'DIS',n:'Disney',mc:'$180B',g:25,q:60,v:55,m:18,r:45,s:48},
-  {t:'INTC',n:'Intel',mc:'$100B',g:30,q:35,v:55,m:20,r:28,s:35},
-  {t:'BA',n:'Boeing',mc:'$140B',g:18,q:32,v:45,m:15,r:22,s:28},
-];
-
-const idStocks = [
-  {t:'BBCA',n:'BCA',mc:'IDR 980T',g:72,q:95,v:45,m:35,r:90,s:85},
-  {t:'BBRI',n:'BRI',mc:'IDR 650T',g:68,q:92,v:40,m:30,r:88,s:82},
-  {t:'TLKM',n:'Telkom',mc:'IDR 320T',g:45,q:85,v:62,m:25,r:82,s:78},
-  {t:'ASII',n:'Astra',mc:'IDR 250T',g:52,q:78,v:55,m:30,r:72,s:72},
-  {t:'BMRI',n:'Mandiri',mc:'IDR 480T',g:70,q:88,v:38,m:28,r:85,s:80},
-  {t:'UNVR',n:'Unilever',mc:'IDR 85T',g:35,q:90,v:70,m:15,r:88,s:65},
-  {t:'GOTO',n:'GoTo',mc:'IDR 120T',g:82,q:30,v:25,m:65,r:18,s:42},
-  {t:'BRIS',n:'BRI Syariah',mc:'IDR 95T',g:75,q:82,v:35,m:40,r:65,s:76},
-];
-
 let currentMarket = 'US';
 let currentStrategy = 'all';
-let currentStocks = [...usStocks];
+let currentStocks = [];
 
 function scoreClass(v){return v>=80?'score-green':v>=50?'score-yellow':'score-red';}
 
@@ -171,6 +139,20 @@ function renderTable(stocks){
   `).join('');
 }
 
+function loadScores(market){
+  currentStocks=[];
+  renderTable([]);
+  fetch('/api/radar-scores/?market='+market)
+    .then(r=>r.json())
+    .then(data=>{
+      currentStocks=data.stocks||[];
+      filterStocks();
+    })
+    .catch(()=>{
+      document.getElementById('radar-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text-secondary);">Failed to load scores. Try refreshing.</td></tr>';
+    });
+}
+
 function filterStocks(){
   let stocks=[...currentStocks];
   const q=document.getElementById('radar-search').value.toLowerCase();
@@ -190,6 +172,8 @@ function filterStocks(){
   renderTable(stocks);
 }
 
+loadScores('US');
+
 document.querySelectorAll('.stab').forEach(tab=>{
   tab.addEventListener('click',function(){
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
@@ -204,11 +188,10 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
     document.querySelectorAll('.market-btn').forEach(b=>b.classList.remove('active'));
     this.classList.add('active');
     currentMarket=this.dataset.market;
-    currentStocks=currentMarket==='US'?[...usStocks]:[...idStocks];
     currentStrategy='all';
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     document.querySelector('.stab[data-strategy="all"]').classList.add('active');
-    filterStocks();
+    loadScores(currentMarket);
   });
 });
 
@@ -226,7 +209,5 @@ document.querySelectorAll('.sortable').forEach(th=>{
     filterStocks();
   });
 });
-
-filterStocks();
 </script>
 {% endblock %}

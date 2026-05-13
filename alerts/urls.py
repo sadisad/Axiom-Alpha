@@ -7,6 +7,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('maps/', views.maps, name='maps'),
     path('radar/', views.radar, name='radar'),
+    path('api/radar-scores/', views.radar_scores, name='radar_scores'),
     path('screener/', views.screener, name='screener'),
     path('compare/', views.compare, name='compare'),
     path('headlines/', views.headlines, name='headlines'),

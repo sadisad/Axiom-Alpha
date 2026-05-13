@@ -17,6 +17,14 @@
 @keyframes shimmer{0%{background-position:-1000px 0}100%{background-position:1000px 0}}
 .skeleton-box{background:linear-gradient(90deg,rgba(23,12,121,0.4) 25%,rgba(86,182,198,0.08) 50%,rgba(23,12,121,0.4) 75%);background-size:1000px 100%;animation:shimmer 2s infinite linear;border-radius:16px;border:1px solid var(--surface-border);}
 @media(max-width:900px){.sa-2col{grid-template-columns:1fr !important;}}
+@media(max-width:600px){
+  .sa-panel{padding:0.75rem;}
+  #screener-form{flex-direction:column;}
+  #screener-form > div{min-width:0 !important;}
+  #screener-form .btn{width:100%;}
+  .sa-pill{font-size:0.75rem;padding:0.25rem 0.5rem;}
+  .metric-row{grid-template-columns:1fr auto !important;}
+}
 </style>
 
 <div class="sa-page">
@@ -50,7 +58,7 @@
 <!-- Loading Skeleton -->
 <div id="loading-skeleton" style="display:none;">
   <div class="skeleton-box" style="height:120px;margin-bottom:1rem;"></div>
-  <div style="display:grid;grid-template-columns:380px 1fr;gap:1rem;">
+  <div style="display:grid;grid-template-columns:1fr;gap:1rem;" id="skeleton-grid">
     <div class="skeleton-box" style="height:500px;"></div>
     <div class="skeleton-box" style="height:500px;"></div>
   </div>
@@ -68,8 +76,8 @@
 
 <!-- Company Header -->
 <div class="sa-panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
-    <div style="display:flex;align-items:center;gap:1rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
       {% if analysis.domain %}
       <img src="https://logo.clearbit.com/{{ analysis.domain }}" alt="" style="width:44px;height:44px;border-radius:10px;background:white;padding:3px;object-fit:contain;" onerror="this.style.display='none'">
       {% endif %}

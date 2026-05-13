@@ -46,6 +46,13 @@
   .hm-metric-row{flex-wrap:wrap;}
   .hm-view-toggle{margin-left:0;}
 }
+@media(max-width:600px){
+  .hm-panel{padding:0.6rem;}
+  .hm-title-row h1{font-size:1.1rem;}
+  .hm-opt{font-size:0.78rem;padding:0.35rem 0.6rem;}
+  .hm-pill{font-size:0.72rem;padding:0.2rem 0.5rem;}
+  .hm-universe-dd{width:220px;max-height:350px;}
+}
 </style>
 
 <div class="hm-page">
@@ -149,7 +156,7 @@
       <span style="font-size:1rem;font-weight:800;color:var(--brand-light);" id="map-title">🇺🇸 S&P 500 · YTD Return</span>
       <span style="font-size:0.72rem;color:var(--text-secondary);">Click any block to analyze</span>
     </div>
-    <div style="height:72vh;min-height:480px;" id="heatmap-container">
+    <div style="height:72vh;min-height:480px;max-height:70vh;" id="heatmap-container">
       <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
