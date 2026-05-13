@@ -515,6 +515,7 @@ function updateSizeUI(){
 function loadScores(market){
   currentStocks=[];
   renderTable([]);
+  showToast('Loading stocks...', 'info', 2000);
   const tbody=document.getElementById('radar-body');
   tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text-secondary);"><span style="display:inline-block;width:18px;height:18px;border:2px solid rgba(138,203,208,0.2);border-top-color:var(--brand-teal);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:0.5rem;"></span>Loading...</td></tr>';
   let url = '/api/radar-scores/?market='+market;
@@ -523,13 +524,21 @@ function loadScores(market){
   fetch(url)
     .then(r=>r.json())
     .then(data=>{
-      currentStocks=data.stocks||[];
+      if (data.error) {
+        showToast('Error: ' + data.error, 'error', 4000);
+      } else {
+        currentStocks=data.stocks||[];
+        const count = currentStocks.length;
+        const listName = document.getElementById('list-name-display').textContent;
+        showToast(count + ' stocks loaded' + (currentList ? ' (' + listName + ')' : ''), 'success', 2500);
+      }
       document.getElementById('total-count').textContent=currentStocks.length;
       document.getElementById('stock-count').textContent=currentStocks.length;
       sortStocks();
       filterStocks();
     })
     .catch(()=>{
+      showToast('Failed to load scores. Try refreshing.', 'error', 4000);
       document.getElementById('radar-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--text-secondary);">Failed to load scores. Try refreshing.</td></tr>';
     });
 }
@@ -630,10 +639,12 @@ function renderListDropdown(filter){
     item.addEventListener('click', function(){
       currentList = this.dataset.listKey;
       const name = this.querySelector('.sld-item-name').textContent;
+      const count = this.querySelector('.sld-count').textContent;
       document.getElementById('list-name-display').textContent = name;
       document.getElementById('select-list-dropdown').classList.remove('open');
       currentSize = 100;
       updateSizeUI();
+      showToast('Switched to ' + name + ' (' + count + ' stocks)', 'info', 2000);
       loadScores(currentMarket);
     });
   });

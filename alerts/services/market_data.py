@@ -2,10 +2,12 @@ import yfinance as yf
 import time
 import threading
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 _cache = {}
 _cache_lock = threading.Lock()
 CACHE_TTL = 300  # 5 minutes
+SCORES_CACHE_TTL = 120  # 2 minutes for radar scores
 
 def _get_cached(key, fetch_fn, ttl=None):
     if ttl is None:
@@ -22,21 +24,30 @@ def _get_cached(key, fetch_fn, ttl=None):
     return data
 
 def _safe_info(ticker_sym, fields=None):
-    try:
-        t = yf.Ticker(ticker_sym)
-        info = t.info
-        if fields:
-            return {f: info.get(f) for f in fields}
-        return info
-    except Exception:
+    cache_key = f'info:{ticker_sym}'
+    def fetch():
+        try:
+            t = yf.Ticker(ticker_sym)
+            info = t.info
+            if fields:
+                return {f: info.get(f) for f in fields}
+            return info
+        except Exception:
+            return {}
+    result = _get_cached(cache_key, fetch, ttl=CACHE_TTL)
+    if result is None:
         return {}
+    return result
 
 def _safe_history(ticker_sym, period='1mo'):
-    try:
-        t = yf.Ticker(ticker_sym)
-        return t.history(period=period)
-    except Exception:
-        return None
+    cache_key = f'hist:{ticker_sym}:{period}'
+    def fetch():
+        try:
+            t = yf.Ticker(ticker_sym)
+            return t.history(period=period)
+        except Exception:
+            return None
+    return _get_cached(cache_key, fetch, ttl=CACHE_TTL)
 
 SP500_SYMBOLS = [
     'MSFT','AAPL','NVDA','AMZN','GOOGL','META','BRK-B','LLY','AVGO','TSLA',
@@ -274,48 +285,55 @@ def score_bg(v):
     if v >= 50: return ('rgba(255,200,0,0.15)', '#ffc800')
     return ('rgba(239,68,68,0.12)', '#ff6464')
 
+def _fetch_single_score(sym, market):
+    try:
+        info = _safe_info(sym, [
+            'shortName','marketCap','revenueGrowth','revenueGrowthQuarterly',
+            'earningsGrowth','earningsQuarterlyGrowth','returnOnEquity',
+            'profitMargins','trailingPE','forwardPE','priceToBook','beta',
+            'currentPrice','previousClose',
+        ])
+        if not info or not info.get('shortName'):
+            return None
+        hist = _safe_history(sym, period='1mo')
+        scores = compute_score(info, hist)
+        price = info.get('currentPrice') or info.get('previousClose') or 0
+        prev = info.get('previousClose') or price
+        change_pct = ((price - prev) / prev * 100) if prev and price else 0
+        sym_display = sym.replace('.JK','')
+        return {
+            't': sym_display,
+            'n': info.get('shortName','')[:20],
+            'mc': _fmt_mcap(info.get('marketCap')),
+            'g': scores['growth'],
+            'q': scores['quality'],
+            'v': scores['value'],
+            'm': scores['momentum'],
+            'r': scores['risk'],
+            's': scores['score'],
+            'p': round(price, 2) if price else 0,
+            'ch': round(change_pct, 2),
+        }
+    except Exception:
+        return None
+
 def get_market_scores(symbols=None, market='US'):
     if symbols is None:
         symbols = SP500_SAMPLE
 
     def fetch():
         results = []
-        for sym in symbols:
-            try:
-                info = _safe_info(sym, [
-                    'shortName','marketCap','revenueGrowth','revenueGrowthQuarterly',
-                    'earningsGrowth','earningsQuarterlyGrowth','returnOnEquity',
-                    'profitMargins','trailingPE','forwardPE','priceToBook','beta',
-                    'currentPrice','previousClose',
-                ])
-                if not info or not info.get('shortName'):
-                    continue
-                hist = _safe_history(sym, period='1mo')
-                scores = compute_score(info, hist)
-                price = info.get('currentPrice') or info.get('previousClose') or 0
-                prev = info.get('previousClose') or price
-                change_pct = ((price - prev) / prev * 100) if prev and price else 0
-                sym_display = sym.replace('.JK','')
-                results.append({
-                    't': sym_display,
-                    'n': info.get('shortName','')[:20],
-                    'mc': _fmt_mcap(info.get('marketCap')),
-                    'g': scores['growth'],
-                    'q': scores['quality'],
-                    'v': scores['value'],
-                    'm': scores['momentum'],
-                    'r': scores['risk'],
-                    's': scores['score'],
-                    'p': round(price, 2) if price else 0,
-                    'ch': round(change_pct, 2),
-                })
-            except Exception:
-                continue
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_sym = {executor.submit(_fetch_single_score, sym, market): sym for sym in symbols}
+            for future in as_completed(future_to_sym):
+                result = future.result()
+                if result is not None:
+                    results.append(result)
         results.sort(key=lambda x: x['s'], reverse=True)
         return results
 
     cache_key = f'scores_{market}_{hash(tuple(symbols))}'
-    return _get_cached(cache_key, fetch, ttl=CACHE_TTL)
+    return _get_cached(cache_key, fetch, ttl=SCORES_CACHE_TTL)
 
 def get_dashboard_gauges(market='US'):
     symbols = SP500_SYMBOLS[:20]
