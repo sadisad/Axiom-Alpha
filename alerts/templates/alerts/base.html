@@ -177,10 +177,17 @@
         .topnav-mobile {
             display: none;
             flex-direction: column;
+            position: fixed;
+            top: 48px;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: var(--nav-bg);
             border-bottom: 1px solid var(--nav-border);
             padding: 0.75rem 1rem;
             gap: 0.25rem;
+            z-index: 99;
+            overflow-y: auto;
         }
         .topnav-mobile.open { display: flex; }
         .topnav-mobile a {
@@ -210,6 +217,7 @@
         .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
         .hamburger.open span:nth-child(2) { opacity: 0; }
         .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+        body.mobile-nav-open { overflow: hidden; }
 
         main { flex: 1; padding: 1.5rem; max-width: 1500px; margin: 0 auto; width: 100%; }
         .panel { background:rgba(15,10,60,0.7); border:1px solid rgba(138,203,208,0.15); border-radius:14px; padding:1.25rem; }
@@ -319,6 +327,7 @@
             const btn = document.getElementById('hamburger-btn');
             nav.classList.toggle('open');
             btn.classList.toggle('open');
+            document.body.classList.toggle('mobile-nav-open');
         }
     </script>
 </body>
