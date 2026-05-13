@@ -54,6 +54,38 @@ SP500_SYMBOLS = [
     'TMO','TJX','USB','VZ','WBA','WELL','WM','WMT','ZTS','CBRE',
 ]
 SP500_SAMPLE = SP500_SYMBOLS[:100]
+
+IDX_SYMBOLS = [
+    # Banking
+    'BBCA.JK','BBRI.JK','BMRI.JK','BBNI.JK','BTPS.JK','BRIS.JK','MEGA.JK','NISP.JK',
+    'BBTN.JK','BNGA.JK','BJTM.JK',
+    # Telco & Media
+    'TLKM.JK','EXCL.JK','ISAT.JK','FREN.JK','EMTK.JK','MNCN.JK',
+    # Conglomerate & Holding
+    'ASII.JK','UNVR.JK','CPIN.JK','SMGR.JK','ADRO.JK',
+    # Consumer & Retail
+    'ICBP.JK','INDF.JK','ACES.JK','ERAA.JK','MAPI.JK','LPPF.JK',
+    'GOTO.JK',
+    # Property & Real Estate
+    'BSDE.JK','CTRA.JK','SMRA.JK','BKDP.JK',
+    # Infrastructure & Utilities
+    'TOWR.JK','PGAS.JK','PTPP.JK','WSKT.JK','WIKA.JK','NRCA.JK',
+    # Energy & Mining
+    'PTBA.JK','BUMI.JK','ANTM.JK','INCO.JK','MDKA.JK','INKP.JK','TKIM.JK',
+    # Plantation & Agri
+    'AALI.JK','LSIP.JK','SGRO.JK','UNTR.JK',
+    # Transportation & Logistics
+    'BIRD.JK','ASSA.JK',
+    # Health & Pharma
+    'KLBF.JK','HEAL.JK',
+    # Tech & Digital
+    'BUKA.JK','BELI.JK',
+    # Additional IDX30/IDX50
+    'HMSP.JK','MIKA.JK','HRUM.JK','BRPT.JK','TBIG.JK','AKRA.JK',
+    'TPIA.JK','JPFA.JK','INTP.JK',
+    'TINS.JK','MEDC.JK','LINK.JK','AMMN.JK','ARGO.JK',
+]
+
 STOCK_LISTS = {
     'mega_cap': {
         'name': 'USA Mega Cap', 'emoji': '🇺🇸', 'category': 'LISTS', 'symbols': [
@@ -147,9 +179,19 @@ STOCK_LISTS = {
             'SCHF','SCHM','FNCL','IYT','IHF','IEZ','IYC','IYE','IYW','IYR',
         ],
     },
+    'idx_composite': {
+        'name': 'IDX Composite', 'emoji': '🇮🇩', 'category': 'LISTS', 'symbols': IDX_SYMBOLS[:80],
+    },
+    'idx_bluechips': {
+        'name': 'IDX 30 Blue Chips', 'emoji': '🏦', 'category': 'LISTS', 'symbols': [
+            'BBCA.JK','BBRI.JK','BMRI.JK','BBNI.JK','TLKM.JK','ASII.JK','UNVR.JK',
+            'HMSP.JK','ICBP.JK','CPIN.JK','INDF.JK','ADRO.JK','SMGR.JK','UNTR.JK',
+            'PGAS.JK','TOWR.JK','EXCL.JK','MIKA.JK','BRIS.JK','EMTK.JK',
+            'MAPI.JK','KLBF.JK','BTPS.JK','MNCN.JK','INKP.JK','AKRA.JK',
+            'MDKA.JK','INCO.JK','ANTM.JK','TPIA.JK',
+        ],
+    },
 }
-
-IDX_SYMBOLS = ['BBCA.JK','BBRI.JK','TLKM.JK','BMRI.JK','ASII.JK','UNVR.JK']
 
 TOP_RATED_SYMBOLS = [
     'MU','NVDA','V','MSFT','MA','NEM','GOOGL','CRM','META','PGR',
@@ -402,7 +444,7 @@ def get_returns_data(market='US'):
     return _get_cached(f'returns_{market}', fetch, ttl=CACHE_TTL)
 
 def get_top_rated(market='US'):
-    symbols = TOP_RATED_SYMBOLS if market == 'US' else IDX_SYMBOLS[:8]
+    symbols = TOP_RATED_SYMBOLS if market == 'US' else IDX_SYMBOLS
 
     def fetch():
         results = []
