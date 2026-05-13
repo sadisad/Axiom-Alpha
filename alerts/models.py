@@ -59,3 +59,26 @@ class PortfolioItem(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.symbol}"
+
+
+class PriceAlert(models.Model):
+    CONDITION_CHOICES = [
+        ('above', 'Above'),
+        ('below', 'Below'),
+        ('crosses_up', 'Crosses Up'),
+        ('crosses_down', 'Crosses Down'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='price_alerts')
+    symbol = models.CharField(max_length=20)
+    market = models.CharField(max_length=5, default='US')
+    condition = models.CharField(max_length=15, choices=CONDITION_CHOICES, default='above')
+    target_price = models.DecimalField(max_digits=20, decimal_places=4)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    triggered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.symbol} {self.condition} ${self.target_price}"

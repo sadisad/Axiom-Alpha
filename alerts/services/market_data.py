@@ -595,23 +595,41 @@ def get_strategy_picks():
 
     return _get_cached('strategy_picks', fetch, ttl=CACHE_TTL)
 
-def get_stock_info_batch(symbols):
+def batch_stock_data(symbol_market_pairs):
+    def _fetch_one(pair):
+        sym, mkt = pair
+        proc = sym + '.JK' if mkt == 'ID' and not sym.endswith('.JK') else sym
+        info = _safe_info(proc)
+        if not info:
+            return sym, {'name': sym, 'price': '-', 'price_raw': 0, 'prev_close': 0, 'change': 0, 'is_positive': True, 'current_price': 0}
+        name = info.get('shortName', sym)
+        current_price = info.get('currentPrice', info.get('regularMarketPrice', 0)) or 0
+        prev_close = info.get('previousClose', current_price)
+        change = ((current_price - prev_close) / prev_close * 100) if prev_close and current_price else 0
+        return sym, {
+            'name': name,
+            'price': f'{current_price:,.2f}' if current_price else '-',
+            'price_raw': current_price,
+            'prev_close': prev_close,
+            'change': round(change, 2),
+            'is_positive': change >= 0,
+            'current_price': round(current_price, 2),
+        }
+
     results = {}
-    for sym in symbols:
-        try:
-            info = _safe_info(sym, ['shortName','currentPrice','previousClose'])
-            price = info.get('currentPrice') or info.get('previousClose') or 0
-            prev = info.get('previousClose') or price
-            change = ((price - prev) / prev * 100) if prev and price else 0
-            results[sym] = {
-                'name': info.get('shortName', sym),
-                'price': f'{price:,.2f}' if price else '-',
-                'change': round(change, 2),
-                'is_positive': change >= 0,
-            }
-        except Exception:
-            results[sym] = {'name': sym, 'price': '-', 'change': 0, 'is_positive': True}
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(_fetch_one, pair): pair for pair in symbol_market_pairs}
+        for future in as_completed(futures):
+            try:
+                sym, data = future.result()
+                results[sym] = data
+            except Exception:
+                pass
     return results
+
+def get_stock_info_batch(symbols):
+    pairs = [(s, 'US') for s in symbols]
+    return batch_stock_data(pairs)
 
 def _fmt_mcap(mc):
     if mc is None:

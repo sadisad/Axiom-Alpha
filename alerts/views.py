@@ -27,14 +27,13 @@ from .services.market_data import (
     get_dashboard_gauges, get_dashboard_key_stats, get_returns_data,
     get_top_rated, get_trending_portfolios, get_strategy_picks,
     SP500_SYMBOLS, IDX_SYMBOLS, STOCK_LISTS, get_market_scores,
+    batch_stock_data,
 )
 from .firebase_db import (
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
     get_portfolio, add_portfolio, remove_portfolio,
 )
-import yfinance as yf
-import json
 import decimal
 import logging
 
@@ -213,30 +212,22 @@ def watchtower(request):
     context = {}
     if request.user.is_authenticated:
         uid = request.user.pk
-        watchlist_items = []
         saved = get_watchlist(uid)
+        pairs = [(item['symbol'], item.get('market', 'US')) for item in saved]
+        stock_data = batch_stock_data(pairs) if pairs else {}
+        watchlist_items = []
         for item in saved:
-            try:
-                process_sym = item['symbol']
-                if item.get('market') == 'ID' and not process_sym.endswith('.JK'):
-                    process_sym += '.JK'
-                info = yf.Ticker(process_sym).info
-                price = info.get('currentPrice', info.get('regularMarketPrice', 0))
-                prev_close = info.get('previousClose', price)
-                change = ((price - prev_close) / prev_close * 100) if prev_close and price else 0
-                watchlist_items.append({
-                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
-                    'name': info.get('shortName', item['symbol']),
-                    'price': f"{price:,.2f}" if price else '-',
-                    'change': round(change, 2),
-                    'is_positive': change >= 0,
-                })
-            except Exception:
-                watchlist_items.append({
-                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
-                    'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True,
-                })
+            data = stock_data.get(item['symbol'], {'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True})
+            watchlist_items.append({
+                'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                'name': data.get('name', item['symbol']),
+                'price': data.get('price', '-'),
+                'change': data.get('change', 0),
+                'is_positive': data.get('is_positive', True),
+            })
         context['watchlist_items'] = watchlist_items
+        from .models import PriceAlert
+        context['alerts'] = PriceAlert.objects.filter(user=request.user, is_active=True).order_by('-created_at')
     return render(request, 'alerts/watchtower.html', context)
 
 
@@ -244,61 +235,63 @@ def portfolios(request):
     context = {}
     if request.user.is_authenticated:
         uid = request.user.pk
+        positions = get_portfolio(uid)
+        pairs = [(pos['symbol'], pos.get('market', 'US')) for pos in positions]
+        stock_data = batch_stock_data(pairs) if pairs else {}
         portfolio_items = []
         total_value = 0
         total_cost = 0
         total_pnl = 0
         first_symbol = 'SPY'
-        positions = get_portfolio(uid)
         for idx, pos in enumerate(positions):
-            try:
-                process_sym = pos['symbol']
-                if pos.get('market') == 'ID' and not process_sym.endswith('.JK'):
-                    process_sym += '.JK'
-                info = yf.Ticker(process_sym).info
-                current_price = info.get('currentPrice', info.get('regularMarketPrice', 0)) or 0
-                buy_price = float(pos['buy_price'])
-                qty = float(pos['quantity'])
-                cost_basis = buy_price * qty
-                current_value = current_price * qty
-                pnl = current_value - cost_basis
-                pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
-                portfolio_items.append({
-                    'id': pos['id'],
-                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
-                    'name': pos.get('company_name', '') or info.get('shortName', pos['symbol']),
-                    'quantity': qty, 'buy_price': buy_price,
-                    'current_price': round(current_price, 2),
-                    'current_value': round(current_value, 2),
-                    'cost_basis': round(cost_basis, 2),
-                    'pnl': round(pnl, 2),
-                    'pnl_pct': round(pnl_pct, 2),
-                    'is_positive': pnl >= 0,
-                })
-                total_value += current_value
-                total_cost += cost_basis
-                total_pnl += pnl
-                if idx == 0:
-                    first_symbol = pos['symbol']
-            except Exception:
-                portfolio_items.append({
-                    'id': pos['id'],
-                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
-                    'name': pos.get('company_name', '') or pos['symbol'],
-                    'quantity': float(pos['quantity']), 'buy_price': float(pos['buy_price']),
-                    'current_price': 0, 'current_value': 0,
-                    'cost_basis': float(pos['quantity']) * float(pos['buy_price']),
-                    'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
-                })
-                total_cost += float(pos['quantity']) * float(pos['buy_price'])
-                if idx == 0:
-                    first_symbol = pos['symbol']
+            data = stock_data.get(pos['symbol'], {})
+            current_price = data.get('current_price', 0)
+            buy_price = float(pos['buy_price'])
+            qty = float(pos['quantity'])
+            cost_basis = buy_price * qty
+            current_value = current_price * qty
+            pnl = current_value - cost_basis
+            pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
+            portfolio_items.append({
+                'id': pos['id'],
+                'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                'name': pos.get('company_name', '') or data.get('name', pos['symbol']),
+                'quantity': qty, 'buy_price': buy_price,
+                'current_price': round(current_price, 2),
+                'current_value': round(current_value, 2),
+                'cost_basis': round(cost_basis, 2),
+                'pnl': round(pnl, 2),
+                'pnl_pct': round(pnl_pct, 2),
+                'is_positive': pnl >= 0,
+            })
+            total_value += current_value
+            total_cost += cost_basis
+            total_pnl += pnl
+            if idx == 0:
+                first_symbol = pos['symbol']
         context['portfolio_items'] = portfolio_items
         context['total_value'] = round(total_value, 2)
         context['total_cost'] = round(total_cost, 2)
         context['total_pnl'] = round(total_pnl, 2)
         context['total_pnl_pct'] = round((total_pnl / total_cost * 100) if total_cost else 0, 2)
         context['total_pnl_positive'] = total_pnl >= 0
+        allocation = []
+        for item in portfolio_items:
+            if total_value > 0:
+                pct = round((item['current_value'] / total_value) * 100, 1)
+            else:
+                pct = 0
+            allocation.append({
+                'symbol': item['symbol'],
+                'name': item['name'],
+                'value': item['current_value'],
+                'pct': pct,
+                'color': None,
+            })
+        colors = ['#56B6C6','#ffc800','#00c896','#ff6464','#8b5cf6','#f59e0b','#3b82f6','#ec4899','#14b8a6','#f97316']
+        for i, a in enumerate(allocation):
+            a['color'] = colors[i % len(colors)]
+        context['allocation_json'] = json.dumps(allocation, cls=NumpyEncoder)
         first_mkt = positions[0].get('market', 'US') if positions else 'US'
         if first_mkt == 'ID':
             context['chart_symbol'] = f"IDX:{first_symbol}"
@@ -316,64 +309,50 @@ def dashboard(request):
         uid = request.user.pk
 
         saved = get_watchlist(uid)
+        positions = get_portfolio(uid)
+
+        all_pairs = [(item['symbol'], item.get('market', 'US')) for item in saved]
+        all_pairs += [(pos['symbol'], pos.get('market', 'US')) for pos in positions]
+        stock_data = batch_stock_data(all_pairs) if all_pairs else {}
+
         for item in saved:
-            try:
-                process_sym = item['symbol']
-                if item.get('market') == 'ID' and not process_sym.endswith('.JK'):
-                    process_sym += '.JK'
-                info = yf.Ticker(process_sym).info
-                price = info.get('currentPrice', info.get('regularMarketPrice', 0))
-                prev_close = info.get('previousClose', price)
-                change = ((price - prev_close) / prev_close * 100) if prev_close and price else 0
-                watchlist_items.append({
-                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
-                    'name': info.get('shortName', item['symbol']),
-                    'price': f"{price:,.2f}" if price else '-',
-                    'change': round(change, 2),
-                    'is_positive': change >= 0,
-                })
-            except Exception:
-                watchlist_items.append({
-                    'symbol': item['symbol'], 'market': item.get('market', 'US'),
-                    'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True,
-                })
+            data = stock_data.get(item['symbol'], {'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True})
+            watchlist_items.append({
+                'symbol': item['symbol'], 'market': item.get('market', 'US'),
+                'name': data.get('name', item['symbol']),
+                'price': data.get('price', '-'),
+                'change': data.get('change', 0),
+                'is_positive': data.get('is_positive', True),
+            })
 
         recent_searches = get_search_history(uid, limit=6)
 
-        positions = get_portfolio(uid)
+        total_value = 0
+        total_cost = 0
+        total_pnl = 0
         for pos in positions:
-            try:
-                process_sym = pos['symbol']
-                if pos.get('market') == 'ID' and not process_sym.endswith('.JK'):
-                    process_sym += '.JK'
-                info = yf.Ticker(process_sym).info
-                current_price = info.get('currentPrice', info.get('regularMarketPrice', 0)) or 0
-                buy_price = float(pos['buy_price'])
-                qty = float(pos['quantity'])
-                cost_basis = buy_price * qty
-                current_value = current_price * qty
-                pnl = current_value - cost_basis
-                pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
-                portfolio_items.append({
-                    'id': pos['id'],
-                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
-                    'name': pos.get('company_name', '') or info.get('shortName', pos['symbol']),
-                    'quantity': qty, 'buy_price': buy_price,
-                    'current_price': round(current_price, 2),
-                    'current_value': round(current_value, 2),
-                    'pnl': round(pnl, 2),
-                    'pnl_pct': round(pnl_pct, 2),
-                    'is_positive': pnl >= 0,
-                })
-            except Exception:
-                portfolio_items.append({
-                    'id': pos['id'],
-                    'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
-                    'name': pos.get('company_name', '') or pos['symbol'],
-                    'quantity': float(pos['quantity']), 'buy_price': float(pos['buy_price']),
-                    'current_price': 0, 'current_value': 0,
-                    'pnl': 0, 'pnl_pct': 0, 'is_positive': True,
-                })
+            data = stock_data.get(pos['symbol'], {})
+            current_price = data.get('current_price', 0)
+            buy_price = float(pos['buy_price'])
+            qty = float(pos['quantity'])
+            cost_basis = buy_price * qty
+            current_value = current_price * qty
+            pnl = current_value - cost_basis
+            pnl_pct = (pnl / cost_basis * 100) if cost_basis else 0
+            portfolio_items.append({
+                'id': pos['id'],
+                'symbol': pos['symbol'], 'market': pos.get('market', 'US'),
+                'name': pos.get('company_name', '') or data.get('name', pos['symbol']),
+                'quantity': qty, 'buy_price': buy_price,
+                'current_price': round(current_price, 2),
+                'current_value': round(current_value, 2),
+                'pnl': round(pnl, 2),
+                'pnl_pct': round(pnl_pct, 2),
+                'is_positive': pnl >= 0,
+            })
+            total_value += current_value
+            total_cost += cost_basis
+            total_pnl += pnl
 
     try:
         gauges = get_dashboard_gauges()
@@ -538,18 +517,213 @@ def portfolio_add(request):
     buy_price = request.POST.get('buy_price', '0')
     company_name = request.POST.get('company_name', '')
 
+    if not symbol:
+        return redirect('portfolios')
     try:
-        add_portfolio(
-            request.user.pk, symbol, market, company_name,
-            decimal.Decimal(quantity), decimal.Decimal(buy_price),
-        )
-    except Exception:
-        pass
-    return redirect('dashboard')
+        qty_dec = decimal.Decimal(quantity)
+        price_dec = decimal.Decimal(buy_price)
+        if qty_dec <= 0 or price_dec <= 0:
+            return redirect('portfolios')
+        add_portfolio(request.user.pk, symbol, market, company_name, qty_dec, price_dec)
+    except (decimal.InvalidOperation, ValueError) as e:
+        logger.warning(f"Invalid portfolio input for {symbol}: {e}")
+    except Exception as e:
+        logger.error(f"Failed to add portfolio position for {symbol}: {e}")
+    return redirect('portfolios')
 
 
 @login_required
 @require_POST
 def portfolio_remove(request, pk):
     remove_portfolio(request.user.pk, pk)
-    return redirect('dashboard')
+    return redirect('portfolios')
+
+
+def prices_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'auth required'}, status=401)
+    symbols_param = request.GET.get('symbols', '')
+    markets_param = request.GET.get('markets', '')
+    if not symbols_param:
+        return JsonResponse({'prices': {}})
+    symbols = [s.strip().upper() for s in symbols_param.split(',') if s.strip()]
+    markets = [m.strip() for m in markets_param.split(',')] if markets_param else ['US'] * len(symbols)
+    while len(markets) < len(symbols):
+        markets.append('US')
+    pairs = list(zip(symbols, markets[:len(symbols)]))
+    stock_data = batch_stock_data(pairs)
+    prices = {}
+    for sym in symbols:
+        d = stock_data.get(sym, {})
+        if d:
+            prices[sym] = {
+                'name': d.get('name', sym),
+                'price': d.get('price', '-'),
+                'change': d.get('change', 0),
+                'is_positive': d.get('is_positive', True),
+                'current_price': d.get('current_price', 0),
+            }
+    return JsonResponse({'prices': prices})
+
+
+def market_status(request):
+    from datetime import datetime as dt, timedelta
+    import pytz
+    try:
+        eastern = pytz.timezone('US/Eastern')
+        now_et = dt.now(eastern)
+        is_weekday = now_et.weekday() < 5
+        market_open_time = now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+        market_close_time = now_et.replace(hour=16, minute=0, second=0, microsecond=0)
+        is_open = is_weekday and market_open_time <= now_et <= market_close_time
+        next_open = None
+        if not is_open:
+            if now_et < market_open_time and is_weekday:
+                next_open = int((market_open_time - now_et).total_seconds())
+            else:
+                for days_ahead in range(1, 7):
+                    next_day = now_et + timedelta(days=days_ahead)
+                    if next_day.weekday() < 5:
+                        next_open = int(((next_day.replace(hour=9, minute=30, second=0, microsecond=0) - now_et).total_seconds()))
+                        break
+        return JsonResponse({'is_open': is_open, 'next_open_seconds': next_open})
+    except Exception:
+        return JsonResponse({'is_open': False})
+
+
+@login_required
+def alert_list(request):
+    from .models import PriceAlert
+    alerts = PriceAlert.objects.filter(user=request.user, is_active=True).order_by('-created_at')
+    uid = request.user.pk
+    saved = get_watchlist(uid)
+    pairs = [(item['symbol'], item.get('market', 'US')) for item in saved]
+    stock_data = batch_stock_data(pairs) if pairs else {}
+    watchlist_items = []
+    for item in saved:
+        data = stock_data.get(item['symbol'], {'name': item['symbol'], 'price': '-', 'change': 0, 'is_positive': True})
+        watchlist_items.append({
+            'symbol': item['symbol'], 'market': item.get('market', 'US'),
+            'name': data.get('name', item['symbol']),
+            'price': data.get('price', '-'),
+            'change': data.get('change', 0),
+            'is_positive': data.get('is_positive', True),
+        })
+    return render(request, 'alerts/watchtower.html', {
+        'watchlist_items': watchlist_items,
+        'alerts': alerts,
+    })
+
+
+@login_required
+@require_POST
+def alert_create(request):
+    from .models import PriceAlert
+    symbol = request.POST.get('symbol', '').upper().strip().replace('.JK', '')
+    market = request.POST.get('market', 'US')
+    condition = request.POST.get('condition', 'above')
+    target_price = request.POST.get('target_price', '0')
+    if not symbol or condition not in dict(PriceAlert.CONDITION_CHOICES):
+        return redirect('watchtower')
+    try:
+        PriceAlert.objects.create(
+            user=request.user,
+            symbol=symbol,
+            market=market,
+            condition=condition,
+            target_price=decimal.Decimal(target_price),
+        )
+    except (decimal.InvalidOperation, ValueError):
+        pass
+    return redirect('watchtower')
+
+
+@login_required
+@require_POST
+def alert_delete(request, pk):
+    from .models import PriceAlert
+    try:
+        alert = PriceAlert.objects.get(pk=pk, user=request.user)
+        alert.delete()
+    except PriceAlert.DoesNotExist:
+        pass
+    return redirect('watchtower')
+
+
+@login_required
+def portfolio_export_csv(request):
+    import csv
+    from django.http import HttpResponse
+    positions = get_portfolio(request.user.pk)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="portfolio.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Symbol', 'Market', 'Company Name', 'Quantity', 'Buy Price'])
+    for pos in positions:
+        writer.writerow([pos['symbol'], pos['market'], pos.get('company_name', ''), pos['quantity'], pos['buy_price']])
+    return response
+
+
+@login_required
+@require_POST
+def portfolio_import_csv(request):
+    import csv
+    from io import StringIO
+    csv_file = request.FILES.get('csv_file')
+    if not csv_file or not csv_file.name.endswith('.csv'):
+        return redirect('portfolios')
+    try:
+        decoded = csv_file.read().decode('utf-8')
+        reader = csv.DictReader(StringIO(decoded))
+        count = 0
+        for row in reader:
+            symbol = row.get('Symbol', row.get('symbol', '')).strip().upper().replace('.JK', '')
+            market = row.get('Market', row.get('market', 'US')).strip()
+            company_name = row.get('Company Name', row.get('company_name', row.get('name', ''))).strip()
+            qty_str = row.get('Quantity', row.get('quantity', '0')).strip()
+            price_str = row.get('Buy Price', row.get('buy_price', row.get('price', '0'))).strip()
+            if not symbol:
+                continue
+            try:
+                qty = decimal.Decimal(qty_str)
+                price = decimal.Decimal(price_str)
+                if qty > 0 and price > 0:
+                    add_portfolio(request.user.pk, symbol, market, company_name, qty, price)
+                    count += 1
+            except (decimal.InvalidOperation, ValueError):
+                continue
+    except Exception as e:
+        logger.error(f"CSV import error: {e}")
+    return redirect('portfolios')
+
+
+@login_required
+def watchlist_export_csv(request):
+    import csv
+    from django.http import HttpResponse
+    items = get_watchlist(request.user.pk)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="watchlist.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Symbol', 'Market'])
+    for item in items:
+        writer.writerow([item['symbol'], item.get('market', 'US')])
+    return response
+
+
+@login_required
+@require_POST
+def portfolio_edit(request, pk):
+    from .models import PortfolioItem
+    try:
+        item = PortfolioItem.objects.get(pk=pk, user=request.user)
+        qty = request.POST.get('quantity')
+        price = request.POST.get('buy_price')
+        if qty:
+            item.quantity = decimal.Decimal(qty)
+        if price:
+            item.buy_price = decimal.Decimal(price)
+        item.save()
+    except (PortfolioItem.DoesNotExist, decimal.InvalidOperation, ValueError):
+        pass
+    return redirect('portfolios')

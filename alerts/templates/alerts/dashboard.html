@@ -231,7 +231,7 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
       </div>
       {% if watchlist_items %}
         {% for item in watchlist_items %}
-        <div class="mover-item">
+        <div class="mover-item" data-price-symbol="{{ item.symbol }}" data-price-market="{{ item.market }}">
           <div>
             <a href="{% url 'screener' %}?symbol={{ item.symbol }}&market={{ item.market }}" style="text-decoration:none;">
               <div class="mover-name">{{ item.symbol }}</div>
@@ -239,8 +239,8 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
             </a>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;">{{ item.price }}</div>
-            <div class="mover-delta {% if item.is_positive %}pos{% else %}neg{% endif %}">{% if item.is_positive %}▲{% else %}▼{% endif %} {{ item.change }}%</div>
+            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;" data-price-val>{{ item.price }}</div>
+            <div class="mover-delta {% if item.is_positive %}pos{% else %}neg{% endif %}" data-change-val>{% if item.is_positive %}▲{% else %}▼{% endif %} {{ item.change }}%</div>
           </div>
         </div>
         {% endfor %}
@@ -359,7 +359,7 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
       </div>
       {% if portfolio_items %}
         {% for pos in portfolio_items %}
-        <div class="mover-item">
+        <div class="mover-item" data-price-symbol="{{ pos.symbol }}" data-price-market="{{ pos.market }}">
           <div>
             <a href="{% url 'screener' %}?symbol={{ pos.symbol }}&market={{ pos.market }}" style="text-decoration:none;">
               <div class="mover-name">{{ pos.symbol }}</div>
@@ -367,8 +367,8 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
             </a>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;">{{ pos.current_value }}</div>
-            <div class="mover-delta {% if pos.is_positive %}pos{% else %}neg{% endif %}">
+            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;" data-price-val>{{ pos.current_value }}</div>
+            <div class="mover-delta {% if pos.is_positive %}pos{% else %}neg{% endif %}" data-change-val>
               {% if pos.is_positive %}+{% endif %}{{ pos.pnl_pct }}%
             </div>
           </div>

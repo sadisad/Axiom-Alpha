@@ -4,6 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Axiom Alpha — Institutional-grade stock analysis, radar, screener, and portfolio tracking. Real-time scores, strategy picks, and market intelligence.">
+    <meta name="keywords" content="stock analysis, trading, portfolio, screener, market radar, Axiom Alpha, fundamental analysis">
+    <meta property="og:title" content="Axiom Alpha | Pro Trading Terminal">
+    <meta property="og:description" content="Institutional-grade stock analysis and portfolio intelligence.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Axiom Alpha | Pro Trading Terminal">
+    <meta name="twitter:description" content="Institutional-grade stock analysis and portfolio intelligence.">
     <title>Axiom Alpha | Pro Trading</title>
     <link rel="icon" type="image/x-icon" href="{% static 'alerts/images/favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}">
@@ -31,6 +40,28 @@
             --nav-hover: rgba(86,182,198,0.1);
             --nav-text: #8ACBD0;
             --nav-text-active: #56B6C6;
+        }
+        html[data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --surface: #ffffff;
+            --surface-hover: rgba(23, 12, 121, 0.04);
+            --surface-border: rgba(23, 12, 121, 0.1);
+            --text-primary: #1a1a2e;
+            --text-secondary: #5a6072;
+            --nav-bg: rgba(255,255,255,0.97);
+            --nav-border: rgba(23,12,121,0.1);
+            --nav-hover: rgba(86,182,198,0.08);
+            --nav-text: #3a3a5c;
+            --nav-text-active: #2a5f6d;
+        }
+        html[data-theme="light"] body {
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(86, 182, 198, 0.06), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(23, 12, 121, 0.04), transparent 25%);
+        }
+        html[data-theme="light"] .panel {
+            background: rgba(255,255,255,0.85);
+            border-color: rgba(23,12,121,0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
@@ -251,6 +282,27 @@
         @keyframes toastOut{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(40px);}}
         @media(max-width:600px){.toast-container{right:0.5rem;left:0.5rem;max-width:none;}}
 
+        /* Market status indicator */
+        .market-status{display:inline-flex;align-items:center;gap:0.35rem;padding:0.15rem 0.55rem;border-radius:12px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;background:rgba(15,10,60,0.5);border:1px solid rgba(138,203,208,0.1);}
+        .market-dot{width:6px;height:6px;border-radius:50%;animation:pulse-dot 2s infinite;}
+        @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+        /* Price flash animation */
+        @keyframes flash-green{0%{background:rgba(16,185,129,0.3);}100%{background:transparent;}}
+        @keyframes flash-red{0%{background:rgba(239,68,68,0.3);}100%{background:transparent;}}
+        .flash-green{animation:flash-green 0.6s ease-out !important;}
+        .flash-red{animation:flash-red 0.6s ease-out !important;}
+
+        /* Loading skeleton */
+        .skeleton{background:linear-gradient(90deg,rgba(138,203,208,0.05) 25%,rgba(138,203,208,0.1) 50%,rgba(138,203,208,0.05) 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:6px;}
+        @keyframes skeleton-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+        .skel-line{height:14px;margin:0.3rem 0;border-radius:4px;}
+        .skel-line.w50{width:50%;}.skel-line.w70{width:70%;}.skel-line.w90{width:90%;}.skel-line.w100{width:100%;}
+        .skel-block{height:60px;border-radius:8px;margin:0.3rem 0;}
+
+        /* Reduced motion */
+        @media(prefers-reduced-motion:reduce){.market-dot,.skeleton{animation:none !important;}.flash-green,.flash-red{animation:none !important;}.toast{animation:none !important;}}
+
         @media (max-width: 900px) {
             .topnav-links { display: none; }
             .hamburger { display: flex; }
@@ -282,6 +334,10 @@
             </div>
 
             <div class="topnav-links">
+                <div class="market-status" title="US Market Status">
+                    <span class="market-dot" style="background:{{ market_status_color }};"></span>
+                    <span style="color:{{ market_status_color }};">{{ market_status_text }}</span>
+                </div>
                 <div class="topnav-divider"></div>
                 <a href="{% url 'radar' %}" class="topnav-link {% if request.resolver_match.url_name == 'radar' %}active{% endif %}"><i data-lucide="radar" style="width:15px;height:15px;"></i> Radar</a>
                 <a href="{% url 'compare' %}" class="topnav-link {% if request.resolver_match.url_name == 'compare' %}active{% endif %}"><i data-lucide="git-compare" style="width:15px;height:15px;"></i> Compare</a>
@@ -290,6 +346,8 @@
                 <a href="{% url 'headlines' %}" class="topnav-link {% if request.resolver_match.url_name == 'headlines' %}active{% endif %}"><i data-lucide="newspaper" style="width:15px;height:15px;"></i> Headlines</a>
                 <a href="{% url 'watchtower' %}" class="topnav-link {% if request.resolver_match.url_name == 'watchtower' %}active{% endif %}"><i data-lucide="bell" style="width:15px;height:15px;"></i> Alerts</a>
                 <a href="{% url 'about' %}" class="topnav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"><i data-lucide="circle-help" style="width:15px;height:15px;"></i></a>
+                <div class="topnav-divider"></div>
+                <button onclick="toggleTheme()" id="theme-toggle-btn" style="background:none;border:none;cursor:pointer;padding:0.3rem;color:var(--nav-text);display:inline-flex;align-items:center;" title="Toggle theme" aria-label="Toggle light/dark theme"><i data-lucide="sun" style="width:15px;height:15px;" id="theme-icon-sun"></i><i data-lucide="moon" style="width:15px;height:15px;display:none;" id="theme-icon-moon"></i></button>
                 <div class="topnav-divider"></div>
                 {% if user.is_authenticated and not is_premium %}
                 <a href="{% url 'about' %}#pricing" class="topnav-auth-btn topnav-auth-signup" style="font-size:12px;padding:0.3rem 0.7rem;">Upgrade</a>
@@ -322,6 +380,7 @@
         <a href="{% url 'headlines' %}"><i data-lucide="newspaper" style="width:16px;height:16px;"></i> Headlines</a>
         <a href="{% url 'watchtower' %}"><i data-lucide="bell" style="width:16px;height:16px;"></i> Alerts</a>
         <a href="{% url 'about' %}"><i data-lucide="circle-help" style="width:16px;height:16px;"></i> About</a>
+        <a href="#" onclick="event.preventDefault();toggleTheme()"><i data-lucide="sun" style="width:16px;height:16px;" id="theme-icon-sun-m"></i><i data-lucide="moon" style="width:16px;height:16px;display:none;" id="theme-icon-moon-m"></i> Theme</a>
         {% if user.is_authenticated %}
         <a href="{% url 'logout' %}"><i data-lucide="log-out" style="width:16px;height:16px;"></i> Logout ({{ user.username }})</a>
         {% else %}
@@ -353,6 +412,36 @@
 
     <script>
         lucide.createIcons();
+            function toggleTheme() {
+                var html = document.documentElement;
+                var isLight = html.getAttribute('data-theme') === 'light';
+                html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+                localStorage.setItem('theme', isLight ? 'dark' : 'light');
+                updateThemeIcon(!isLight);
+            }
+            function updateThemeIcon(isLight) {
+                var sun = document.getElementById('theme-icon-sun');
+                var moon = document.getElementById('theme-icon-moon');
+                if (sun && moon) {
+                    sun.style.display = isLight ? 'none' : 'inline-block';
+                    moon.style.display = isLight ? 'inline-block' : 'none';
+                }
+                var sunM = document.getElementById('theme-icon-sun-m');
+                var moonM = document.getElementById('theme-icon-moon-m');
+                if (sunM && moonM) {
+                    sunM.style.display = isLight ? 'none' : 'inline-block';
+                    moonM.style.display = isLight ? 'inline-block' : 'none';
+                }
+            }
+            (function() {
+                var saved = localStorage.getItem('theme');
+                if (saved === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    updateThemeIcon(true);
+                } else {
+                    updateThemeIcon(false);
+                }
+            })();
         function toggleMobileNav() {
             const nav = document.getElementById('mobile-nav');
             const btn = document.getElementById('hamburger-btn');
@@ -378,6 +467,48 @@
                 }
             }, duration);
         }
+
+        // Auto-refresh prices for watchlist & portfolio
+        function initAutoRefresh() {
+            var priceEls = document.querySelectorAll('[data-price-symbol]');
+            if (!priceEls.length) return;
+            var symbols = [];
+            var markets = [];
+            priceEls.forEach(function(el) {
+                symbols.push(el.dataset.priceSymbol);
+                markets.push(el.dataset.priceMarket || 'US');
+            });
+            setInterval(function() {
+                var url = '/api/prices/?symbols=' + symbols.join(',') + '&markets=' + markets.join(',');
+                fetch(url).then(function(r){return r.json();}).then(function(data) {
+                    if (!data.prices) return;
+                    Object.keys(data.prices).forEach(function(sym) {
+                        var p = data.prices[sym];
+                        priceEls.forEach(function(el) {
+                            if (el.dataset.priceSymbol !== sym) return;
+                            var priceEl = el.querySelector('[data-price-val]');
+                            var changeEl = el.querySelector('[data-change-val]');
+                            if (priceEl) {
+                                var oldVal = priceEl.textContent;
+                                var newVal = p.price || '-';
+                                if (oldVal !== newVal) {
+                                    priceEl.textContent = newVal;
+                                    var cls = p.is_positive ? 'flash-green' : 'flash-red';
+                                    priceEl.classList.remove('flash-green','flash-red');
+                                    void priceEl.offsetWidth;
+                                    priceEl.classList.add(cls);
+                                }
+                            }
+                            if (changeEl) {
+                                changeEl.textContent = (p.is_positive ? '\u25B2' : '\u25BC') + ' ' + Math.abs(p.change) + '%';
+                                changeEl.className = 'mover-delta ' + (p.is_positive ? 'pos' : 'neg');
+                            }
+                        });
+                    });
+                }).catch(function(){});
+            }, 30000);
+        }
+        document.addEventListener('DOMContentLoaded', initAutoRefresh);
     </script>
 </body>
 </html>

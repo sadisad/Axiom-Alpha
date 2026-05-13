@@ -11,7 +11,7 @@
 .strategy-row{display:flex;gap:0.3rem;overflow-x:auto;padding-bottom:0.35rem;margin-bottom:0.5rem;-webkit-overflow-scrolling:touch;}
 .strategy-row::-webkit-scrollbar{height:3px;}
 .strategy-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
-.stab{padding:0.35rem 0.75rem;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.15s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem;}
+.stab{padding:0.4rem 0.8rem;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.15s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem;-webkit-tap-highlight-color:transparent;}
 .stab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
 .stab.active{color:#0d0645;border-color:transparent;font-weight:800;}
 .stab[data-strategy="all"].active{background:linear-gradient(135deg,#56B6C6,#00c896);}
@@ -62,12 +62,12 @@
 
 /* Controls and table */
 .radar-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.4rem;}
-.radar-search{position:relative;}
-.radar-search input{padding:0.35rem 0.65rem 0.35rem 2rem;border-radius:6px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.82rem;outline:none;width:200px;transition:border-color 0.15s;}
+.radar-search{position:relative;min-width:0;}
+.radar-search input{padding:0.35rem 0.65rem 0.35rem 2rem;border-radius:6px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.82rem;outline:none;width:200px;min-width:0;transition:border-color 0.15s;}
 .radar-search input:focus{border-color:var(--brand-teal);}
 .radar-search svg{position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);pointer-events:none;}
 .market-toggle{display:flex;gap:0.2rem;background:rgba(23,12,121,0.5);border-radius:6px;padding:0.15rem;border:1px solid rgba(138,203,208,0.1);}
-.market-toggle button{padding:0.3rem 0.65rem;border:none;border-radius:5px;font-size:0.74rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text-secondary);}
+.market-toggle button{padding:0.3rem 0.65rem;border:none;border-radius:5px;font-size:0.74rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text-secondary);min-height:34px;}
 .market-toggle button.active{background:var(--brand-teal);color:#0d0645;}
 
 .radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow-x:auto;background:rgba(15,10,60,0.5);-webkit-overflow-scrolling:touch;}
@@ -99,17 +99,17 @@
 /* Pro tip label */
 .pro-tip{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(0,200,150,0.1);color:#00c896;font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;margin-left:0.4rem;}
 .size-controls{display:flex;align-items:center;gap:0.35rem;}
-.size-btn{width:26px;height:26px;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-teal);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;line-height:1;}
+.size-btn{width:28px;height:28px;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-teal);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;line-height:1;-webkit-tap-highlight-color:transparent;}
 .size-btn:hover{border-color:var(--brand-teal);background:rgba(86,182,198,0.1);}
 .size-btn:active{transform:scale(0.95);}
 .size-btn:disabled{opacity:0.3;cursor:not-allowed;border-color:rgba(138,203,208,0.1);}
 .size-value{font-size:0.78rem;font-weight:700;color:var(--brand-light);min-width:24px;text-align:center;}
-.size-reset{padding:0.2rem 0.5rem;border-radius:5px;border:1px solid rgba(138,203,208,0.15);background:transparent;color:var(--text-secondary);font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.size-reset{padding:0.25rem 0.55rem;border-radius:5px;border:1px solid rgba(138,203,208,0.15);background:transparent;color:var(--text-secondary);font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;min-height:28px;}
 .size-reset:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
 
 /* Select List */
 .select-list-wrap{position:relative;display:inline-block;}
-.select-list-btn{display:flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.select-list-btn{display:flex;align-items:center;gap:0.4rem;padding:0.38rem 0.75rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;min-height:34px;-webkit-tap-highlight-color:transparent;}
 .select-list-btn:hover{border-color:var(--brand-teal);}
 .select-list-btn .list-name{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .select-list-dropdown{position:absolute;top:100%;left:0;margin-top:0.35rem;width:320px;max-height:420px;overflow-y:auto;background:rgba(15,10,60,0.98);border:1px solid rgba(138,203,208,0.2);border-radius:10px;padding:0.5rem;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:none;backdrop-filter:blur(12px);}
@@ -127,7 +127,7 @@
 
 /* Key Statistics */
 .keystat-bar{display:flex;gap:0.25rem;flex-wrap:wrap;margin-bottom:0.5rem;}
-.keystat-btn{padding:0.25rem 0.55rem;border-radius:5px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;color:var(--text-secondary);}
+.keystat-btn{padding:0.3rem 0.6rem;border-radius:5px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;color:var(--text-secondary);-webkit-tap-highlight-color:transparent;min-height:30px;}
 .keystat-btn:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
 .keystat-btn.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
 
@@ -139,18 +139,18 @@
 .adv-panel{display:none;border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;background:rgba(15,10,60,0.5);}
 .adv-panel.open{display:block;}
 .adv-strat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-bottom:0.75rem;}
-.adv-strat-card{padding:0.5rem;border-radius:6px;border:1px solid rgba(138,203,208,0.1);cursor:pointer;transition:all 0.15s;text-align:center;}
+.adv-strat-card{padding:0.55rem;border-radius:6px;border:1px solid rgba(138,203,208,0.1);cursor:pointer;transition:all 0.15s;text-align:center;-webkit-tap-highlight-color:transparent;}
 .adv-strat-card:hover{border-color:var(--brand-teal);}
 .adv-strat-card.selected{border-color:var(--brand-teal);background:rgba(86,182,198,0.08);}
 .adv-strat-card .emoji{font-size:1.1rem;}
 .adv-strat-card .label{font-size:0.68rem;font-weight:700;color:var(--brand-light);margin-top:0.15rem;}
 .adv-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;}
-.adv-metric-btn{padding:0.3rem 0.4rem;border-radius:4px;border:1px solid rgba(138,203,208,0.08);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.12s;font-family:'Outfit',sans-serif;color:var(--text-secondary);text-align:left;display:flex;align-items:center;gap:0.3rem;}
+.adv-metric-btn{padding:0.35rem 0.45rem;border-radius:4px;border:1px solid rgba(138,203,208,0.08);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.12s;font-family:'Outfit',sans-serif;color:var(--text-secondary);text-align:left;display:flex;align-items:center;gap:0.3rem;-webkit-tap-highlight-color:transparent;min-height:32px;}
 .adv-metric-btn:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
 .adv-metric-btn.active{background:rgba(86,182,198,0.1);border-color:var(--brand-teal);color:var(--brand-teal);}
 .adv-metric-emoji{font-size:0.75rem;}
 .adv-benchmark-row{display:flex;align-items:center;gap:0.4rem;margin-top:0.5rem;}
-.adv-bench-toggle{padding:0.2rem 0.5rem;border-radius:4px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all 0.12s;font-family:'Outfit',sans-serif;}
+.adv-bench-toggle{padding:0.3rem 0.6rem;border-radius:4px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all 0.12s;font-family:'Outfit',sans-serif;-webkit-tap-highlight-color:transparent;min-height:32px;}
 .adv-bench-toggle:hover{border-color:var(--brand-teal);}
 .adv-bench-toggle.active{background:rgba(86,182,198,0.1);border-color:var(--brand-teal);color:var(--brand-teal);}
 
@@ -161,7 +161,8 @@
 .radar-table{font-size:0.72rem;}
 .radar-table th,.radar-table td{padding:0.4rem 0.3rem;}
 .company-name{max-width:70px;}
-.radar-search input{width:150px;}
+.radar-search input{width:100%;min-width:0;}
+.radar-search{width:100%;order:1;}
 .insight-metas{gap:0.6rem;}
 .insight-body{font-size:0.7rem;}
 .keystat-bar{gap:0.2rem;}
@@ -173,24 +174,39 @@
 .adv-metric-grid{grid-template-columns:repeat(3,1fr);gap:0.25rem;}
 .adv-metric-btn{font-size:0.6rem;padding:0.25rem 0.3rem;}
 .select-list-dropdown{width:280px;max-height:350px;}
-.radar-controls{flex-wrap:wrap;gap:0.3rem;}
+.radar-controls{flex-wrap:wrap;gap:0.4rem;justify-content:space-between;}
+.radar-controls>*{min-width:0;}
 .size-controls{flex-wrap:nowrap;}
+.market-toggle{flex-shrink:0;}
+.select-list-wrap{flex:1;min-width:0;}
+.select-list-btn{width:100%;}
+.select-list-btn .list-name{max-width:120px;}
 }
 @media(max-width:480px){
 .radar-hero h1{font-size:1rem;}
 .radar-page{padding:0 0.25rem;}
-.stab{padding:0.25rem 0.5rem;font-size:0.66rem;}
+.stab{padding:0.3rem 0.55rem;font-size:0.66rem;}
 .insight-card{padding:0.7rem 0.8rem;}
 .insight-icon{width:30px;height:30px;font-size:0.9rem;}
 .insight-title{font-size:0.82rem;}
 .insight-metas{flex-direction:column;gap:0.3rem;}
-.keystat-btn{font-size:0.58rem;padding:0.2rem 0.35rem;}
+.keystat-bar{gap:0.15rem;}
+.keystat-btn{font-size:0.55rem;padding:0.2rem 0.35rem;}
 .adv-strat-grid{grid-template-columns:repeat(2,1fr);}
 .adv-metric-grid{grid-template-columns:repeat(2,1fr);}
 .select-list-dropdown{width:calc(100vw - 1rem);left:-0.25rem;}
-.select-list-btn .list-name{max-width:100px;}
-.radar-search input{width:120px;}
-.radar-controls{flex-wrap:wrap;}
+.select-list-btn .list-name{max-width:90px;}
+.radar-search input{width:100%;font-size:0.78rem;}
+.radar-search{width:100%;}
+.radar-controls{flex-direction:column;align-items:stretch;gap:0.4rem;}
+.radar-controls>*{width:100%;}
+.size-controls{width:auto;align-self:center;flex-wrap:nowrap;}
+.market-toggle button{padding:0.35rem 0.75rem;font-size:0.72rem;min-height:36px;}
+.select-list-btn{min-height:38px;}
+.size-btn{width:32px;height:32px;font-size:0.9rem;}
+.size-reset{padding:0.3rem 0.65rem;font-size:0.72rem;min-height:32px;}
+.score-pill{min-width:24px;padding:0.08rem 0.3rem;font-size:0.65rem;}
+.adv-bench-toggle{padding:0.3rem 0.6rem;font-size:0.72rem;min-height:32px;}
 }
 </style>
 
@@ -200,13 +216,13 @@
     <p>Screen & rank stocks across 5 scoring strategies. Click a strategy to understand the methodology.</p>
   </div>
 
-  <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;flex-wrap:wrap;">
+  <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;flex-wrap:wrap;min-width:0;">
     <div class="market-toggle">
       <button class="market-btn active" data-market="US">US</button>
       <button class="market-btn" data-market="ID">ID</button>
     </div>
     <div class="select-list-wrap">
-      <button class="select-list-btn" id="select-list-btn">
+      <button class="select-list-btn" id="select-list-btn" style="width:100%;">
         <span>&#9776;</span>
         <span class="list-name" id="list-name-display">S&P 500</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -303,7 +319,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
       <input type="text" id="radar-search" placeholder="Search ticker or name...">
     </div>
-    <div style="font-size:0.68rem;color:var(--text-secondary);">Showing <span id="stock-count">0</span> / <span id="total-count">0</span> stocks</div>
+    <div style="font-size:0.68rem;color:var(--text-secondary);white-space:nowrap;">Showing <span id="stock-count">0</span> / <span id="total-count">0</span></div>
     <div class="size-controls">
       <button class="size-btn" id="size-minus" title="Fewer stocks">&minus;</button>
       <span class="size-value" id="size-display">25</span>
