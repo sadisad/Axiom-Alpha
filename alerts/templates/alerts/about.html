@@ -29,7 +29,15 @@
 .ab-step h4{font-size:1rem;font-weight:700;color:var(--brand-light);margin-bottom:0.4rem;}
 .ab-step p{font-size:0.82rem;color:var(--text-secondary);}
 .ab-cta{text-align:center;padding:4rem 2rem;background:rgba(15,10,60,0.5);border:1px solid rgba(138,203,208,0.1);border-radius:18px;margin:2rem 0;}
-@media(max-width:768px){.ab-grid,.ab-steps{grid-template-columns:1fr;}.ab-hero h1{font-size:2.2rem;}}
+.pricing-card{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1.75rem;position:relative;transition:all 0.3s;}
+.pricing-card:hover{border-color:rgba(138,203,208,0.3);transform:translateY(-2px);}
+.pricing-featured{border-color:var(--brand-teal);box-shadow:0 0 30px rgba(86,182,198,0.1);}
+.pricing-badge{position:absolute;top:-12px;right:16px;background:linear-gradient(135deg,#ffc800,#f59e0b);color:#0d0645;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.7rem;font-weight:800;letter-spacing:0.5px;}
+.pricing-features{list-style:none;padding:0;margin:0;}
+.pricing-features li{padding:0.45rem 0;font-size:0.85rem;color:var(--text-secondary);border-bottom:1px solid rgba(138,203,208,0.06);display:flex;align-items:center;gap:0.5rem;}
+.pricing-features li::before{content:'';display:inline-block;width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;background-size:contain;flex-shrink:0;}
+.pricing-features li:last-child{border-bottom:none;}
+@media(max-width:768px){.ab-grid,.ab-steps{grid-template-columns:1fr;}.ab-hero h1{font-size:2.2rem;}.pricing-grid{grid-template-columns:1fr !important;}}
 @media(max-width:480px){.ab-hero{padding:2rem 1rem;}.ab-hero h1{font-size:1.6rem;}.ab-hero p{font-size:0.95rem;}.ab-cta{padding:2rem 1rem;}.ab-cta h2{font-size:1.4rem;}.ab-btn{padding:0.7rem 1.5rem;font-size:0.9rem;}}
 </style>
 
@@ -119,6 +127,60 @@
       <div class="ab-step-num">4</div>
       <h4>Track</h4>
       <p>Add to your watchlist and portfolio. Monitor your positions with real-time data.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing -->
+<div class="ab-section" id="pricing">
+  <div class="ab-section-title">Pricing</div>
+  <h2>Choose your plan</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1000px;margin:0 auto;">
+    <!-- Basic -->
+    <div class="pricing-card">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-secondary);margin-bottom:0.5rem;">Basic</div>
+      <div style="font-size:2.2rem;font-weight:800;color:var(--brand-light);">Free</div>
+      <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1.5rem;">Explore Axiom Alpha for free</div>
+      <ul class="pricing-features">
+        <li>5 free reports to try</li>
+        <li>Heatmap</li>
+        <li>Radar</li>
+        <li>Watchlist (1 watchlist, 10 stocks)</li>
+      </ul>
+      <a href="{% url 'register' %}" class="ab-btn ab-btn-outline" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:0.85rem;">Get Started</a>
+    </div>
+    <!-- Premium Annual -->
+    <div class="pricing-card pricing-featured">
+      <div class="pricing-badge">Save 28%</div>
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--brand-teal);margin-bottom:0.5rem;">Premium Annual</div>
+      <div style="font-size:2.2rem;font-weight:800;color:var(--brand-light);">$20.75<span style="font-size:0.9rem;font-weight:400;color:var(--text-secondary);">/mo</span></div>
+      <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1.5rem;">Billed annually ($249/yr)</div>
+      <ul class="pricing-features">
+        <li>Unlimited reports</li>
+        <li>Deep Fundamental Screener (DCF + Relative)</li>
+        <li>Heatmap + Radar</li>
+        <li>Unlimited watchlists & stocks</li>
+        <li>Stock Comparison</li>
+        <li>Headlines & Alerts</li>
+        <li>Trending Portfolios</li>
+      </ul>
+      <a href="#" class="ab-btn ab-btn-primary" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:0.85rem;">Upgrade to Premium</a>
+    </div>
+    <!-- Premium Monthly -->
+    <div class="pricing-card">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-secondary);margin-bottom:0.5rem;">Premium Monthly</div>
+      <div style="font-size:2.2rem;font-weight:800;color:var(--brand-light);">$29<span style="font-size:0.9rem;font-weight:400;color:var(--text-secondary);">/mo</span></div>
+      <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1.5rem;">Billed monthly</div>
+      <ul class="pricing-features">
+        <li>Unlimited reports</li>
+        <li>Deep Fundamental Screener (DCF + Relative)</li>
+        <li>Heatmap + Radar</li>
+        <li>Unlimited watchlists & stocks</li>
+        <li>Stock Comparison</li>
+        <li>Headlines & Alerts</li>
+        <li>Trending Portfolios</li>
+      </ul>
+      <a href="#" class="ab-btn ab-btn-outline" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:0.85rem;">Start Monthly</a>
     </div>
   </div>
 </div>

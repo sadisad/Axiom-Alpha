@@ -28,6 +28,23 @@ class SearchHistory(models.Model):
         return f"{self.user.username} - {self.symbol}"
 
 
+class UserProfile(models.Model):
+    PLAN_CHOICES = [
+        ('basic', 'Basic'),
+        ('premium_annual', 'Premium Annual'),
+        ('premium_monthly', 'Premium Monthly'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='basic')
+
+    @property
+    def is_premium(self):
+        return self.plan in ('premium_annual', 'premium_monthly')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_plan_display()}"
+
+
 class PortfolioItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='portfolio_items')
     symbol = models.CharField(max_length=20)

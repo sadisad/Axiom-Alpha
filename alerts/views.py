@@ -167,7 +167,7 @@ def radar(request):
 
 def radar_scores(request):
     market = request.GET.get('market', 'US')
-    symbols = SP500_SYMBOLS[:30] if market == 'US' else IDX_SYMBOLS
+    symbols = SP500_SYMBOLS[:100] if market == 'US' else IDX_SYMBOLS
     try:
         scores = get_market_scores(symbols, market)
         return JsonResponse({'stocks': scores, 'market': market})

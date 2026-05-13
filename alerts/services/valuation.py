@@ -175,7 +175,7 @@ def get_fundamental_analysis(ticker_symbol):
             "Employees": format_large_number(info.get('fullTimeEmployees'))
         }
         
-        upgrades = ticker.upgrades_downgrades
+        upgrades = yf.Ticker(ticker_symbol).upgrades_downgrades
         if upgrades is not None and not upgrades.empty:
             upgrades = upgrades.sort_index(ascending=False).head(15)
             upgrades_list = []

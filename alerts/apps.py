@@ -7,6 +7,7 @@ class AlertsConfig(AppConfig):
 
     def ready(self):
         import django.contrib.auth
+        from alerts import signals  # noqa: F401
 
         def _patched_get_user_session_key(request):
             from django.contrib.auth import SESSION_KEY

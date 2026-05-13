@@ -1,74 +1,89 @@
 {% extends 'alerts/base.html' %}
 {% block content %}
 <style>
-.hub { display:flex; flex-direction:column; gap:1.5rem; }
-.hub-row { display:grid; gap:1.5rem; }
-.panel { background:rgba(15,10,60,0.7); border:1px solid rgba(138,203,208,0.15); border-radius:14px; padding:1.25rem; }
-.panel-title { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:1rem; }
+.hub { display:flex; flex-direction:column; gap:0.6rem; }
+.hub-row { display:grid; gap:0.6rem; }
+.panel { background:rgba(15,10,60,0.7); border:1px solid rgba(138,203,208,0.12); border-radius:10px; padding:0.85rem 1rem; }
+.panel-title { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.6rem; }
 
 /* Gauge */
-.gauge-row { display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap; }
+.gauge-row { display:flex; gap:0.6rem; align-items:center; justify-content:space-around; }
 .gauge { text-align:center; }
 .gauge svg { display:block; margin:0 auto; }
-.gauge-val { font-size:1.4rem; font-weight:800; margin-top:-4px; }
-.gauge-lbl { font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; }
-.stat-pill { text-align:center; padding:0.4rem 0.8rem; }
-.stat-pill .val { font-size:1.1rem; font-weight:800; color:var(--brand-light); }
-.stat-pill .lbl { font-size:0.68rem; color:var(--text-secondary); text-transform:uppercase; }
+.gauge-val { font-size:1.15rem; font-weight:800; margin-top:-2px; }
+.gauge-lbl { font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; }
+.stat-pill { text-align:center; padding:0.25rem 0.5rem; }
+.stat-pill .val { font-size:0.95rem; font-weight:800; color:var(--brand-light); }
+.stat-pill .lbl { font-size:0.58rem; color:var(--text-secondary); text-transform:uppercase; }
+.stats-row { display:flex; gap:0.25rem; justify-content:space-around; flex-wrap:wrap; }
 
 /* Strategy cards */
-.strategy-cards { display:flex; gap:1rem; overflow-x:auto; padding-bottom:0.5rem; scrollbar-width:thin; }
-.strategy-cards::-webkit-scrollbar { height:4px; }
+.strategy-cards { display:flex; gap:0.6rem; overflow-x:auto; padding-bottom:0.25rem; scrollbar-width:thin; }
+.strategy-cards::-webkit-scrollbar { height:3px; }
 .strategy-cards::-webkit-scrollbar-track { background:transparent; }
 .strategy-cards::-webkit-scrollbar-thumb { background:var(--brand-teal); border-radius:2px; }
-.scard { min-width:220px; background:rgba(23,12,121,0.5); border:1px solid rgba(138,203,208,0.2); border-radius:12px; padding:1rem; flex-shrink:0; transition:all 0.2s; cursor:pointer; }
-.scard:hover { border-color:var(--brand-teal); transform:translateY(-2px); }
-.scard-badge { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.68rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:4px; margin-bottom:0.75rem; }
-.scard-score { float:right; font-size:0.75rem; color:var(--text-secondary); }
-.scard-name { font-size:1.05rem; font-weight:800; color:var(--brand-light); margin-bottom:0.2rem; }
-.scard-ticker { font-size:0.78rem; color:var(--text-secondary); }
-.scard-metrics { display:flex; gap:0.75rem; margin-top:0.75rem; font-size:0.75rem; }
+.scard { min-width:180px; background:rgba(23,12,121,0.4); border:1px solid rgba(138,203,208,0.15); border-radius:8px; padding:0.7rem 0.85rem; flex-shrink:0; transition:all 0.2s; cursor:pointer; }
+.scard:hover { border-color:var(--brand-teal); transform:translateY(-1px); }
+.scard-badge { display:inline-flex; align-items:center; gap:0.25rem; font-size:0.6rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:3px; margin-bottom:0.4rem; }
+.scard-name { font-size:0.92rem; font-weight:800; color:var(--brand-light); margin-bottom:0.1rem; }
+.scard-ticker { font-size:0.7rem; color:var(--text-secondary); }
+.scard-metrics { display:flex; gap:0.5rem; margin-top:0.5rem; font-size:0.68rem; }
 .scard-metrics span { color:var(--success); font-weight:600; }
 .scard-metrics span.neg { color:var(--danger); }
 
 /* Returns table */
-.returns-tabs { display:flex; gap:0.4rem; margin-bottom:1rem; }
-.rtab { padding:0.3rem 0.7rem; border-radius:6px; font-size:0.78rem; font-weight:700; cursor:pointer; border:1px solid rgba(138,203,208,0.2); color:var(--text-secondary); background:transparent; transition:all 0.2s; }
+.returns-tabs { display:flex; gap:0.3rem; }
+.rtab { padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem; font-weight:700; cursor:pointer; border:1px solid rgba(138,203,208,0.15); color:var(--text-secondary); background:transparent; transition:all 0.15s; }
 .rtab.active { background:var(--brand-teal); color:#0d0645; border-color:var(--brand-teal); }
-.returns-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.ret-col-title { font-size:0.7rem; font-weight:700; padding:0.4rem 0.6rem; border-radius:5px; margin-bottom:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; }
-.ret-item { display:grid; grid-template-columns:1fr 1fr 1fr; align-items:center; padding:0.45rem 0.5rem; border-radius:6px; font-size:0.82rem; transition:background 0.15s; }
-.ret-item:hover { background:rgba(86,182,198,0.07); }
-.ret-sym { font-weight:700; color:var(--brand-light); }
-.ret-name { color:var(--text-secondary); font-size:0.74rem; }
-.ret-pct { font-weight:800; text-align:right; }
+.returns-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
+.ret-col-title { font-size:0.62rem; font-weight:700; padding:0.25rem 0.45rem; border-radius:4px; margin-bottom:0.35rem; display:inline-flex; align-items:center; gap:0.3rem; }
+.ret-item { display:grid; grid-template-columns:1fr auto; align-items:center; padding:0.3rem 0.35rem; border-radius:4px; font-size:0.78rem; transition:background 0.12s; }
+.ret-item:hover { background:rgba(86,182,198,0.06); }
+.ret-sym { font-weight:700; color:var(--brand-light); font-size:0.78rem; }
+.ret-name { color:var(--text-secondary); font-size:0.64rem; }
+.ret-pct { font-weight:800; text-align:right; font-size:0.78rem; }
 .pos { color:var(--success); }
 .neg { color:var(--danger); }
 
 /* Score movers */
-.mover-item { display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.75rem; border-radius:8px; margin-bottom:0.4rem; transition:background 0.15s; }
-.mover-item:hover { background:rgba(86,182,198,0.07); }
-.mover-name { font-weight:700; color:var(--brand-light); font-size:0.88rem; }
-.mover-score { font-size:0.72rem; color:var(--text-secondary); }
-.mover-delta { font-weight:800; font-size:1rem; }
+.mover-item { display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.5rem; border-radius:6px; transition:background 0.12s; }
+.mover-item:hover { background:rgba(86,182,198,0.06); }
+.mover-name { font-weight:700; color:var(--brand-light); font-size:0.82rem; }
+.mover-score { font-size:0.64rem; color:var(--text-secondary); }
+.mover-delta { font-weight:800; font-size:0.85rem; }
 
 /* Watchlist table */
-.wl-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-.wl-table th { text-align:left; padding:0.5rem 0.75rem; color:var(--text-secondary); font-size:0.7rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid rgba(138,203,208,0.1); }
-.wl-table td { padding:0.65rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.03); }
-.wl-table tr:hover td { background:rgba(86,182,198,0.05); }
+.wl-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.wl-table th { text-align:left; padding:0.4rem 0.5rem; color:var(--text-secondary); font-size:0.62rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid rgba(138,203,208,0.1); }
+.wl-table td { padding:0.5rem 0.5rem; border-bottom:1px solid rgba(255,255,255,0.03); }
 
 /* Universe dropdown */
-.um-item { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 0.75rem; font-size:0.82rem; color:var(--text-secondary); text-decoration:none; transition:all 0.12s; }
-.um-item:hover { background:rgba(86,182,198,0.1); color:var(--brand-light); }
-.um-count { margin-left:auto; font-size:0.72rem; color:#555; }
+.um-item { display:flex; align-items:center; gap:0.35rem; padding:0.3rem 0.6rem; font-size:0.76rem; color:var(--text-secondary); text-decoration:none; transition:all 0.1s; }
+.um-item:hover { background:rgba(86,182,198,0.08); color:var(--brand-light); }
+.um-count { margin-left:auto; font-size:0.64rem; color:#555; }
+
+/* Section header */
+.sec-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.35rem; }
+
+/* Compact top rated */
+.tr-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+.tr-table th { padding:0.4rem 0.4rem; text-align:left; color:var(--text-secondary); font-size:0.62rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid rgba(138,203,208,0.1); }
+.tr-table th:not(:first-child):not(:nth-child(2)):not(:nth-child(3)) { text-align:center; }
+.tr-table td { padding:0.45rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.025); }
+.tr-badge { padding:0.1rem 0.4rem; border-radius:3px; font-weight:700; font-size:0.72rem; }
+
+/* Hide TradingView branding */
+.tv-overlay { position:absolute; bottom:0; left:0; right:0; height:36px; background:linear-gradient(transparent, #0d0645 70%); z-index:10; pointer-events:none; }
+iframe[src*="tradingview"] { margin-bottom: -32px; }
 
 @media(max-width:768px){
   .hub-row { grid-template-columns:1fr !important; }
   .returns-grid { grid-template-columns:1fr; }
-  .gauge-row { gap:1rem; }
-  .wl-table th,.wl-table td { padding:0.4rem 0.35rem; font-size:0.75rem; }
-  .scard { min-width:180px; }
+  .gauge-row { gap:0.5rem; }
+  .stat-pill .val { font-size:0.85rem; }
+  .scard { min-width:155px; padding:0.6rem 0.7rem; }
+  .tr-table { font-size:0.72rem; }
+  .tr-table th,.tr-table td { padding:0.35rem 0.25rem; }
   .ret-item { grid-template-columns:1fr auto; }
   .ret-name { display:none; }
   #trending-portfolios-grid,
@@ -78,122 +93,133 @@
 }
 @media(max-width:480px){
   .gauge-row { flex-wrap:wrap; justify-content:center; }
-  .gauge svg { width:60px; height:38px; }
-  .gauge-val { font-size:1.1rem; }
+  .gauge svg { width:50px; height:32px; }
+  .gauge-val { font-size:0.95rem; }
+  .scard { min-width:140px; }
 }
 </style>
 
 <div class="hub">
 
-  <!-- Row 1: Hub Header -->
-  <div class="panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-      <div>
-        <h1 style="font-size:1.6rem; font-weight:800; color:var(--brand-light); margin:0;">Axiom Alpha Terminal</h1>
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 2: Market Scores with Universe Dropdown -->
-  <div class="panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-      <div style="display:flex; align-items:center; gap:0.75rem;">
-        <div class="panel-title" style="margin:0;">📊 Market Scores</div>
-        <div style="position:relative;" id="universe-dropdown">
-          <button onclick="toggleUniverse()" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.3rem 0.75rem; border-radius:6px; border:1px solid rgba(138,203,208,0.25); background:rgba(23,12,121,0.6); color:var(--brand-light); font-size:0.78rem; font-weight:700; cursor:pointer; font-family:'Outfit',sans-serif;">
-            <span id="universe-label">S&P 500</span>
-            <i data-lucide="chevron-down" style="width:12px;height:12px;"></i>
-          </button>
-          <div id="universe-menu" style="display:none; position:absolute; top:100%; left:0; margin-top:4px; width:280px; max-height:400px; overflow-y:auto; background:rgba(15,10,60,0.98); border:1px solid rgba(138,203,208,0.2); border-radius:10px; padding:0.5rem 0; z-index:200; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.25rem;">Trending</div>
-            <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="um-item">💾 Semiconductors <span class="um-count">102</span></a>
-            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">🖥️ Technology Hardware <span class="um-count">147</span></a>
-            <a href="{% url 'screener' %}?symbol=QCOM&market=US" class="um-item">📡 Communications Equipment <span class="um-count">25</span></a>
-            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">📟 Electronic Equipment <span class="um-count">85</span></a>
-            <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">⭐ Magnificent 7 <span class="um-count">7</span></a>
-            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Lists</div>
-            <a href="{% url 'screener' %}?symbol=MSFT&market=US" class="um-item">📈 US Mid Caps <span class="um-count">1,000</span></a>
-            <a href="#" class="um-item">🌏 Asia Large Cap <span class="um-count">502</span></a>
-            <a href="#" class="um-item">🌐 Developed Markets Large Cap <span class="um-count">502</span></a>
-            <a href="#" class="um-item">🌍 Emerging Markets Large Cap <span class="um-count">502</span></a>
-            <a href="{% url 'screener' %}?symbol=SPY&market=US" class="um-item">🇺🇸 S&P 500 <span class="um-count">500</span></a>
-            <a href="#" class="um-item">🌍 Global Large Cap <span class="um-count">500</span></a>
-            <a href="#" class="um-item">🇪🇺 Europe Large Cap <span class="um-count">500</span></a>
-            <a href="#" class="um-item">🌎 World Large Cap (ex USA) <span class="um-count">500</span></a>
-            <a href="{% url 'portfolios' %}" class="um-item">📊 All Portfolios <span class="um-count">233</span></a>
-            <a href="#" class="um-item">💰 US Dividend Aristocrats <span class="um-count">123</span></a>
-            <a href="#" class="um-item">🇺🇸 USA Mega Cap <span class="um-count">100</span></a>
-            <a href="#" class="um-item">💻 NASDAQ 100 <span class="um-count">99</span></a>
-            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Countries</div>
-            <a href="#" class="um-item">🇺🇸 United States <span class="um-count">2,013</span></a>
-            <a href="#" class="um-item">🇨🇳 China <span class="um-count">332</span></a>
-            <a href="#" class="um-item">🇯🇵 Japan <span class="um-count">160</span></a>
-            <a href="#" class="um-item">🇩🇪 Germany <span class="um-count">142</span></a>
-            <a href="#" class="um-item">🇮🇳 India <span class="um-count">141</span></a>
-            <a href="#" class="um-item">🇬🇧 United Kingdom <span class="um-count">136</span></a>
-            <a href="#" class="um-item">🇫🇷 France <span class="um-count">88</span></a>
-            <a href="#" class="um-item">🇨🇦 Canada <span class="um-count">86</span></a>
-            <a href="#" class="um-item">🇨🇭 Switzerland <span class="um-count">82</span></a>
-            <a href="#" class="um-item">🇹🇼 Taiwan <span class="um-count">63</span></a>
-            <a href="#" class="um-item">🇮🇩 Indonesia <span class="um-count">17</span></a>
-            <div style="padding:0.35rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.5rem;">Sectors</div>
-            <a href="#" class="um-item">💰 Financials <span class="um-count">731</span></a>
-            <a href="#" class="um-item">⚙️ Industrials <span class="um-count">676</span></a>
-            <a href="#" class="um-item">💻 Technology <span class="um-count">673</span></a>
-            <a href="#" class="um-item">🛒 Consumer <span class="um-count">608</span></a>
-            <a href="#" class="um-item">🏥 Healthcare <span class="um-count">427</span></a>
-            <a href="#" class="um-item">⛏️ Materials <span class="um-count">250</span></a>
-            <a href="#" class="um-item">🏠 Real Estate <span class="um-count">167</span></a>
-            <a href="#" class="um-item">⚡ Utilities <span class="um-count">164</span></a>
+  <!-- Row 1: Market Scores + Strategy Picks -->
+  <div class="hub-row" style="grid-template-columns:1fr 1fr;">
+    <div class="panel">
+      <div class="sec-head">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="panel-title" style="margin:0;">📊 MARKET SCORES</div>
+          <div style="position:relative;" id="universe-dropdown">
+            <button onclick="toggleUniverse()" style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.2rem 0.55rem; border-radius:5px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.5); color:var(--brand-light); font-size:0.7rem; font-weight:700; cursor:pointer; font-family:'Outfit',sans-serif;">
+              <span id="universe-label">S&P 500</span>
+              <i data-lucide="chevron-down" style="width:10px;height:10px;"></i>
+            </button>
+            <div id="universe-menu" style="display:none; position:absolute; top:100%; left:0; margin-top:3px; width:260px; max-height:360px; overflow-y:auto; background:rgba(15,10,60,0.98); border:1px solid rgba(138,203,208,0.2); border-radius:8px; padding:0.35rem 0; z-index:200; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
+              <div style="padding:0.25rem 0.6rem; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary);">Trending</div>
+              <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="um-item">💾 Semiconductors <span class="um-count">102</span></a>
+              <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">🖥️ Tech Hardware <span class="um-count">147</span></a>
+              <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">⭐ Magnificent 7 <span class="um-count">7</span></a>
+              <div style="padding:0.25rem 0.6rem; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.25rem;">Markets</div>
+              <a href="{% url 'screener' %}?symbol=SPY&market=US" class="um-item">🇺🇸 S&P 500 <span class="um-count">500</span></a>
+              <a href="{% url 'screener' %}?symbol=MSFT&market=US" class="um-item">📈 US Mid Caps <span class="um-count">1,000</span></a>
+              <a href="#" class="um-item">🌏 Asia Large Cap <span class="um-count">502</span></a>
+              <a href="#" class="um-item">🌍 Global Large Cap <span class="um-count">500</span></a>
+              <a href="#" class="um-item">🇪🇺 Europe Large Cap <span class="um-count">500</span></a>
+              <a href="#" class="um-item">💻 NASDAQ 100 <span class="um-count">99</span></a>
+              <div style="padding:0.25rem 0.6rem; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-top:0.25rem;">Sectors</div>
+              <a href="#" class="um-item">💰 Financials <span class="um-count">731</span></a>
+              <a href="#" class="um-item">⚙️ Industrials <span class="um-count">676</span></a>
+              <a href="#" class="um-item">💻 Technology <span class="um-count">673</span></a>
+              <a href="#" class="um-item">🏥 Healthcare <span class="um-count">427</span></a>
+              <a href="#" class="um-item">⚡ Energy <span class="um-count">250</span></a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="gauge-row">
-      {% for g in gauges %}
-      <div class="gauge">
-        <svg width="80" height="50" viewBox="0 0 80 50">
-          <path d="M8,46 A34,34 0 0,1 72,46" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8" stroke-linecap="round"/>
-          <path d="M8,46 A34,34 0 0,1 72,46" fill="none" stroke="{{ g.color }}" stroke-width="8" stroke-linecap="round"
-            stroke-dasharray="{{ g.dash }} 107" />
-        </svg>
-        <div class="gauge-val" style="color:{{ g.color }};">{{ g.value }}</div>
-        <div class="gauge-lbl">{{ g.label }}</div>
+      <div class="gauge-row">
+        {% for g in gauges %}
+        <div class="gauge">
+          <svg width="64" height="40" viewBox="0 0 80 50">
+            <path d="M8,46 A34,34 0 0,1 72,46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M8,46 A34,34 0 0,1 72,46" fill="none" stroke="{{ g.color }}" stroke-width="8" stroke-linecap="round" stroke-dasharray="{{ g.dash }} 107" />
+          </svg>
+          <div class="gauge-val" style="color:{{ g.color }};">{{ g.value }}</div>
+          <div class="gauge-lbl">{{ g.label }}</div>
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-      <div style="width:1px; height:60px; background:rgba(138,203,208,0.15); margin:0 0.5rem;"></div>
-      {% for st in key_stats %}
-      <div class="stat-pill">
-        <div class="val">{{ st.value }}</div>
-        <div class="lbl">{{ st.label }}</div>
+      <div style="width:100%;height:1px;background:rgba(138,203,208,0.08);margin:0.5rem 0;"></div>
+      <div class="stats-row">
+        {% for st in key_stats %}
+        <div class="stat-pill">
+          <div class="val">{{ st.value }}</div>
+          <div class="lbl">{{ st.label }}</div>
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
-  </div>
 
-  <!-- Row 3: Strategy Picks + Watchlist -->
-  <div class="hub-row" style="grid-template-columns:1fr;">
-
-    <!-- Strategy picks -->
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-        <div class="panel-title" style="margin:0;">⚡ Strategy Picks</div>
-        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">⚡ STRATEGY PICKS</div>
+        <div style="display:flex; gap:0.25rem; flex-wrap:wrap;">
           <span class="rtab active" onclick="filterStrategy('compounders',this)">Compounders</span>
           <span class="rtab" onclick="filterStrategy('hypergrowth',this)">Hypergrowth</span>
-          <span class="rtab" onclick="filterStrategy('value',this)">Value Hunter</span>
+          <span class="rtab" onclick="filterStrategy('value',this)">Value</span>
           <span class="rtab" onclick="filterStrategy('momentum',this)">Momentum</span>
         </div>
       </div>
-      <div class="strategy-cards" id="strategy-cards">
+      <div class="strategy-cards" id="strategy-cards"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Top Rated + Watchlist side by side -->
+  <div class="hub-row" style="grid-template-columns:2fr 1fr;">
+    <div class="panel">
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">🏆 TOP RATED — USA MEGA CAP</div>
+        <a href="{% url 'radar' %}" style="font-size:0.68rem; color:var(--brand-teal); text-decoration:none; border:1px solid rgba(138,203,208,0.15); padding:0.2rem 0.6rem; border-radius:4px;">
+          <i data-lucide="radar" style="width:10px;height:10px;"></i> Radar
+        </a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tr-table">
+          <thead>
+            <tr style="border-bottom:1px solid rgba(138,203,208,0.1);">
+              <th>#</th>
+              <th>Ticker</th>
+              <th>Name</th>
+              <th style="text-align:right;">MCap</th>
+              <th style="text-align:center;">Growth</th>
+              <th style="text-align:center;">Quality</th>
+              <th style="text-align:center;">Value</th>
+              <th style="text-align:center;">Mom.</th>
+              <th style="text-align:center;">Risk</th>
+              <th style="text-align:center;">Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stock in top_rated %}
+            <tr style="cursor:pointer; transition:background 0.12s;" onmouseover="this.style.background='rgba(86,182,198,0.05)'" onmouseout="this.style.background='transparent'" onclick="location.href='{% url 'screener' %}?symbol={{ stock.ticker }}&market=US'">
+              <td style="color:var(--text-secondary); font-weight:600; font-size:0.72rem;">{{ forloop.counter }}</td>
+              <td style="font-weight:800; color:var(--brand-light);">🇺🇸 {{ stock.ticker }}</td>
+              <td style="color:var(--text-secondary); font-size:0.72rem;">{{ stock.name }}</td>
+              <td style="text-align:right; color:var(--brand-light); font-weight:600; font-size:0.72rem;">{{ stock.mcap }}</td>
+              <td style="text-align:center;"><span class="tr-badge" style="background:{{ stock.growth_bg }};color:{{ stock.growth_fg }};">{{ stock.growth }}</span></td>
+              <td style="text-align:center;"><span class="tr-badge" style="background:{{ stock.quality_bg }};color:{{ stock.quality_fg }};">{{ stock.quality }}</span></td>
+              <td style="text-align:center;"><span class="tr-badge" style="background:{{ stock.value_bg }};color:{{ stock.value_fg }};">{{ stock.value }}</span></td>
+              <td style="text-align:center;"><span class="tr-badge" style="background:{{ stock.mom_bg }};color:{{ stock.mom_fg }};">{{ stock.mom }}</span></td>
+              <td style="text-align:center;"><span class="tr-badge" style="background:{{ stock.risk_bg }};color:{{ stock.risk_fg }};">{{ stock.risk }}</span></td>
+              <td style="text-align:center;"><span style="background:rgba(0,200,150,0.12); color:#00c896; padding:0.12rem 0.45rem; border-radius:4px; font-weight:800; font-size:0.78rem;">{{ stock.score }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Watchlist Panel -->
-    <div class="panel" style="max-height:400px;overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <div class="panel-title" style="margin:0;">⭐ Watchlist</div>
-        <span style="font-size:0.75rem; color:var(--text-secondary);">{{ watchlist_items|length }} stocks</span>
+    <div class="panel" style="max-height:340px; overflow-y:auto;">
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">⭐ WATCHLIST</div>
+        <span style="font-size:0.68rem; color:var(--text-secondary);">{{ watchlist_items|length }}</span>
       </div>
       {% if watchlist_items %}
         {% for item in watchlist_items %}
@@ -205,120 +231,70 @@
             </a>
           </div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:var(--brand-light);">{{ item.price }}</div>
+            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;">{{ item.price }}</div>
             <div class="mover-delta {% if item.is_positive %}pos{% else %}neg{% endif %}">{% if item.is_positive %}▲{% else %}▼{% endif %} {{ item.change }}%</div>
           </div>
         </div>
         {% endfor %}
       {% else %}
-        <div style="text-align:center; padding:2rem 0; color:var(--text-secondary);">
-          <i data-lucide="star" style="width:32px;height:32px;opacity:0.3;margin-bottom:0.5rem;"></i>
-          <p style="font-size:0.85rem;">Add stocks via Deep Screener</p>
+        <div style="text-align:center; padding:1.5rem 0; color:var(--text-secondary);">
+          <i data-lucide="star" style="width:24px;height:24px;opacity:0.3;"></i>
+          <p style="font-size:0.78rem; margin-top:0.3rem;">Add via Screener</p>
         </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Row 3b: Top Rated Table (Bastion-style) -->
-  <div class="panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-      <div class="panel-title" style="margin:0;">🏆 Top Rated — USA Mega Cap</div>
-      <a href="{% url 'radar' %}" style="font-size:0.75rem; color:var(--brand-teal); text-decoration:none; border:1px solid rgba(138,203,208,0.2); padding:0.3rem 0.8rem; border-radius:6px;">
-        <i data-lucide="radar" style="width:12px;height:12px;"></i> Radar →
-      </a>
-    </div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%; border-collapse:collapse; font-size:0.82rem; min-width:800px;">
-        <thead>
-          <tr style="border-bottom:1px solid rgba(138,203,208,0.12);">
-            <th style="padding:0.6rem 0.5rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">#</th>
-            <th style="padding:0.6rem 0.5rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Ticker</th>
-            <th style="padding:0.6rem 0.5rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Name</th>
-            <th style="padding:0.6rem 0.5rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">MCap (B)</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Growth</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Quality</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Value</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Mom.</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Risk</th>
-            <th style="padding:0.6rem 0.5rem; text-align:center; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for stock in top_rated %}
-          <tr style="border-bottom:1px solid rgba(255,255,255,0.03); cursor:pointer; transition:background 0.15s;" 
-              onmouseover="this.style.background='rgba(86,182,198,0.06)'" onmouseout="this.style.background='transparent'"
-              onclick="location.href='{% url 'screener' %}?symbol={{ stock.ticker }}&market=US'">
-            <td style="padding:0.65rem 0.5rem; color:var(--text-secondary); font-weight:600;">{{ forloop.counter }}</td>
-            <td style="padding:0.65rem 0.5rem; font-weight:800; color:var(--brand-light);">🇺🇸 {{ stock.ticker }}</td>
-            <td style="padding:0.65rem 0.5rem; color:var(--text-secondary);">{{ stock.name }}</td>
-            <td style="padding:0.65rem 0.5rem; text-align:right; color:var(--brand-light); font-weight:600;">{{ stock.mcap }}</td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:{{ stock.growth_bg }}; color:{{ stock.growth_fg }}; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.78rem;">{{ stock.growth }}</span></td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:{{ stock.quality_bg }}; color:{{ stock.quality_fg }}; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.78rem;">{{ stock.quality }}</span></td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:{{ stock.value_bg }}; color:{{ stock.value_fg }}; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.78rem;">{{ stock.value }}</span></td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:{{ stock.mom_bg }}; color:{{ stock.mom_fg }}; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.78rem;">{{ stock.mom }}</span></td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:{{ stock.risk_bg }}; color:{{ stock.risk_fg }}; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.78rem;">{{ stock.risk }}</span></td>
-            <td style="padding:0.65rem 0.5rem; text-align:center;"><span style="background:rgba(0,200,150,0.15); color:#00c896; padding:0.2rem 0.6rem; border-radius:6px; font-weight:800; font-size:0.85rem;">{{ stock.score }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Row 3c: Trending Portfolios -->
-  <div class="panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-      <div class="panel-title" style="margin:0;">📊 Trending Portfolios</div>
-      <div style="display:flex; gap:0.4rem;">
-        <span class="rtab active" onclick="activateTab(this)">Top</span>
-        <span class="rtab" onclick="activateTab(this)">USA</span>
-        <span class="rtab" onclick="activateTab(this)">Europe</span>
-        <span class="rtab" onclick="activateTab(this)">Global</span>
+  <!-- Row 3: Trending Portfolios + Returns -->
+  <div class="hub-row" style="grid-template-columns:1fr 1fr;">
+    <div class="panel">
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">📊 TRENDING PORTFOLIOS</div>
+        <div style="display:flex; gap:0.25rem;">
+          <span class="rtab active" onclick="activateTab(this)">Top</span>
+          <span class="rtab" onclick="activateTab(this)">USA</span>
+          <span class="rtab" onclick="activateTab(this)">Europe</span>
+          <span class="rtab" onclick="activateTab(this)">Global</span>
+        </div>
       </div>
-    </div>
-    <div class="hub-row" style="grid-template-columns:1fr 1fr;" id="trending-portfolios-grid">
-      <!-- Table -->
       <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+        <table class="tr-table">
           <thead>
-            <tr style="border-bottom:1px solid rgba(138,203,208,0.12);">
-              <th style="padding:0.5rem; text-align:left; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">Portfolio</th>
-              <th style="padding:0.5rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">1W</th>
-              <th style="padding:0.5rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">1M</th>
-              <th style="padding:0.5rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">YTD</th>
-              <th style="padding:0.5rem; text-align:right; color:var(--text-secondary); font-size:0.68rem; font-weight:700; text-transform:uppercase;">1Y</th>
+            <tr style="border-bottom:1px solid rgba(138,203,208,0.1);">
+              <th>Portfolio</th>
+              <th style="text-align:right;">1W</th>
+              <th style="text-align:right;">1M</th>
+              <th style="text-align:right;">YTD</th>
+              <th style="text-align:right;">1Y</th>
             </tr>
           </thead>
           <tbody>
             {% for p in trending_portfolios %}
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.03); transition:background 0.15s;" onmouseover="this.style.background='rgba(86,182,198,0.06)'" onmouseout="this.style.background='transparent'">
-              <td style="padding:0.65rem 0.5rem;"><span style="font-weight:700; color:var(--brand-light);">{{ p.name }}</span></td>
-              <td style="padding:0.65rem 0.5rem; text-align:right; font-weight:700; color:{% if p.w1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.w1 }}</td>
-              <td style="padding:0.65rem 0.5rem; text-align:right; font-weight:700; color:{% if p.m1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.m1 }}</td>
-              <td style="padding:0.65rem 0.5rem; text-align:right; font-weight:700; color:{% if p.ytd_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.ytd }}</td>
-              <td style="padding:0.65rem 0.5rem; text-align:right; font-weight:700; color:{% if p.y1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.y1 }}</td>
+            <tr style="transition:background 0.12s;" onmouseover="this.style.background='rgba(86,182,198,0.05)'" onmouseout="this.style.background='transparent'">
+              <td style="font-weight:700; color:var(--brand-light);">{{ p.name }}</td>
+              <td style="text-align:right; font-weight:700; color:{% if p.w1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.w1 }}</td>
+              <td style="text-align:right; font-weight:700; color:{% if p.m1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.m1 }}</td>
+              <td style="text-align:right; font-weight:700; color:{% if p.ytd_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.ytd }}</td>
+              <td style="text-align:right; font-weight:700; color:{% if p.y1_pos %}var(--success){% else %}var(--danger){% endif %};">{{ p.y1 }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <!-- Mini Chart -->
-      <div style="height:260px; border-radius:10px; overflow:hidden; border:1px solid rgba(138,203,208,0.1);">
+      <div style="margin-top:0.5rem; border-radius:8px; overflow:hidden; border:1px solid rgba(138,203,208,0.08); height:200px; position:relative;">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
           {"symbol":"AMEX:SPY","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
           </script>
         </div>
+        <div class="tv-overlay"></div>
       </div>
     </div>
-  </div>
 
-  <!-- Row 4: Total Returns + Score Movers -->
-  <div class="hub-row" style="grid-template-columns:1fr 1fr;" id="returns-movers-grid">
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-        <div class="panel-title" style="margin:0;">📈 Total Returns</div>
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">📈 TOTAL RETURNS</div>
         <div class="returns-tabs">
           <span class="rtab active" data-period="1W" onclick="switchReturns('1W',this)">1W</span>
           <span class="rtab" data-period="1M" onclick="switchReturns('1M',this)">1M</span>
@@ -329,123 +305,121 @@
       </div>
       <div class="returns-grid">
         <div id="returns-top">
-          <div class="ret-col-title" style="background:rgba(16,185,129,0.12); color:var(--success);">↑ TOP 15</div>
+          <div class="ret-col-title" style="background:rgba(16,185,129,0.1); color:var(--success);">↑ TOP 15</div>
           {% for s in top_returns %}
           <div class="ret-item">
             <div><div class="ret-sym">{{ s.symbol }}</div><div class="ret-name">{{ s.name }}</div></div>
-            <div></div>
             <div class="ret-pct pos">+{{ s.pct }}%</div>
           </div>
           {% endfor %}
         </div>
         <div id="returns-bottom">
-          <div class="ret-col-title" style="background:rgba(239,68,68,0.12); color:var(--danger);">↓ BOTTOM 15</div>
+          <div class="ret-col-title" style="background:rgba(239,68,68,0.1); color:var(--danger);">↓ BOTTOM 15</div>
           {% for s in bottom_returns %}
           <div class="ret-item">
             <div><div class="ret-sym">{{ s.symbol }}</div><div class="ret-name">{{ s.name }}</div></div>
-            <div></div>
             <div class="ret-pct neg">{{ s.pct }}%</div>
           </div>
           {% endfor %}
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Score Movers + Recent Searches -->
-    <div style="display:flex; flex-direction:column; gap:1.5rem;">
-
-      <!-- Recent Analyses -->
-      {% if recent_searches %}
-      <div class="panel">
-        <div class="panel-title">🕐 Recent Analyses</div>
-        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-          {% for s in recent_searches %}
-          <a href="{% url 'screener' %}?symbol={{ s.symbol }}&market={{ s.market }}"
-             style="padding:0.35rem 0.75rem; border:1px solid rgba(138,203,208,0.2); border-radius:20px; font-size:0.8rem; font-weight:700; color:var(--brand-light); text-decoration:none; background:rgba(23,12,121,0.5); transition:all 0.2s;"
-             onmouseover="this.style.borderColor='var(--brand-teal)'"
-             onmouseout="this.style.borderColor='rgba(138,203,208,0.2)'">
-            {{ s.symbol }} <span style="color:var(--text-secondary); font-size:0.7rem;">{{ s.market }}</span>
-          </a>
-          {% endfor %}
-        </div>
+  <!-- Row 4: Recent + Portfolio side by side -->
+  <div class="hub-row" style="grid-template-columns:1fr 1fr;" id="returns-movers-grid">
+    {% if recent_searches %}
+    <div class="panel">
+      <div class="panel-title">🕐 RECENT ANALYSES</div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+        {% for s in recent_searches %}
+        <a href="{% url 'screener' %}?symbol={{ s.symbol }}&market={{ s.market }}"
+           style="padding:0.25rem 0.6rem; border:1px solid rgba(138,203,208,0.15); border-radius:6px; font-size:0.72rem; font-weight:700; color:var(--brand-light); text-decoration:none; background:rgba(23,12,121,0.4); transition:all 0.15s;"
+           onmouseover="this.style.borderColor='var(--brand-teal)';this.style.background='rgba(86,182,198,0.08)'"
+           onmouseout="this.style.borderColor='rgba(138,203,208,0.15)';this.style.background='rgba(23,12,121,0.4)'">
+          {{ s.symbol }} <span style="color:var(--text-secondary); font-size:0.6rem;">{{ s.market }}</span>
+        </a>
+        {% endfor %}
       </div>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <div class="sec-head">
+        <div class="panel-title" style="margin:0;">💼 PORTFOLIO</div>
+        <button onclick="document.getElementById('add-portfolio-modal').style.display='flex'" class="btn btn-outline" style="padding:0.2rem 0.6rem; font-size:0.68rem;">+ Add</button>
+      </div>
+      {% if portfolio_items %}
+        {% for pos in portfolio_items %}
+        <div class="mover-item">
+          <div>
+            <a href="{% url 'screener' %}?symbol={{ pos.symbol }}&market={{ pos.market }}" style="text-decoration:none;">
+              <div class="mover-name">{{ pos.symbol }}</div>
+              <div class="mover-score">{{ pos.quantity }}x @ {{ pos.buy_price }}</div>
+            </a>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700; color:var(--brand-light); font-size:0.85rem;">{{ pos.current_value }}</div>
+            <div class="mover-delta {% if pos.is_positive %}pos{% else %}neg{% endif %}">
+              {% if pos.is_positive %}+{% endif %}{{ pos.pnl_pct }}%
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="text-align:center; padding:1rem 0; color:var(--text-secondary); font-size:0.78rem;">
+          <i data-lucide="briefcase" style="width:24px;height:24px;opacity:0.3;"></i>
+          <p style="margin-top:0.3rem;">No positions yet</p>
+        </div>
       {% endif %}
-
-      <!-- Portfolio Summary -->
-      <div class="panel" style="flex:1;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <div class="panel-title" style="margin:0;">💼 Portfolio</div>
-          <button onclick="document.getElementById('add-portfolio-modal').style.display='flex'" class="btn btn-outline" style="padding:0.3rem 0.75rem; font-size:0.75rem;">+ Add</button>
-        </div>
-        {% if portfolio_items %}
-          {% for pos in portfolio_items %}
-          <div class="mover-item">
-            <div>
-              <a href="{% url 'screener' %}?symbol={{ pos.symbol }}&market={{ pos.market }}" style="text-decoration:none;">
-                <div class="mover-name">{{ pos.symbol }}</div>
-                <div class="mover-score">{{ pos.quantity }}x @ {{ pos.buy_price }}</div>
-              </a>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-weight:700; color:var(--brand-light);">{{ pos.current_value }}</div>
-              <div class="mover-delta {% if pos.is_positive %}pos{% else %}neg{% endif %}">
-                {% if pos.is_positive %}+{% endif %}{{ pos.pnl_pct }}%
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div style="text-align:center; padding:1.5rem 0; color:var(--text-secondary); font-size:0.85rem;">
-            <i data-lucide="briefcase" style="width:28px;height:28px;opacity:0.3;margin-bottom:0.5rem;"></i>
-            <p>No positions yet</p>
-          </div>
-        {% endif %}
-      </div>
-
     </div>
   </div>
 
+  <!-- Row 5: Heatmap + News -->
   <div class="hub-row" style="grid-template-columns:1fr 1fr;" id="market-overview-grid">
-    <div class="panel" style="padding:0; overflow:hidden; height:420px;">
-      <div style="padding:1rem 1.25rem 0.5rem; border-bottom:1px solid rgba(138,203,208,0.1);">
-        <div class="panel-title" style="margin:0;">🗺️ US Market Heatmap</div>
+    <div class="panel" style="padding:0; overflow:hidden; height:340px; position:relative;">
+      <div style="padding:0.6rem 0.85rem 0.35rem; border-bottom:1px solid rgba(138,203,208,0.08);">
+        <div class="panel-title" style="margin:0;">🗺️ US MARKET HEATMAP</div>
       </div>
-      <div style="height:370px;">
+      <div style="height:300px; position:relative;">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
           {"exchanges":[],"dataSource":"SPX500","grouping":"sector","blockSize":"market_cap_basic","blockColor":"change","locale":"en","colorTheme":"dark","hasTopBar":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"width":"100%","height":"100%"}
           </script>
         </div>
+        <div class="tv-overlay"></div>
       </div>
     </div>
-    <div class="panel" style="padding:0; overflow:hidden; height:420px;">
-      <div style="padding:1rem 1.25rem 0.5rem; border-bottom:1px solid rgba(138,203,208,0.1);">
-        <div class="panel-title" style="margin:0;">📰 Financial News</div>
+    <div class="panel" style="padding:0; overflow:hidden; height:340px; position:relative;">
+      <div style="padding:0.6rem 0.85rem 0.35rem; border-bottom:1px solid rgba(138,203,208,0.08);">
+        <div class="panel-title" style="margin:0;">📰 FINANCIAL NEWS</div>
       </div>
-      <div style="height:370px;">
+      <div style="height:300px; position:relative;">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
           {"feedMode":"all_symbols","isTransparent":true,"displayMode":"regular","width":"100%","height":"100%","colorTheme":"dark","locale":"en"}
           </script>
         </div>
+        <div class="tv-overlay"></div>
       </div>
     </div>
   </div>
 
   <!-- Row 6: Economic Calendar -->
-  <div class="panel" style="padding:0; overflow:hidden; height:380px;">
-    <div style="padding:1rem 1.25rem 0.5rem; border-bottom:1px solid rgba(138,203,208,0.1);">
-      <div class="panel-title" style="margin:0;">📅 Economic Calendar — US & Indonesia</div>
+  <div class="panel" style="padding:0; overflow:hidden; height:300px; position:relative;">
+    <div style="padding:0.6rem 0.85rem 0.35rem; border-bottom:1px solid rgba(138,203,208,0.08);">
+      <div class="panel-title" style="margin:0;">📅 ECONOMIC CALENDAR — US & INDONESIA</div>
     </div>
-    <div style="height:330px;">
+    <div style="height:260px; position:relative;">
       <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
         {"colorTheme":"dark","isTransparent":true,"width":"100%","height":"100%","locale":"en","importanceFilter":"-1,0,1","countryFilter":"us,id"}
         </script>
       </div>
+      <div class="tv-overlay"></div>
     </div>
   </div>
 
@@ -453,26 +427,26 @@
 
 <!-- Add Portfolio Modal -->
 <div id="add-portfolio-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center; padding:1rem; overflow-y:auto;">
-  <div class="panel" style="width:100%; max-width:440px; padding:2rem; position:relative;">
-    <h3 style="color:var(--brand-light); margin-bottom:1.5rem;">Add Portfolio Position</h3>
+  <div class="panel" style="width:100%; max-width:400px; padding:1.5rem; position:relative;">
+    <h3 style="color:var(--brand-light); margin-bottom:1rem; font-size:1.05rem;">Add Position</h3>
     <form method="POST" action="{% url 'portfolio_add' %}">
       {% csrf_token %}
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;" class="modal-form-grid">
-        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Symbol</label>
-          <input type="text" name="symbol" placeholder="AAPL" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
-        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Market</label>
-          <select name="market" style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"><option value="US">US</option><option value="ID">ID</option></select></div>
-        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Quantity</label>
-          <input type="number" name="quantity" placeholder="10" step="0.01" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
-        <div><label style="color:var(--text-secondary); font-size:0.8rem; display:block; margin-bottom:0.3rem;">Buy Price</label>
-          <input type="number" name="buy_price" placeholder="150.00" step="0.0001" required style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none;"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.75rem;" class="modal-form-grid">
+        <div><label style="color:var(--text-secondary); font-size:0.68rem; display:block; margin-bottom:0.15rem;">Symbol</label>
+          <input type="text" name="symbol" placeholder="AAPL" required style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none; font-size:0.85rem;"></div>
+        <div><label style="color:var(--text-secondary); font-size:0.68rem; display:block; margin-bottom:0.15rem;">Market</label>
+          <select name="market" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none; font-size:0.85rem;"><option value="US">US</option><option value="ID">ID</option></select></div>
+        <div><label style="color:var(--text-secondary); font-size:0.68rem; display:block; margin-bottom:0.15rem;">Quantity</label>
+          <input type="number" name="quantity" placeholder="10" step="0.01" required style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none; font-size:0.85rem;"></div>
+        <div><label style="color:var(--text-secondary); font-size:0.68rem; display:block; margin-bottom:0.15rem;">Buy Price</label>
+          <input type="number" name="buy_price" placeholder="150.00" step="0.0001" required style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid rgba(138,203,208,0.2); background:rgba(23,12,121,0.7); color:var(--brand-light); outline:none; font-size:0.85rem;"></div>
       </div>
-      <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
-        <button type="button" onclick="document.getElementById('add-portfolio-modal').style.display='none'" class="btn btn-outline">Cancel</button>
-        <button type="submit" class="btn">Add</button>
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+        <button type="button" onclick="document.getElementById('add-portfolio-modal').style.display='none'" class="btn btn-outline" style="padding:0.4rem 1rem; font-size:0.78rem;">Cancel</button>
+        <button type="submit" class="btn" style="padding:0.4rem 1rem; font-size:0.78rem;">Add</button>
       </div>
     </form>
-    <button onclick="document.getElementById('add-portfolio-modal').style.display='none'" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-secondary); font-size:1.4rem; cursor:pointer;">×</button>
+    <button onclick="document.getElementById('add-portfolio-modal').style.display='none'" style="position:absolute; top:0.75rem; right:0.75rem; background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">×</button>
   </div>
 </div>
 
@@ -501,7 +475,7 @@ function renderStrategyPicks() {
         <div><span class="scard-badge" style="background:${meta.bg};color:${meta.color};">${meta.icon} ${meta.label}</span></div>
         <div class="scard-name">${item.name}</div>
         <div class="scard-ticker">${flag} ${item.sector} · ${item.symbol}</div>
-        <div class="scard-metrics">Fwd P/E ${item.fwd_pe} <span${m1Class}>1M ${item.m1}</span> <span${y1Class}>1Y ${item.y1}</span></div>
+        <div class="scard-metrics">P/E ${item.fwd_pe} <span${m1Class}>1M ${item.m1}</span> <span${y1Class}>1Y ${item.y1}</span></div>
       </div>`;
     });
   }
@@ -520,7 +494,7 @@ function renderReturns(period) {
   data.top.forEach(s => {
     const pct = parseFloat(s.pct);
     const d = document.createElement('div'); d.className = 'ret-item';
-    d.innerHTML = '<div><div class="ret-sym">' + s.symbol + '</div><div class="ret-name">' + s.name + '</div></div><div></div><div class="ret-pct ' + (pct >= 0 ? 'pos' : 'neg') + '">' + (pct >= 0 ? '+' : '') + s.pct + '%</div>';
+    d.innerHTML = '<div><div class="ret-sym">' + s.symbol + '</div><div class="ret-name">' + s.name + '</div></div><div class="ret-pct ' + (pct >= 0 ? 'pos' : 'neg') + '">' + (pct >= 0 ? '+' : '') + s.pct + '%</div>';
     topEl.appendChild(d);
   });
   const titleB = botEl.querySelector('.ret-col-title');
@@ -529,7 +503,7 @@ function renderReturns(period) {
   data.bottom.forEach(s => {
     const pct = parseFloat(s.pct);
     const d = document.createElement('div'); d.className = 'ret-item';
-    d.innerHTML = '<div><div class="ret-sym">' + s.symbol + '</div><div class="ret-name">' + s.name + '</div></div><div></div><div class="ret-pct ' + (pct >= 0 ? 'pos' : 'neg') + '">' + (pct >= 0 ? '+' : '') + s.pct + '%</div>';
+    d.innerHTML = '<div><div class="ret-sym">' + s.symbol + '</div><div class="ret-name">' + s.name + '</div></div><div class="ret-pct ' + (pct >= 0 ? 'pos' : 'neg') + '">' + (pct >= 0 ? '+' : '') + s.pct + '%</div>';
     botEl.appendChild(d);
   });
 }

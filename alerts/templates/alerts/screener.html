@@ -1,254 +1,312 @@
 {% extends 'alerts/base.html' %}
 {% block content %}
 <style>
-.sa-page{display:flex;flex-direction:column;gap:1.5rem;}
-.sa-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.15);border-radius:14px;padding:1.25rem;}
-.sa-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:1rem;}
-.sa-tab{padding:0.35rem 0.8rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.2);color:var(--text-secondary);background:transparent;transition:all 0.2s;text-decoration:none;}
-.sa-tab.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
-.sa-pill{display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;border:1px solid rgba(138,203,208,0.2);border-radius:20px;font-size:0.82rem;font-weight:600;color:var(--brand-light);text-decoration:none;background:rgba(23,12,121,0.5);transition:all 0.2s;}
-.sa-pill:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
-.sa-2col{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;}
-.metric-row{display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.85rem;}
-.metric-row:last-child{border:none;}
-.metric-label{color:var(--text-secondary);}
-.metric-value{font-weight:700;color:var(--brand-light);}
-.score-badge{display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.6rem;border-radius:6px;font-weight:800;font-size:0.85rem;}
+.sc{display:flex;flex-direction:column;gap:0.5rem;}
+.sc-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.12);border-radius:10px;padding:0.85rem 1rem;}
+.sc-lbl{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.5rem;}
+
+/* Search */
+.sc-search{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
+.sc-search input{flex:1;min-width:180px;padding:0.55rem 1rem 0.55rem 2.5rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.92rem;outline:none;transition:border-color 0.15s;}
+.sc-search input:focus{border-color:var(--brand-teal);}
+.sc-search select{padding:0.55rem 0.8rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.9rem;outline:none;}
+.sc-tags{display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.4rem;}
+.sc-tag{padding:0.2rem 0.55rem;border:1px solid rgba(138,203,208,0.15);border-radius:14px;font-size:0.72rem;font-weight:600;color:var(--brand-light);text-decoration:none;background:rgba(23,12,121,0.4);transition:all 0.15s;}
+.sc-tag:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+
+/* Header */
+.stock-hdr{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+.stock-hdr img{width:40px;height:40px;border-radius:8px;background:#fff;padding:2px;object-fit:contain;}
+.stock-hdr h1{font-size:1.3rem;font-weight:900;color:var(--brand-light);margin:0;line-height:1.2;}
+.stock-hdr .meta{font-size:0.78rem;color:var(--text-secondary);display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;}
+.stock-hdr .meta span{white-space:nowrap;}
+.axiom-score{font-size:2rem;font-weight:900;line-height:1;}
+.axiom-badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:5px;font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;}
+.wl-btn{padding:0.35rem 0.85rem;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.2);background:transparent;color:var(--text-secondary);transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.wl-btn:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.wl-btn.active{background:rgba(245,158,11,0.12);border-color:var(--warning);color:var(--warning);}
+
+/* Factor bars */
+.factor-row{display:flex;align-items:center;gap:0.6rem;padding:0.35rem 0;}
+.factor-row+.factor-row{border-top:1px solid rgba(255,255,255,0.03);}
+.factor-name{width:70px;font-size:0.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0;}
+.factor-bar{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+.factor-fill{height:100%;border-radius:3px;transition:width 0.6s ease;max-width:100%;}
+.factor-val{font-size:0.82rem;font-weight:800;width:32px;text-align:right;flex-shrink:0;}
+
+/* 2 col */
+.sc-2col{display:grid;grid-template-columns:340px 1fr;gap:0.5rem;}
+.sc-2col-right{display:flex;flex-direction:column;gap:0.5rem;}
+
+/* Metric grid */
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;}
+.m-row{display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.78rem;}
+.m-row:last-child{border:none;}
+.m-lbl{color:var(--text-secondary);}
+.m-val{font-weight:700;color:var(--brand-light);}
+
+/* Strategy box */
+.strat-box{border-radius:8px;padding:0.7rem 0.85rem;margin-bottom:0.35rem;border:1px solid rgba(138,203,208,0.1);}
+.strat-box.undervalued{background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2);}
+.strat-box.mixed{background:rgba(255,200,0,0.05);border-color:rgba(255,200,0,0.15);}
+.strat-box.overvalued{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15);}
+.strat-box h3{font-size:0.82rem;font-weight:800;margin:0 0 0.2rem;}
+.strat-box p{font-size:0.72rem;color:var(--text-secondary);margin:0;line-height:1.4;}
+
+/* Skeleton */
 @keyframes shimmer{0%{background-position:-1000px 0}100%{background-position:1000px 0}}
-.skeleton-box{background:linear-gradient(90deg,rgba(23,12,121,0.4) 25%,rgba(86,182,198,0.08) 50%,rgba(23,12,121,0.4) 75%);background-size:1000px 100%;animation:shimmer 2s infinite linear;border-radius:16px;border:1px solid var(--surface-border);}
-@media(max-width:900px){.sa-2col{grid-template-columns:1fr !important;}}
-@media(max-width:600px){
-  .sa-panel{padding:0.75rem;}
-  #screener-form{flex-direction:column;}
-  #screener-form > div{min-width:0 !important;}
-  #screener-form .btn{width:100%;}
-  .sa-pill{font-size:0.75rem;padding:0.25rem 0.5rem;}
-  .metric-row{grid-template-columns:1fr auto !important;}
-}
+.skeleton{background:linear-gradient(90deg,rgba(23,12,121,0.4) 25%,rgba(86,182,198,0.08) 50%,rgba(23,12,121,0.4) 75%);background-size:1000px 100%;animation:shimmer 2s infinite linear;border-radius:10px;border:1px solid var(--surface-border);}
+
+/* Hide TV branding */
+.tv-overlay{position:absolute;bottom:0;left:0;right:0;height:32px;background:linear-gradient(transparent,#0d0645 70%);z-index:10;pointer-events:none;}
+
+@media(max-width:900px){.sc-2col{grid-template-columns:1fr !important;}}
+@media(max-width:600px){.sc-panel{padding:0.65rem 0.75rem;}.m-grid{grid-template-columns:1fr;}.stock-hdr h1{font-size:1.1rem;}.factor-name{width:55px;font-size:0.65rem;}}
 </style>
 
-<div class="sa-page">
+<div class="sc">
 
-<!-- Search Bar -->
-<div class="sa-panel">
-  <form method="GET" action="{% url 'screener' %}" id="screener-form" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-    <div style="flex:1;position:relative;min-width:200px;">
-      <i data-lucide="search" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);width:16px;height:16px;"></i>
-      <input type="text" id="symbol-input" name="symbol" value="{{ symbol|default:'' }}" autocomplete="off" placeholder="Search stocks (e.g. AAPL, BBCA)"
-        style="width:100%;padding:0.75rem 1rem 0.75rem 2.75rem;border-radius:10px;border:1px solid var(--surface-border);background:rgba(23,12,121,0.6);color:var(--brand-light);font-size:1rem;outline:none;">
+<!-- Search -->
+<div class="sc-panel">
+  <form method="GET" action="{% url 'screener' %}" id="screener-form" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;position:relative;">
+      <i data-lucide="search" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);width:15px;height:15px;"></i>
+      <input type="text" id="symbol-input" name="symbol" value="{{ symbol|default:'' }}" autocomplete="off" placeholder="Search stocks (e.g. AAPL, BBCA)">
     </div>
-    <select name="market" id="market-select" style="padding:0.75rem 1.25rem;border-radius:10px;border:1px solid var(--surface-border);background:rgba(23,12,121,0.6);color:var(--brand-light);font-size:0.95rem;outline:none;">
+    <select name="market" id="market-select">
       <option value="US" {% if market == 'US' %}selected{% endif %}>US</option>
       <option value="ID" {% if market == 'ID' %}selected{% endif %}>ID</option>
     </select>
-    <button type="submit" class="btn" style="padding:0.75rem 2rem;">Analyze</button>
+    <button type="submit" class="btn" style="padding:0.55rem 1.5rem;font-size:0.85rem;">Analyze</button>
   </form>
-  <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-    <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;">SEE ALSO</span>
-    <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="sa-pill">🇺🇸 Apple</a>
-    <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="sa-pill">🇺🇸 NVIDIA</a>
-    <a href="{% url 'screener' %}?symbol=MSFT&market=US" class="sa-pill">🇺🇸 Microsoft</a>
-    <a href="{% url 'screener' %}?symbol=BBCA&market=ID" class="sa-pill">🇮🇩 BCA</a>
-    <a href="{% url 'screener' %}?symbol=BBRI&market=ID" class="sa-pill">🇮🇩 BRI</a>
-    <a href="{% url 'screener' %}?symbol=META&market=US" class="sa-pill">🇺🇸 Meta</a>
-    <a href="{% url 'screener' %}?symbol=GOOGL&market=US" class="sa-pill">🇺🇸 Alphabet</a>
-  </div>
-</div>
-
-<!-- Loading Skeleton -->
-<div id="loading-skeleton" style="display:none;">
-  <div class="skeleton-box" style="height:120px;margin-bottom:1rem;"></div>
-  <div style="display:grid;grid-template-columns:1fr;gap:1rem;" id="skeleton-grid">
-    <div class="skeleton-box" style="height:500px;"></div>
-    <div class="skeleton-box" style="height:500px;"></div>
+  <div class="sc-tags">
+    <span style="font-size:0.65rem;color:var(--text-secondary);font-weight:600;padding:0.2rem 0;">POPULAR</span>
+    <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="sc-tag">NVDA</a>
+    <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="sc-tag">AAPL</a>
+    <a href="{% url 'screener' %}?symbol=MSFT&market=US" class="sc-tag">MSFT</a>
+    <a href="{% url 'screener' %}?symbol=META&market=US" class="sc-tag">META</a>
+    <a href="{% url 'screener' %}?symbol=GOOGL&market=US" class="sc-tag">GOOGL</a>
+    <a href="{% url 'screener' %}?symbol=BBCA&market=ID" class="sc-tag">BBCA</a>
   </div>
 </div>
 
 {% if analysis %}
 {% if analysis.error %}
-<div class="sa-panel" style="border-color:var(--danger);text-align:center;">
-  <i data-lucide="alert-circle" style="color:var(--danger);width:40px;height:40px;margin-bottom:0.75rem;"></i>
-  <h3 style="color:var(--danger);margin-bottom:0.5rem;">Analysis Failed</h3>
-  <p style="color:var(--text-secondary);">{{ analysis.error }}</p>
+<div class="sc-panel" style="border-color:var(--danger);text-align:center;">
+  <p style="color:var(--danger);font-size:0.9rem;font-weight:700;">Analysis Failed</p>
+  <p style="color:var(--text-secondary);font-size:0.82rem;">{{ analysis.error }}</p>
 </div>
 {% else %}
-<div id="analysis-results" class="sa-page">
 
-<!-- Company Header -->
-<div class="sa-panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
-    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+<!-- Stock Header -->
+<div class="sc-panel">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
       {% if analysis.domain %}
-      <img src="https://logo.clearbit.com/{{ analysis.domain }}" alt="" style="width:44px;height:44px;border-radius:10px;background:white;padding:3px;object-fit:contain;" onerror="this.style.display='none'">
+      <img src="https://logo.clearbit.com/{{ analysis.domain }}" alt="" style="width:40px;height:40px;border-radius:8px;background:#fff;padding:2px;object-fit:contain;" onerror="this.style.display='none'">
       {% endif %}
       <div>
-        <h1 style="font-size:1.8rem;font-weight:800;color:var(--brand-light);margin:0;">{% if market == 'ID' %}🇮🇩{% else %}🇺🇸{% endif %} {{ analysis.company_name }}</h1>
-        <div style="display:flex;gap:1rem;align-items:center;margin-top:0.3rem;">
-          <span style="color:var(--brand-teal);font-weight:700;font-size:0.9rem;">{{ analysis.symbol }}{% if market == 'ID' %}:IDX{% else %}:USA{% endif %}</span>
-          {% if analysis.metrics.Market_Cap %}<span style="color:var(--text-secondary);font-size:0.85rem;">MCap {{ analysis.metrics.Market_Cap }}</span>{% endif %}
-          {% if analysis.metrics.Sector %}<span style="color:var(--text-secondary);font-size:0.85rem;">· {{ analysis.metrics.Sector }}</span>{% endif %}
+        <h1 style="font-size:1.3rem;font-weight:900;color:var(--brand-light);margin:0;line-height:1.2;">{% if market == 'ID' %}🇮🇩{% else %}🇺🇸{% endif %} {{ analysis.company_name }}</h1>
+        <div style="display:flex;gap:0.6rem;align-items:center;margin-top:0.2rem;">
+          <span style="color:var(--brand-teal);font-weight:700;font-size:0.82rem;">{{ analysis.symbol }}{% if market == 'ID' %}:IDX{% else %}:USA{% endif %}</span>
+          {% if analysis.metrics.Market_Cap %}<span style="color:var(--text-secondary);font-size:0.75rem;">MCap {{ analysis.metrics.Market_Cap }}</span>{% endif %}
+          {% if analysis.metrics.Sector %}<span style="color:var(--text-secondary);font-size:0.75rem;">· {{ analysis.metrics.Sector }}</span>{% endif %}
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:0.5rem;align-items:center;">
-      <button id="watchlist-btn" onclick="toggleWatchlist()" class="sa-tab" style="{% if in_watchlist %}background:rgba(245,158,11,0.15);border-color:var(--warning);color:var(--warning);{% endif %}" data-in-watchlist="{{ in_watchlist|yesno:'true,false' }}">
-        <span id="watchlist-icon">{% if in_watchlist %}★{% else %}☆{% endif %}</span> <span id="watchlist-text">{% if in_watchlist %}Watchlisted{% else %}Watchlist{% endif %}</span>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      {% if analysis.dcf and analysis.dcf.current_price %}
+      <div style="text-align:right;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--brand-light);">${{ analysis.dcf.current_price }}</div>
+      </div>
+      {% endif %}
+      <button id="watchlist-btn" onclick="toggleWatchlist()" class="wl-btn {% if in_watchlist %}active{% endif %}" data-in-watchlist="{{ in_watchlist|yesno:'true,false' }}">
+        <span id="watchlist-icon">{% if in_watchlist %}★{% else %}☆{% endif %}</span> <span id="watchlist-text">{% if in_watchlist %}Saved{% else %}Watch{% endif %}</span>
       </button>
     </div>
   </div>
+
+  <!-- Factor Scores -->
+  <div style="margin-top:0.75rem;">
+    {% if analysis.metrics.Revenue_Growth %}
+    <div class="factor-row"><span class="factor-name">Growth</span><div class="factor-bar"><div class="factor-fill" style="width:{% if '-' in analysis.metrics.Revenue_Growth|stringformat:'s' %}15{% else %}{{ analysis.metrics.Revenue_Growth|stringformat:'s'|cut:'%' }}{% endif %}%;background:linear-gradient(90deg,#00c896,#00e6aa);"></div></div><span class="factor-val" style="color:#00c896;">{{ analysis.metrics.Revenue_Growth }}</span></div>
+    {% endif %}
+    {% if analysis.metrics.ROE %}
+    <div class="factor-row"><span class="factor-name">Quality</span><div class="factor-bar"><div class="factor-fill" style="width:{% if '-' in analysis.metrics.ROE|stringformat:'s' %}10{% else %}{{ analysis.metrics.ROE|stringformat:'s'|cut:'%' }}{% endif %}%;background:linear-gradient(90deg,#56B6C6,#8ACBD0);"></div></div><span class="factor-val" style="color:#56B6C6;">{{ analysis.metrics.ROE }}</span></div>
+    {% endif %}
+    {% if analysis.metrics.P_E %}
+    <div class="factor-row"><span class="factor-name">Value</span>
+      <div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.relative.is_relatively_undervalued %}75{% else %}30{% endif %}%;background:linear-gradient(90deg,#ffc800,#ffe066);"></div></div>
+      <span class="factor-val" style="color:#ffc800;">{{ analysis.metrics.P_E }}</span>
+    </div>
+    {% endif %}
+    {% if analysis.dcf and analysis.dcf.upside_percent %}
+    <div class="factor-row"><span class="factor-name">Momentum</span><div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.dcf.is_undervalued %}{{ analysis.dcf.upside_percent|floatformat:0 }}{% else %}10{% endif %}%;background:linear-gradient(90deg,#ff6464,#ff8888);"></div></div><span class="factor-val" style="color:{% if analysis.dcf.is_undervalued %}var(--success){% else %}#ff6464{% endif %};">{{ analysis.dcf.upside_percent }}%</span></div>
+    {% endif %}
+    {% if analysis.metrics.Beta %}
+    <div class="factor-row"><span class="factor-name">Risk</span><div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.metrics.Beta == '-' %}50{% else %}{{ analysis.metrics.Beta }}{% endif %}%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div><span class="factor-val" style="color:#8b5cf6;">{{ analysis.metrics.Beta }}</span></div>
+    {% endif %}
+  </div>
 </div>
 
-<!-- Main 2-Column Layout -->
-<div class="sa-2col">
+<!-- Strategy Verdict -->
+{% if analysis.dcf.is_undervalued and analysis.relative.is_relatively_undervalued %}
+<div class="strat-box undervalued">
+  <h3 style="color:#00c896;">💎 Strong Compounder</h3>
+  <p>Both DCF and Relative models signal undervaluation. A high-conviction setup with strong fundamental backing — quality at a reasonable price.</p>
+</div>
+{% elif analysis.dcf.is_undervalued %}
+<div class="strat-box mixed">
+  <h3 style="color:#ffc800;">⚡ Growth Value</h3>
+  <p>DCF model shows intrinsic upside but relative valuation appears stretched. Growth-driven opportunity with asymmetric risk/reward.</p>
+</div>
+{% elif analysis.relative.is_relatively_undervalued %}
+<div class="strat-box mixed">
+  <h3 style="color:#ffc800;">📊 Relative Value</h3>
+  <p>Trading below sector average on P/E but DCF doesn't confirm deep margin of safety. Could mean the market is pricing in headwinds.</p>
+</div>
+{% else %}
+<div class="strat-box overvalued">
+  <h3 style="color:#ff6464;">🔥 Momentum Play</h3>
+  <p>Currently trading above fair value on both models. Suitable for momentum strategies, but value-oriented investors should wait for a pullback.</p>
+</div>
+{% endif %}
 
-  <!-- LEFT: Ratings Sidebar -->
-  <div style="display:flex;flex-direction:column;gap:1.5rem;">
+<!-- Main 2-Column -->
+<div class="sc-2col">
+  <!-- LEFT: DCF + Relative -->
+  <div style="display:flex;flex-direction:column;gap:0.5rem;">
 
-    <!-- Radar Chart (SVG) -->
-    <div class="sa-panel">
+    <div class="sc-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-        <span class="score-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">⚙️ AXIOM SCORE</span>
-        <span style="font-size:1.6rem;font-weight:900;color:#00c896;">
-          {% if analysis.dcf.is_undervalued and analysis.relative.is_relatively_undervalued %}92{% elif analysis.dcf.is_undervalued or analysis.relative.is_relatively_undervalued %}68{% else %}35{% endif %}
-        </span>
+        <div class="sc-lbl" style="margin:0;">💰 INTRINSIC VALUE (DCF)</div>
+        {% if analysis.dcf.is_undervalued %}
+        <span class="axiom-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">UNDervalued</span>
+        {% else %}
+        <span class="axiom-badge" style="background:rgba(239,68,68,0.12);color:#ff6464;">OVERVALUED</span>
+        {% endif %}
       </div>
-      <svg viewBox="0 0 300 260" style="width:100%;max-width:320px;display:block;margin:0 auto;">
-        <!-- Pentagon grid -->
+      {% if analysis.dcf.error %}
+      <p style="color:var(--warning);font-size:0.82rem;">{{ analysis.dcf.error }}</p>
+      {% else %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.65rem;">
+        <div style="background:rgba(0,0,0,0.2);padding:0.7rem;border-radius:8px;">
+          <div style="font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Current Price</div>
+          <div style="font-size:1.25rem;font-weight:900;color:var(--brand-light);margin-top:0.1rem;">${{ analysis.dcf.current_price }}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);padding:0.7rem;border-radius:8px;border:1px solid {% if analysis.dcf.is_undervalued %}rgba(0,200,150,0.2){% else %}rgba(239,68,68,0.2){% endif %};">
+          <div style="font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Fair Value</div>
+          <div style="font-size:1.25rem;font-weight:900;color:{% if analysis.dcf.is_undervalued %}#00c896{% else %}#ff6464{% endif %};margin-top:0.1rem;">${{ analysis.dcf.intrinsic_value }}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <div style="flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:{% if analysis.dcf.upside_percent > 0 %}{{ analysis.dcf.upside_percent }}{% else %}0{% endif %}%;max-width:100%;background:linear-gradient(90deg,var(--brand-teal),{% if analysis.dcf.is_undervalued %}#00c896{% else %}#ff6464{% endif %});border-radius:3px;"></div>
+        </div>
+        <span style="font-weight:800;font-size:0.95rem;color:{% if analysis.dcf.is_undervalued %}var(--success){% else %}var(--danger){% endif %};">{{ analysis.dcf.upside_percent }}%</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="sc-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+        <div class="sc-lbl" style="margin:0;">📊 RELATIVE VALUATION</div>
+        {% if analysis.relative.is_relatively_undervalued %}
+        <span class="axiom-badge" style="background:rgba(0,200,150,0.15);color:#00c896;">CHEAP</span>
+        {% else %}
+        <span class="axiom-badge" style="background:rgba(239,68,68,0.12);color:#ff6464;">EXPENSIVE</span>
+        {% endif %}
+      </div>
+      {% if analysis.relative.error %}
+      <p style="color:var(--warning);font-size:0.82rem;">{{ analysis.relative.error }}</p>
+      {% else %}
+      <div class="m-grid">
+        <div class="m-row"><span class="m-lbl">Industry</span><span class="m-val">{{ analysis.relative.industry }}</span></div>
+        <div class="m-row"><span class="m-lbl">Trailing P/E</span><span class="m-val" style="color:{% if analysis.relative.is_relatively_undervalued %}var(--success){% else %}var(--danger){% endif %};">{{ analysis.relative.pe_ratio|floatformat:2 }}</span></div>
+        <div class="m-row"><span class="m-lbl">Forward P/E</span><span class="m-val">{{ analysis.relative.forward_pe|default:'-' }}</span></div>
+        <div class="m-row"><span class="m-lbl">Sector Avg P/E</span><span class="m-val">{{ analysis.relative.market_average_pe }}</span></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Radar Chart -->
+    <div class="sc-panel" style="text-align:center;">
+      <div class="sc-lbl" style="text-align:left;margin-bottom:0.25rem;">FACTOR RADAR</div>
+      <svg viewBox="0 0 300 260" style="width:100%;max-width:300px;display:block;margin:0 auto;">
         <g transform="translate(150,130)">
           <polygon points="0,-100 95,-31 59,81 -59,81 -95,-31" fill="none" stroke="rgba(138,203,208,0.1)" stroke-width="1"/>
           <polygon points="0,-70 66,-22 41,57 -41,57 -66,-22" fill="none" stroke="rgba(138,203,208,0.07)" stroke-width="1"/>
           <polygon points="0,-40 38,-12 24,32 -24,32 -38,-12" fill="none" stroke="rgba(138,203,208,0.05)" stroke-width="1"/>
-          <!-- Data polygon -->
-          <polygon points="0,-{% if analysis.dcf.is_undervalued %}80{% else %}40{% endif %} {% if analysis.relative.pe_ratio %}75{% else %}30{% endif %},-{% if analysis.metrics.ROE %}25{% else %}10{% endif %} {% if analysis.metrics.Revenue_Growth %}50{% else %}20{% endif %},65 -{% if analysis.metrics.Profit_Margin %}50{% else %}20{% endif %},65 -{% if analysis.metrics.Current_Ratio %}75{% else %}30{% endif %},-25"
-            fill="rgba(0,200,150,0.15)" stroke="#00c896" stroke-width="2"/>
+          <polygon points="0,-100 95,-31 59,81 -59,81 -95,-31" fill="rgba(86,182,198,0.08)" stroke="#56B6C6" stroke-width="2"/>
+          <!-- Dots -->
+          <circle cx="0" cy="-70" r="4" fill="#00c896"/>
+          <circle cx="66" cy="-22" r="4" fill="#56B6C6"/>
+          <circle cx="41" cy="57" r="4" fill="#ffc800"/>
+          <circle cx="-41" cy="57" r="4" fill="#ff6464"/>
+          <circle cx="-66" cy="-22" r="4" fill="#8b5cf6"/>
         </g>
-        <!-- Labels -->
-        <text x="150" y="18" text-anchor="middle" fill="var(--brand-light)" font-size="12" font-weight="700">Growth</text>
-        <text x="278" y="115" text-anchor="start" fill="var(--brand-light)" font-size="12" font-weight="700">Quality</text>
-        <text x="235" y="235" text-anchor="middle" fill="var(--brand-light)" font-size="12" font-weight="700">Value</text>
-        <text x="65" y="235" text-anchor="middle" fill="var(--brand-light)" font-size="12" font-weight="700">Momentum</text>
-        <text x="22" y="115" text-anchor="end" fill="var(--brand-light)" font-size="12" font-weight="700">Risk Shield</text>
+        <text x="150" y="14" text-anchor="middle" fill="#00c896" font-size="11" font-weight="700">Growth</text>
+        <text x="275" y="112" text-anchor="start" fill="#56B6C6" font-size="11" font-weight="700">Quality</text>
+        <text x="238" y="235" text-anchor="middle" fill="#ffc800" font-size="11" font-weight="700">Value</text>
+        <text x="62" y="235" text-anchor="middle" fill="#ff6464" font-size="11" font-weight="700">Momentum</text>
+        <text x="25" y="112" text-anchor="end" fill="#8b5cf6" font-size="11" font-weight="700">Risk</text>
       </svg>
-    </div>
-
-    <!-- Strategy Fit -->
-    <div class="sa-panel">
-      <div class="sa-title">Strategy Fit</div>
-      {% if analysis.dcf.is_undervalued and analysis.relative.is_relatively_undervalued %}
-      <div style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);border-radius:10px;padding:1rem;margin-bottom:1rem;">
-        <span class="score-badge" style="background:rgba(0,200,150,0.2);color:#00c896;">💎 Strong Compounder</span>
-        <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;">Both DCF and Relative models indicate undervaluation. A high-conviction setup with strong fundamental backing.</p>
-      </div>
-      {% elif analysis.dcf.is_undervalued %}
-      <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:1rem;margin-bottom:1rem;">
-        <span class="score-badge" style="background:rgba(255,200,0,0.15);color:#ffc800;">⚡ Growth Value</span>
-        <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;">DCF model shows intrinsic upside but relative valuation appears stretched. Growth-driven opportunity.</p>
-      </div>
-      {% else %}
-      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:1rem;margin-bottom:1rem;">
-        <span class="score-badge" style="background:rgba(239,68,68,0.15);color:#ff6464;">📊 Momentum Play</span>
-        <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;">Currently trading above fair value. Suitable for momentum traders, less ideal for value-oriented strategies.</p>
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- DCF Summary -->
-    <div class="sa-panel">
-      <div class="sa-title">💰 Intrinsic Value (DCF)</div>
-      {% if analysis.dcf.error %}
-      <p style="color:var(--warning);font-size:0.85rem;">{{ analysis.dcf.error }}</p>
-      {% else %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
-        <div style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:10px;">
-          <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.3rem;">Current</div>
-          <div style="font-size:1.4rem;font-weight:800;color:var(--brand-light);">{{ analysis.dcf.current_price }}</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.2);padding:1rem;border-radius:10px;border:1px solid {% if analysis.dcf.is_undervalued %}rgba(16,185,129,0.3){% else %}rgba(239,68,68,0.3){% endif %};">
-          <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.3rem;">Fair Value</div>
-          <div style="font-size:1.4rem;font-weight:800;color:{% if analysis.dcf.is_undervalued %}var(--success){% else %}var(--danger){% endif %};">{{ analysis.dcf.intrinsic_value }}</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:0.75rem;">
-        <div style="flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
-          <div style="height:100%;width:{% if analysis.dcf.upside_percent > 0 %}{{ analysis.dcf.upside_percent }}{% else %}0{% endif %}%;max-width:100%;background:linear-gradient(90deg,var(--brand-teal),var(--success));border-radius:4px;"></div>
-        </div>
-        <span style="font-weight:800;font-size:1.1rem;color:{% if analysis.dcf.is_undervalued %}var(--success){% else %}var(--danger){% endif %};">{{ analysis.dcf.upside_percent }}%</span>
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- Relative Valuation -->
-    <div class="sa-panel">
-      <div class="sa-title">📊 Relative Valuation (P/E)</div>
-      {% if analysis.relative.error %}
-      <p style="color:var(--warning);font-size:0.85rem;">{{ analysis.relative.error }}</p>
-      {% else %}
-      <div class="metric-row"><span class="metric-label">Industry</span><span class="metric-value">{{ analysis.relative.industry }}</span></div>
-      <div class="metric-row"><span class="metric-label">Trailing P/E</span><span class="metric-value" style="color:{% if analysis.relative.is_relatively_undervalued %}var(--success){% else %}var(--danger){% endif %};">{{ analysis.relative.pe_ratio|floatformat:2 }}</span></div>
-      <div class="metric-row"><span class="metric-label">Market Avg P/E</span><span class="metric-value">{{ analysis.relative.market_average_pe }}</span></div>
-      <div class="metric-row"><span class="metric-label">Status</span>
-        <span class="score-badge" style="background:{% if analysis.relative.is_relatively_undervalued %}rgba(0,200,150,0.15){% else %}rgba(239,68,68,0.12){% endif %};color:{% if analysis.relative.is_relatively_undervalued %}#00c896{% else %}#ff6464{% endif %};">{% if analysis.relative.is_relatively_undervalued %}Undervalued{% else %}Overvalued{% endif %}</span>
-      </div>
-      {% endif %}
     </div>
   </div>
 
-  <!-- RIGHT: Charts + Metrics -->
-  <div style="display:flex;flex-direction:column;gap:1.5rem;">
-
-    <!-- TradingView Chart -->
-    <div class="sa-panel" style="padding:0;overflow:hidden;height:500px;">
-      <div class="tradingview-widget-container" style="height:100%;width:100%">
-        <div id="tradingview_chart" style="height:calc(100% - 32px);width:100%"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget({"autosize":true,"symbol":"{{ analysis.tv_symbol }}","interval":"D","timezone":"Etc/UTC","theme":"dark","style":"1","locale":"en","enable_publishing":false,"backgroundColor":"#0d0645","gridColor":"rgba(86,182,198,0.1)","hide_top_toolbar":false,"hide_legend":false,"save_image":false,"container_id":"tradingview_chart"});
-        </script>
-      </div>
+  <!-- RIGHT: Chart + Metrics -->
+  <div class="sc-2col-right">
+    <div class="sc-panel" style="padding:0;overflow:hidden;height:420px;position:relative;">
+      <div id="tradingview_chart" style="height:100%;width:100%"></div>
+      <div class="tv-overlay"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.widget({"autosize":true,"symbol":"{{ analysis.tv_symbol }}","interval":"D","timezone":"Etc/UTC","theme":"dark","style":"1","locale":"en","enable_publishing":false,"backgroundColor":"#0d0645","gridColor":"rgba(86,182,198,0.1)","hide_top_toolbar":false,"hide_legend":false,"save_image":false,"container_id":"tradingview_chart"});
+      </script>
     </div>
 
-    <!-- Quantitative Metrics -->
-    <div class="sa-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <div class="sa-title" style="margin:0;">📋 Quantitative Metrics</div>
+    <div class="sc-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+        <div class="sc-lbl" style="margin:0;">📋 QUANTITATIVE METRICS</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 2rem;">
+      <div class="m-grid">
         {% for key, val in analysis.metrics.items %}
-        <div class="metric-row">
-          <span class="metric-label">{{ key }}</span>
-          <span class="metric-value" style="{% if '-' in val|stringformat:'s' and val != '-' %}color:var(--danger);{% elif '%' in val|stringformat:'s' and '-' not in val|stringformat:'s' and val != '-' %}color:var(--success);{% endif %}">{{ val }}</span>
+        {% if key != 'upgrades' %}
+        <div class="m-row">
+          <span class="m-lbl">{{ key }}</span>
+          <span class="m-val" style="{% if '-' in val|stringformat:'s' and val != '-' %}color:var(--danger);{% elif '%' in val|stringformat:'s' and '-' not in val|stringformat:'s' and val != '-' %}color:var(--success);{% endif %}">{{ val }}</span>
         </div>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
 
     {% if analysis.metrics.upgrades %}
-    <!-- Analyst Ratings -->
-    <div class="sa-panel">
-      <div class="sa-title">🏛️ Analyst Upgrades & Downgrades</div>
+    <div class="sc-panel">
+      <div class="sc-lbl">🏛️ ANALYST UPGRADES & DOWNGRADES</div>
       <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:600px;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.75rem;min-width:480px;">
           <thead>
-            <tr style="border-bottom:1px solid rgba(138,203,208,0.12);">
-              <th style="padding:0.5rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;">Date</th>
-              <th style="padding:0.5rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;">Action</th>
-              <th style="padding:0.5rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;">Analyst</th>
-              <th style="padding:0.5rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;">Rating</th>
-              <th style="padding:0.5rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;">PT Change</th>
+            <tr style="border-bottom:1px solid rgba(138,203,208,0.1);">
+              <th style="padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;">Date</th>
+              <th style="padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;">Action</th>
+              <th style="padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;">Firm</th>
+              <th style="padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;">Rating</th>
+              <th style="padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;">PT</th>
             </tr>
           </thead>
           <tbody>
             {% for u in analysis.metrics.upgrades %}
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.15s;" onmouseover="this.style.background='rgba(86,182,198,0.05)'" onmouseout="this.style.background='transparent'">
-              <td style="padding:0.5rem;color:var(--brand-light);white-space:nowrap;">{{ u.date }}</td>
-              <td style="padding:0.5rem;">
-                {% if u.is_upgrade %}<span class="score-badge" style="background:rgba(16,185,129,0.15);color:var(--success);">{{ u.action }}</span>
-                {% elif u.is_downgrade %}<span class="score-badge" style="background:rgba(239,68,68,0.15);color:var(--danger);">{{ u.action }}</span>
-                {% else %}<span style="color:var(--text-secondary);">{{ u.action }}</span>{% endif %}
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.02);transition:background 0.12s;" onmouseover="this.style.background='rgba(86,182,198,0.04)'" onmouseout="this.style.background='transparent'">
+              <td style="padding:0.35rem 0.4rem;color:var(--brand-light);white-space:nowrap;">{{ u.date }}</td>
+              <td style="padding:0.35rem 0.4rem;">
+                {% if u.is_upgrade %}<span style="background:rgba(0,200,150,0.15);color:#00c896;padding:0.1rem 0.4rem;border-radius:3px;font-weight:700;font-size:0.68rem;">{{ u.action }}</span>
+                {% elif u.is_downgrade %}<span style="background:rgba(239,68,68,0.12);color:#ff6464;padding:0.1rem 0.4rem;border-radius:3px;font-weight:700;font-size:0.68rem;">{{ u.action }}</span>
+                {% else %}<span style="color:var(--text-secondary);font-size:0.68rem;">{{ u.action }}</span>{% endif %}
               </td>
-              <td style="padding:0.5rem;color:var(--brand-light);">{{ u.analyst }}</td>
-              <td style="padding:0.5rem;color:var(--text-secondary);">{{ u.rating_change }}</td>
-              <td style="padding:0.5rem;color:var(--brand-teal);">{{ u.pt_change }}</td>
+              <td style="padding:0.35rem 0.4rem;color:var(--brand-light);font-size:0.72rem;">{{ u.analyst }}</td>
+              <td style="padding:0.35rem 0.4rem;color:var(--text-secondary);font-size:0.72rem;">{{ u.rating_change }}</td>
+              <td style="padding:0.35rem 0.4rem;color:var(--brand-teal);font-size:0.72rem;">{{ u.pt_change }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -257,39 +315,38 @@
     </div>
     {% endif %}
 
-    <!-- TradingView Financials Widget -->
-    <div class="sa-panel" style="padding:0;overflow:hidden;height:500px;">
-      <div style="padding:1rem 1.25rem 0.5rem;border-bottom:1px solid rgba(138,203,208,0.1);">
-        <div class="sa-title" style="margin:0;">📈 Financial Charts — Revenue · Profits · Cash Flow</div>
+    <div class="sc-panel" style="padding:0;overflow:hidden;height:380px;position:relative;">
+      <div style="padding:0.5rem 0.85rem 0.3rem;border-bottom:1px solid rgba(138,203,208,0.08);">
+        <div class="sc-lbl" style="margin:0;">📈 FINANCIALS</div>
       </div>
-      <div style="height:450px;">
+      <div style="height:340px;">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-financials.js" async>
           {"isTransparent":true,"largeChartUrl":"","displayMode":"regular","width":"100%","height":"100%","colorTheme":"dark","symbol":"{{ analysis.tv_symbol }}","locale":"en"}
           </script>
         </div>
+        <div class="tv-overlay"></div>
       </div>
     </div>
 
-    <!-- Technical Analysis Widget -->
-    <div class="sa-panel" style="padding:0;overflow:hidden;height:450px;">
-      <div style="padding:1rem 1.25rem 0.5rem;border-bottom:1px solid rgba(138,203,208,0.1);">
-        <div class="sa-title" style="margin:0;">🔬 Technical Analysis</div>
+    <div class="sc-panel" style="padding:0;overflow:hidden;height:340px;position:relative;">
+      <div style="padding:0.5rem 0.85rem 0.3rem;border-bottom:1px solid rgba(138,203,208,0.08);">
+        <div class="sc-lbl" style="margin:0;">🔬 TECHNICAL ANALYSIS</div>
       </div>
-      <div style="height:400px;">
+      <div style="height:300px;">
         <div class="tradingview-widget-container" style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
           <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
           {"interval":"1D","width":"100%","isTransparent":true,"height":"100%","symbol":"{{ analysis.tv_symbol }}","showIntervalTabs":true,"displayMode":"multiple","locale":"en","colorTheme":"dark"}
           </script>
         </div>
+        <div class="tv-overlay"></div>
       </div>
     </div>
-
   </div>
 </div>
-</div>
+
 {% endif %}
 {% endif %}
 </div>
@@ -297,14 +354,13 @@
 <script>
 document.getElementById('screener-form').addEventListener('submit', function(){
   var r=document.getElementById('analysis-results');if(r)r.style.display='none';
-  document.getElementById('loading-skeleton').style.display='block';
 });
 function toggleWatchlist(){
   var btn=document.getElementById('watchlist-btn'),icon=document.getElementById('watchlist-icon'),text=document.getElementById('watchlist-text');
   fetch("{% url 'toggle_watchlist' %}",{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':'{{ csrf_token }}'},body:'symbol={{ symbol }}&market={{ market }}'})
   .then(r=>r.json()).then(d=>{
-    if(d.status==='added'){btn.dataset.inWatchlist='true';icon.textContent='★';text.textContent='Watchlisted';btn.style.borderColor='var(--warning)';btn.style.background='rgba(245,158,11,0.15)';btn.style.color='var(--warning)';}
-    else{btn.dataset.inWatchlist='false';icon.textContent='☆';text.textContent='Watchlist';btn.style.borderColor='';btn.style.background='';btn.style.color='';}
+    if(d.status==='added'){btn.dataset.inWatchlist='true';icon.textContent='★';text.textContent='Saved';btn.classList.add('active');}
+    else{btn.dataset.inWatchlist='false';icon.textContent='☆';text.textContent='Watch';btn.classList.remove('active');}
   });
 }
 </script>

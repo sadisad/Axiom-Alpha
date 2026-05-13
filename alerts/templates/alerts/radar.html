@@ -2,74 +2,137 @@
 {% load static %}
 {% block content %}
 <style>
-.radar-page{max-width:1400px;margin:0 auto;padding:0 1rem;}
-.radar-hero{text-align:center;padding:2rem 0 1.5rem;}
-.radar-hero h1{font-size:2rem;font-weight:900;color:var(--brand-light);margin:0 0 0.5rem;letter-spacing:-0.02em;}
-.radar-hero p{color:var(--text-secondary);font-size:0.95rem;max-width:600px;margin:0 auto;}
-.strategy-tabs{display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.5rem;margin-bottom:1rem;-webkit-overflow-scrolling:touch;}
-.strategy-tabs::-webkit-scrollbar{height:4px;}
-.strategy-tabs::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px;}
-.stab{padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.2s;white-space:nowrap;text-decoration:none;}
+.radar-page{max-width:1400px;margin:0 auto;padding:0 0.5rem;}
+.radar-hero{text-align:center;padding:0.75rem 0 0.5rem;}
+.radar-hero h1{font-size:1.4rem;font-weight:900;color:var(--brand-light);margin:0 0 0.2rem;letter-spacing:-0.02em;}
+.radar-hero p{color:var(--text-secondary);font-size:0.78rem;max-width:520px;margin:0 auto;line-height:1.4;}
+
+/* Strategy tabs */
+.strategy-row{display:flex;gap:0.3rem;overflow-x:auto;padding-bottom:0.35rem;margin-bottom:0.5rem;-webkit-overflow-scrolling:touch;}
+.strategy-row::-webkit-scrollbar{height:3px;}
+.strategy-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
+.stab{padding:0.35rem 0.75rem;border-radius:6px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.15s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem;}
 .stab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
-.stab.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
-.radar-table-wrap{border:1px solid rgba(138,203,208,0.1);border-radius:12px;overflow:hidden;background:rgba(15,10,60,0.5);}
-.radar-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.stab.active{color:#0d0645;border-color:transparent;font-weight:800;}
+.stab[data-strategy="all"].active{background:linear-gradient(135deg,#56B6C6,#00c896);}
+.stab[data-strategy="growth"].active{background:#00c896;}
+.stab[data-strategy="quality"].active{background:#56B6C6;}
+.stab[data-strategy="value"].active{background:#ffc800;}
+.stab[data-strategy="momentum"].active{background:#ff6464;}
+.stab[data-strategy="risk"].active{background:#8b5cf6;}
+
+/* Strategy insight card */
+.insight-card{border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.6rem;border:1px solid rgba(138,203,208,0.12);transition:all 0.3s;position:relative;overflow:hidden;}
+.insight-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.06;pointer-events:none;border-radius:10px;}
+.insight-card[data-theme="axiom"]{background:rgba(15,10,60,0.8);border-color:rgba(86,182,198,0.2);}
+.insight-card[data-theme="axiom"]::before{background:linear-gradient(135deg,#56B6C6,#00c896);}
+.insight-card[data-theme="growth"]{background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2);}
+.insight-card[data-theme="growth"]::before{background:linear-gradient(135deg,#00c896,#00e6aa);}
+.insight-card[data-theme="quality"]{background:rgba(86,182,198,0.06);border-color:rgba(86,182,198,0.2);}
+.insight-card[data-theme="quality"]::before{background:linear-gradient(135deg,#56B6C6,#8ACBD0);}
+.insight-card[data-theme="value"]{background:rgba(255,200,0,0.06);border-color:rgba(255,200,0,0.2);}
+.insight-card[data-theme="value"]::before{background:linear-gradient(135deg,#ffc800,#ffe066);}
+.insight-card[data-theme="momentum"]{background:rgba(255,100,100,0.06);border-color:rgba(255,100,100,0.2);}
+.insight-card[data-theme="momentum"]::before{background:linear-gradient(135deg,#ff6464,#ff8888);}
+.insight-card[data-theme="risk"]{background:rgba(139,92,246,0.06);border-color:rgba(139,92,246,0.2);}
+.insight-card[data-theme="risk"]::before{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+
+.insight-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.4rem;}
+.insight-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0;}
+.insight-icon.axiom{background:linear-gradient(135deg,#56B6C6,#00c896);color:#0d0645;}
+.insight-icon.growth{background:rgba(0,200,150,0.2);color:#00c896;}
+.insight-icon.quality{background:rgba(86,182,198,0.2);color:#56B6C6;}
+.insight-icon.value{background:rgba(255,200,0,0.15);color:#ffc800;}
+.insight-icon.momentum{background:rgba(255,100,100,0.15);color:#ff6464;}
+.insight-icon.risk{background:rgba(139,92,246,0.2);color:#8b5cf6;}
+
+.insight-title{font-size:0.92rem;font-weight:800;color:var(--brand-light);line-height:1.2;}
+.insight-subtitle{font-size:0.7rem;color:var(--text-secondary);font-weight:500;margin-top:1px;}
+.insight-body{font-size:0.76rem;color:var(--text-secondary);line-height:1.5;margin:0.5rem 0 0.6rem 0;}
+.insight-metas{display:flex;gap:1rem;flex-wrap:wrap;}
+.insight-meta{display:flex;align-items:center;gap:0.35rem;font-size:0.7rem;}
+.risk-bar{width:60px;height:5px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;position:relative;}
+.risk-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+.risk-fill.axiom{background:linear-gradient(90deg,#00c896,#56B6C6);}
+.risk-fill.growth{background:#00c896;}
+.risk-fill.quality{background:#56B6C6;}
+.risk-fill.value{background:#ffc800;}
+.risk-fill.momentum{background:#ff6464;}
+.risk-fill.risk{background:#8b5cf6;}
+
+/* Controls and table */
+.radar-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.4rem;}
+.radar-search{position:relative;}
+.radar-search input{padding:0.35rem 0.65rem 0.35rem 2rem;border-radius:6px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.82rem;outline:none;width:200px;transition:border-color 0.15s;}
+.radar-search input:focus{border-color:var(--brand-teal);}
+.radar-search svg{position:absolute;left:0.6rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);pointer-events:none;}
+.market-toggle{display:flex;gap:0.2rem;background:rgba(23,12,121,0.5);border-radius:6px;padding:0.15rem;border:1px solid rgba(138,203,208,0.1);}
+.market-toggle button{padding:0.3rem 0.65rem;border:none;border-radius:5px;font-size:0.74rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text-secondary);}
+.market-toggle button.active{background:var(--brand-teal);color:#0d0645;}
+
+.radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow:hidden;background:rgba(15,10,60,0.5);}
+.radar-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
 .radar-table thead{background:rgba(23,12,121,0.6);}
-.radar-table th{padding:0.75rem 0.6rem;text-align:left;color:var(--text-secondary);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(138,203,208,0.1);white-space:nowrap;}
-.radar-table th:last-child,.radar-table td:last-child{padding-right:1rem;}
-.radar-table td{padding:0.65rem 0.6rem;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--brand-light);white-space:nowrap;}
-.radar-table tbody tr{transition:background 0.15s;}
-.radar-table tbody tr:hover{background:rgba(86,182,198,0.06);}
+.radar-table th{padding:0.5rem 0.45rem;text-align:left;color:var(--text-secondary);font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(138,203,208,0.08);white-space:nowrap;}
+.radar-table th:last-child,.radar-table td:last-child{padding-right:0.75rem;}
+.radar-table td{padding:0.45rem 0.45rem;border-bottom:1px solid rgba(255,255,255,0.02);color:var(--brand-light);white-space:nowrap;}
+.radar-table tbody tr{transition:background 0.12s;}
+.radar-table tbody tr:hover{background:rgba(86,182,198,0.05);}
 .ticker-link{color:var(--brand-teal);text-decoration:none;font-weight:700;cursor:pointer;}
 .ticker-link:hover{text-decoration:underline;}
-.score-pill{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding:0.2rem 0.5rem;border-radius:6px;font-weight:800;font-size:0.8rem;}
+.score-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:0.12rem 0.4rem;border-radius:4px;font-weight:800;font-size:0.72rem;}
 .score-green{background:rgba(0,200,150,0.15);color:#00c896;}
 .score-yellow{background:rgba(255,200,0,0.12);color:#ffc800;}
 .score-red{background:rgba(239,68,68,0.12);color:#ff6464;}
-.mcap{font-size:0.8rem;color:var(--text-secondary);}
-.company-name{max-width:140px;overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary);font-size:0.8rem;}
-.radar-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem;}
-.radar-search{position:relative;}
-.radar-search input{padding:0.5rem 0.75rem 0.5rem 2.2rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.85rem;outline:none;width:220px;transition:border-color 0.2s;}
-.radar-search input:focus{border-color:var(--brand-teal);}
-.radar-search svg{position:absolute;left:0.7rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);pointer-events:none;}
-.market-toggle{display:flex;gap:0.25rem;background:rgba(23,12,121,0.5);border-radius:8px;padding:0.2rem;border:1px solid rgba(138,203,208,0.1);}
-.market-toggle button{padding:0.4rem 0.8rem;border:none;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-secondary);}
-.market-toggle button.active{background:var(--brand-teal);color:#0d0645;}
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-secondary);}
-.empty-state svg{margin-bottom:1rem;opacity:0.4;}
+.mcap{font-size:0.72rem;color:var(--text-secondary);}
+.company-name{max-width:120px;overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary);font-size:0.72rem;}
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--text-secondary);}
+
+/* Sortable headers */
+.sortable{cursor:pointer;user-select:none;position:relative;}
+.sort-arrow{font-size:0.55rem;margin-left:2px;opacity:0.3;transition:opacity 0.15s;}
+.sortable.asc .sort-arrow::after{content:'\25B2';opacity:1;}
+.sortable.desc .sort-arrow::after{content:'\25BC';opacity:1;}
+.sortable.asc .sort-arrow,.sortable.desc .sort-arrow{opacity:1;}
+.sortable:hover{color:var(--brand-teal);}
+
+/* Pro tip label */
+.pro-tip{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(0,200,150,0.1);color:#00c896;font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;margin-left:0.4rem;}
+
 @media(max-width:768px){
-.radar-page{padding:0 0.5rem;}
-.radar-hero h1{font-size:1.5rem;}
-.radar-table{font-size:0.78rem;}
-.radar-table th,.radar-table td{padding:0.5rem 0.4rem;}
-.company-name{max-width:80px;}
-.radar-search input{width:160px;}
+.radar-hero h1{font-size:1.2rem;}
+.radar-table{font-size:0.72rem;}
+.radar-table th,.radar-table td{padding:0.4rem 0.3rem;}
+.company-name{max-width:70px;}
+.radar-search input{width:150px;}
+.insight-metas{gap:0.6rem;}
+.insight-body{font-size:0.7rem;}
 }
 @media(max-width:480px){
-.radar-hero h1{font-size:1.2rem;}
-.radar-hero p{font-size:0.85rem;}
-.stab{padding:0.35rem 0.6rem;font-size:0.75rem;}
-.market-toggle button{padding:0.3rem 0.6rem;font-size:0.75rem;}
-.radar-search input{width:100%;}
+.radar-hero h1{font-size:1rem;}
+.stab{padding:0.25rem 0.5rem;font-size:0.66rem;}
+.insight-card{padding:0.7rem 0.8rem;}
+.insight-icon{width:30px;height:30px;font-size:0.9rem;}
+.insight-title{font-size:0.82rem;}
+.insight-metas{flex-direction:column;gap:0.3rem;}
 }
 </style>
 
 <div class="radar-page">
   <div class="radar-hero">
     <h1>Stock Radar</h1>
-    <p>Screen & rank stocks across 5 scoring strategies. Find quality compounders, growth picks & contrarian value.</p>
+    <p>Screen & rank stocks across 5 scoring strategies. Click a strategy to understand the methodology.</p>
   </div>
 
-  <div style="display:flex;gap:0.5rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
+  <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;flex-wrap:wrap;">
     <div class="market-toggle">
       <button class="market-btn active" data-market="US">US</button>
       <button class="market-btn" data-market="ID">ID</button>
     </div>
   </div>
 
-  <div class="strategy-tabs" id="strategy-tabs">
-    <a class="stab active" data-strategy="all">All</a>
+  <div class="strategy-row" id="strategy-tabs">
+    <a class="stab active" data-strategy="all">Axiom+</a>
     <a class="stab" data-strategy="growth">Growth</a>
     <a class="stab" data-strategy="quality">Quality</a>
     <a class="stab" data-strategy="value">Value</a>
@@ -77,45 +140,206 @@
     <a class="stab" data-strategy="risk">Risk Shield</a>
   </div>
 
+  <!-- Strategy Insight Card -->
+  <div class="insight-card" data-theme="axiom" id="insight-card">
+    <div class="insight-header">
+      <div class="insight-icon axiom" id="insight-icon">&#8860;</div>
+      <div>
+        <div class="insight-title" id="insight-title">Axiom+</div>
+        <div class="insight-subtitle" id="insight-subtitle">The one score to rule them all</div>
+      </div>
+    </div>
+    <div class="insight-body" id="insight-body">Five factors. One score. Axiom+ blends Growth, Quality, Value, Momentum, and Antifragility into a single number that captures the full picture of a stock — compounders score high, fragile stocks score low. Use it as your default lens for flipping through the market.</div>
+    <div class="insight-metas">
+      <div class="insight-meta">
+        <span style="font-weight:700;color:var(--brand-light);">Risk</span>
+        <div class="risk-bar"><div class="risk-fill axiom" id="risk-fill" style="width:10%;"></div></div>
+        <span id="risk-label" style="color:#00c896;font-weight:700;">Very Low (1/10)</span>
+      </div>
+      <div class="insight-meta">
+        <span style="font-weight:700;color:var(--brand-light);">Ideal for</span>
+        <span id="ideal-label" style="color:var(--text-secondary);">Conservative long-term investors & general screening</span>
+      </div>
+    </div>
+  </div>
+
   <div class="radar-controls">
     <div class="radar-search">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
       <input type="text" id="radar-search" placeholder="Search ticker or name...">
     </div>
-    <div style="font-size:0.75rem;color:var(--text-secondary);">Showing <span id="stock-count">0</span> stocks</div>
+    <div style="font-size:0.68rem;color:var(--text-secondary);">Showing <span id="stock-count">0</span> stocks</div>
   </div>
 
   <div class="radar-table-wrap">
     <table class="radar-table" id="radar-table">
       <thead>
         <tr>
-          <th style="width:40px;">#</th>
-          <th>Ticker</th>
-          <th>Name</th>
-          <th>MCap</th>
-          <th class="sortable" data-col="growth">Growth</th>
-          <th class="sortable" data-col="quality">Quality</th>
-          <th class="sortable" data-col="value">Value</th>
-          <th class="sortable" data-col="momentum">Mom</th>
-          <th class="sortable" data-col="risk">Risk</th>
-          <th class="sortable" data-col="score">Score</th>
+          <th style="width:32px;">#</th>
+          <th class="sortable" data-col="ticker">Ticker <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="name">Name <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="mcap">MCap <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="growth">Growth <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="quality">Quality <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="value">Value <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="momentum">Mom <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="risk">Risk <span class="sort-arrow"></span></th>
+          <th class="sortable" data-col="score">Score <span class="sort-arrow"></span></th>
         </tr>
       </thead>
       <tbody id="radar-body"></tbody>
     </table>
   </div>
   <div id="no-results" class="empty-state" style="display:none;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <p>No stocks match your filter</p>
   </div>
 </div>
 
 <script>
+const STRATEGIES = {
+  all: {
+    icon: '&#8860;',
+    iconClass: 'axiom',
+    theme: 'axiom',
+    title: 'Axiom+',
+    subtitle: 'The one score to rule them all',
+    body: 'Five factors. One score. Axiom+ blends Growth, Quality, Value, Momentum, and Antifragility into a single number that captures the full picture of a stock \u2014 compounders score high, fragile stocks score low. Use it as your default lens for flipping through the market.',
+    risk: 1, riskMax: 10, riskLabel: 'Very Low (1/10)', riskColor: '#00c896',
+    ideal: 'Conservative long-term investors & general screening'
+  },
+  growth: {
+    icon: '&#9650;',
+    iconClass: 'growth',
+    theme: 'growth',
+    title: 'Growth',
+    subtitle: 'Bet on tomorrow\u2019s winners',
+    body: 'Who\u2019s growing the fastest? Growth Champions answers that question with pure data. Revenue growth rate, earnings trajectory, and forward estimates determine whether a company is genuinely scaling or just inflating margins. This is the lens for catching explosive upside \u2014 but high growth means high volatility.',
+    risk: 8, riskMax: 10, riskLabel: 'High (8/10)', riskColor: '#ffc800',
+    ideal: 'Aggressive long-term investors & growth seekers'
+  },
+  quality: {
+    icon: '&#9830;',
+    iconClass: 'quality',
+    theme: 'quality',
+    title: 'Quality',
+    subtitle: 'The best-run businesses in the world',
+    body: 'Which companies are built to last? Quality scores every stock on profitability (EBIT, net income, and free cash flow margins), capital efficiency (ROE, ROA), earnings consistency, and balance sheet health. The top names are dominant businesses with wide moats that compound capital year after year.',
+    risk: 3, riskMax: 10, riskLabel: 'Low (3/10)', riskColor: '#56B6C6',
+    ideal: 'Conservative long-term investors & compounder hunters'
+  },
+  value: {
+    icon: '&#9660;',
+    iconClass: 'value',
+    theme: 'value',
+    title: 'Value',
+    subtitle: 'The cheapest stocks on the market',
+    body: 'How cheap is this stock really? Deep Value scores the universe on forward multiples: P/E, P/B, and EV/EBITDA. But cheapness alone isn\u2019t enough \u2014 Free Cash Flow Yield separates genuinely undervalued companies from value traps that look cheap because they\u2019re broken.',
+    risk: 7, riskMax: 10, riskLabel: 'High (7/10)', riskColor: '#ffc800',
+    ideal: 'Contrarian value investors & margin-of-safety seekers'
+  },
+  momentum: {
+    icon: '&#9650;',
+    iconClass: 'momentum',
+    theme: 'momentum',
+    title: 'Momentum',
+    subtitle: 'The market\u2019s hottest stocks right now',
+    body: 'What\u2019s going up and keeps going up? Momentum Surge tracks price performance across every timeframe: 1-month and 3-month returns, plus proximity to 52-week highs. A one-month spike won\u2019t cut it \u2014 sustained pressure across timeframes signals real institutional accumulation.',
+    risk: 9, riskMax: 10, riskLabel: 'Very High (9/10)', riskColor: '#ff6464',
+    ideal: 'Active short-term traders & trend followers'
+  },
+  risk: {
+    icon: '&#9879;',
+    iconClass: 'risk',
+    theme: 'risk',
+    title: 'Risk Shield',
+    subtitle: 'Built to survive any market',
+    body: 'When markets crash, which stocks hold up? Risk Shield combines market risk metrics (beta, volatility) with financial durability signals: low debt, strong cash flow, predictable earnings. High scorers have low price swings, generate real cash, and deliver profits like clockwork \u2014 the last stocks to crack in a downturn.',
+    risk: 2, riskMax: 10, riskLabel: 'Very Low (2/10)', riskColor: '#8b5cf6',
+    ideal: 'Risk-averse investors & recession hedgers'
+  }
+};
+
+const MCAP_ORDER = {'T':4,'B':3,'M':2,'K':1,'-':0};
 let currentMarket = 'US';
 let currentStrategy = 'all';
 let currentStocks = [];
+let sortCol = 'score';
+let sortDir = 'desc';
 
 function scoreClass(v){return v>=80?'score-green':v>=50?'score-yellow':'score-red';}
+
+function parseMcap(mc) {
+  if (!mc || mc === '-') return 0;
+  const num = parseFloat(mc.replace(/[$,]/g,''));
+  if (mc.includes('T')) return num * 1000;
+  if (mc.includes('B')) return num;
+  if (mc.includes('M')) return num / 1000;
+  return num;
+}
+
+function getVal(stock, col) {
+  switch(col) {
+    case 'ticker': return stock.t;
+    case 'name': return stock.n;
+    case 'mcap': return parseMcap(stock.mc);
+    case 'growth': return stock.g;
+    case 'quality': return stock.q;
+    case 'value': return stock.v;
+    case 'momentum': return stock.m;
+    case 'risk': return stock.r;
+    case 'score': return stock.s;
+    default: return stock.s;
+  }
+}
+
+function sortStocks() {
+  currentStocks.sort((a,b) => {
+    let va = getVal(a, sortCol);
+    let vb = getVal(b, sortCol);
+    if (typeof va === 'string') {
+      va = va.toLowerCase();
+      vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    }
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
+}
+
+function updateSortArrows() {
+  document.querySelectorAll('.sortable').forEach(th => {
+    th.classList.remove('asc','desc');
+    if (th.dataset.col === sortCol) {
+      th.classList.add(sortDir);
+    }
+  });
+}
+
+function updateInsightCard(key) {
+  const s = STRATEGIES[key];
+  const card = document.getElementById('insight-card');
+  const icon = document.getElementById('insight-icon');
+  const title = document.getElementById('insight-title');
+  const subtitle = document.getElementById('insight-subtitle');
+  const body = document.getElementById('insight-body');
+  const fill = document.getElementById('risk-fill');
+  const riskLabel = document.getElementById('risk-label');
+  const idealLabel = document.getElementById('ideal-label');
+
+  card.setAttribute('data-theme', s.theme);
+  icon.className = 'insight-icon ' + s.iconClass;
+  icon.innerHTML = s.icon;
+  title.textContent = s.title;
+  subtitle.textContent = s.subtitle;
+  body.textContent = s.body;
+
+  fill.style.width = (s.risk / s.riskMax * 100) + '%';
+  fill.className = 'risk-fill ' + s.theme;
+  riskLabel.textContent = s.riskLabel;
+  riskLabel.style.color = s.riskColor;
+  idealLabel.textContent = s.ideal;
+}
 
 function renderTable(stocks){
   const tbody=document.getElementById('radar-body');
@@ -125,8 +349,8 @@ function renderTable(stocks){
   noRes.style.display='none';
   tbody.innerHTML=stocks.map((s,i)=>`
     <tr>
-      <td style="color:var(--text-secondary);font-size:0.75rem;">${i+1}</td>
-      <td><a href="{% url 'screener' %}?symbol=${s.t}&market=${currentMarket}" class="ticker-link">${s.t}</a></td>
+      <td style="color:var(--text-secondary);font-size:0.68rem;">${i+1}</td>
+      <td><a href="/screener/?symbol=${s.t}&market=${currentMarket}" class="ticker-link">${s.t}</a></td>
       <td><span class="company-name">${s.n}</span></td>
       <td><span class="mcap">${s.mc}</span></td>
       <td><span class="score-pill ${scoreClass(s.g)}">${s.g}</span></td>
@@ -134,7 +358,7 @@ function renderTable(stocks){
       <td><span class="score-pill ${scoreClass(s.v)}">${s.v}</span></td>
       <td><span class="score-pill ${scoreClass(s.m)}">${s.m}</span></td>
       <td><span class="score-pill ${scoreClass(s.r)}">${s.r}</span></td>
-      <td><span class="score-pill ${scoreClass(s.s)}" style="font-weight:900;font-size:0.85rem;">${s.s}</span></td>
+      <td><span class="score-pill ${scoreClass(s.s)}" style="font-weight:900;font-size:0.78rem;">${s.s}</span></td>
     </tr>
   `).join('');
 }
@@ -146,10 +370,11 @@ function loadScores(market){
     .then(r=>r.json())
     .then(data=>{
       currentStocks=data.stocks||[];
+      sortStocks();
       filterStocks();
     })
     .catch(()=>{
-      document.getElementById('radar-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text-secondary);">Failed to load scores. Try refreshing.</td></tr>';
+      document.getElementById('radar-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--text-secondary);">Failed to load scores. Try refreshing.</td></tr>';
     });
 }
 
@@ -160,15 +385,21 @@ function filterStocks(){
 
   if(currentStrategy!=='all'){
     const col=currentStrategy;
-    const isGrowth=col==='growth',isQ=col==='quality',isV=col==='value',isM=col==='momentum',isR=col==='risk';
     stocks.sort((a,b)=>{
-      const va=isGrowth?a.g:isQ?a.q:isV?a.v:isM?a.m:a.r;
-      const vb=isGrowth?b.g:isQ?b.q:isV?b.v:isM?b.m:b.r;
+      const va=col==='growth'?a.g:col==='quality'?a.q:col==='value'?a.v:col==='momentum'?a.m:a.r;
+      const vb=col==='growth'?b.g:col==='quality'?b.q:col==='value'?b.v:col==='momentum'?b.m:b.r;
       return vb-va;
     });
-  } else {
-    stocks.sort((a,b)=>b.s-a.s);
   }
+
+  if(currentStrategy==='all' && sortCol==='score') {
+    stocks.sort((a,b) => sortDir==='desc' ? b.s-a.s : a.s-b.s);
+  } else if(currentStrategy==='all') {
+    sortStocks();
+    stocks = [...currentStocks];
+    if(q) stocks=stocks.filter(s=>s.t.toLowerCase().includes(q)||s.n.toLowerCase().includes(q));
+  }
+
   renderTable(stocks);
 }
 
@@ -179,6 +410,7 @@ document.querySelectorAll('.stab').forEach(tab=>{
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     this.classList.add('active');
     currentStrategy=this.dataset.strategy;
+    updateInsightCard(currentStrategy);
     filterStocks();
   });
 });
@@ -191,6 +423,7 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
     currentStrategy='all';
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     document.querySelector('.stab[data-strategy="all"]').classList.add('active');
+    updateInsightCard('all');
     loadScores(currentMarket);
   });
 });
@@ -198,14 +431,16 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
 document.getElementById('radar-search').addEventListener('input',filterStocks);
 
 document.querySelectorAll('.sortable').forEach(th=>{
-  th.style.cursor='pointer';
   th.addEventListener('click',function(){
     const col=this.dataset.col;
-    currentStocks.sort((a,b)=>{
-      const va=col==='growth'?a.g:col==='quality'?a.q:col==='value'?a.v:col==='momentum'?a.m:col==='risk'?a.r:a.s;
-      const vb=col==='growth'?b.g:col==='quality'?b.q:col==='value'?b.v:col==='momentum'?b.m:col==='risk'?b.r:b.s;
-      return vb-va;
-    });
+    if(sortCol===col){
+      sortDir = sortDir==='desc' ? 'asc' : 'desc';
+    } else {
+      sortCol = col;
+      sortDir = (col==='ticker' || col==='name') ? 'asc' : 'desc';
+    }
+    updateSortArrows();
+    sortStocks();
     filterStocks();
   });
 });

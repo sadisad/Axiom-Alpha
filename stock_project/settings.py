@@ -75,6 +75,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'alerts.context_processors.firebase_config',
+                'alerts.context_processors.subscription_context',
             ],
         },
     },
