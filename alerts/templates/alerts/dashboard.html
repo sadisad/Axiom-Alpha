@@ -1,9 +1,9 @@
 {% extends 'alerts/base.html' %}
 {% block content %}
 <style>
-.hub { display:flex; flex-direction:column; gap:0.6rem; }
-.hub-row { display:grid; gap:0.6rem; }
-.panel { background:rgba(15,10,60,0.7); border:1px solid rgba(138,203,208,0.12); border-radius:10px; padding:0.85rem 1rem; }
+.hub { display:flex; flex-direction:column; gap:0.6rem; min-width:0; width:100%; }
+.hub-row { display:grid; gap:0.6rem; min-width:0; }
+.panel { background:rgba(15,10,60,0.7); border:1px solid rgba(138,203,208,0.12); border-radius:10px; padding:0.85rem 1rem; min-width:0; overflow:hidden; }
 .panel-title { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.6rem; }
 
 /* Gauge */
@@ -93,14 +93,17 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
   #returns-movers-grid,
   #market-overview-grid { grid-template-columns:1fr !important; }
   .modal-form-grid { grid-template-columns:1fr !important; }
-  .um-menu-mobile { left:-0.5rem !important; }
+  .um-menu-mobile { left:-0.5rem !important; max-width:calc(100vw - 1rem) !important; }
   .tv-mobile-height { height:260px !important; }
+  .hub, .hub-row, .panel { min-width:0; }
+  .wl-table-wrap, .tr-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 }
 @media(max-width:480px){
   .gauge-row { flex-wrap:wrap; justify-content:center; }
   .gauge svg { width:50px; height:32px; }
   .gauge-val { font-size:0.95rem; }
   .scard { min-width:140px; }
+  .panel { padding:0.6rem 0.65rem; }
 }
 </style>
 
@@ -117,7 +120,7 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
               <span id="universe-label">S&P 500</span>
               <i data-lucide="chevron-down" style="width:10px;height:10px;"></i>
             </button>
-            <div id="universe-menu" style="display:none; position:absolute; top:100%; left:0; margin-top:3px; width:260px; max-height:360px; overflow-y:auto; background:rgba(15,10,60,0.98); border:1px solid rgba(138,203,208,0.2); border-radius:8px; padding:0.35rem 0; z-index:200; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
+            <div id="universe-menu" class="um-menu-mobile" style="display:none; position:absolute; top:100%; left:0; margin-top:3px; width:260px; max-height:360px; overflow-y:auto; background:rgba(15,10,60,0.98); border:1px solid rgba(138,203,208,0.2); border-radius:8px; padding:0.35rem 0; z-index:200; box-shadow:0 15px 50px rgba(0,0,0,0.5);">
               <div style="padding:0.25rem 0.6rem; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary);">Trending</div>
               <a href="{% url 'screener' %}?symbol=NVDA&market=US" class="um-item">💾 Semiconductors <span class="um-count">102</span></a>
               <a href="{% url 'screener' %}?symbol=AAPL&market=US" class="um-item">🖥️ Tech Hardware <span class="um-count">147</span></a>

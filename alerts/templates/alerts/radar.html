@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <style>
-.radar-page{max-width:1400px;margin:0 auto;padding:0 0.5rem;}
+.radar-page{max-width:1400px;margin:0 auto;padding:0 0.5rem;min-width:0;width:100%;overflow-x:hidden;}
 .radar-hero{text-align:center;padding:0.75rem 0 0.5rem;}
 .radar-hero h1{font-size:1.4rem;font-weight:900;color:var(--brand-light);margin:0 0 0.2rem;letter-spacing:-0.02em;}
 .radar-hero p{color:var(--text-secondary);font-size:0.78rem;max-width:520px;margin:0 auto;line-height:1.4;}
@@ -22,7 +22,7 @@
 .stab[data-strategy="risk"].active{background:#8b5cf6;}
 
 /* Strategy insight card */
-.insight-card{border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.6rem;border:1px solid rgba(138,203,208,0.12);transition:all 0.3s;position:relative;overflow:hidden;}
+.insight-card{border-radius:10px;padding:0.85rem 1rem;margin-bottom:0.6rem;border:1px solid rgba(138,203,208,0.12);transition:all 0.3s;position:relative;overflow:hidden;min-width:0;}
 .insight-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.06;pointer-events:none;border-radius:10px;}
 .insight-card[data-theme="axiom"]{background:rgba(15,10,60,0.8);border-color:rgba(86,182,198,0.2);}
 .insight-card[data-theme="axiom"]::before{background:linear-gradient(135deg,#56B6C6,#00c896);}
@@ -70,7 +70,7 @@
 .market-toggle button{padding:0.3rem 0.65rem;border:none;border-radius:5px;font-size:0.74rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text-secondary);}
 .market-toggle button.active{background:var(--brand-teal);color:#0d0645;}
 
-.radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow:hidden;background:rgba(15,10,60,0.5);}
+.radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow-x:auto;background:rgba(15,10,60,0.5);-webkit-overflow-scrolling:touch;}
 .radar-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
 .radar-table thead{background:rgba(23,12,121,0.6);}
 .radar-table th{padding:0.5rem 0.45rem;text-align:left;color:var(--text-secondary);font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(138,203,208,0.08);white-space:nowrap;}
@@ -178,6 +178,7 @@
 }
 @media(max-width:480px){
 .radar-hero h1{font-size:1rem;}
+.radar-page{padding:0 0.25rem;}
 .stab{padding:0.25rem 0.5rem;font-size:0.66rem;}
 .insight-card{padding:0.7rem 0.8rem;}
 .insight-icon{width:30px;height:30px;font-size:0.9rem;}
@@ -186,9 +187,10 @@
 .keystat-btn{font-size:0.58rem;padding:0.2rem 0.35rem;}
 .adv-strat-grid{grid-template-columns:repeat(2,1fr);}
 .adv-metric-grid{grid-template-columns:repeat(2,1fr);}
-.select-list-dropdown{width:calc(100vw - 2rem);left:-0.5rem;}
+.select-list-dropdown{width:calc(100vw - 1rem);left:-0.25rem;}
 .select-list-btn .list-name{max-width:100px;}
 .radar-search input{width:120px;}
+.radar-controls{flex-wrap:wrap;}
 }
 </style>
 
