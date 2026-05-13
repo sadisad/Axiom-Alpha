@@ -26,7 +26,7 @@ from .models import WatchlistItem, SearchHistory, PortfolioItem
 from .services.market_data import (
     get_dashboard_gauges, get_dashboard_key_stats, get_returns_data,
     get_top_rated, get_trending_portfolios, get_strategy_picks,
-    SP500_SYMBOLS, IDX_SYMBOLS, get_market_scores,
+    SP500_SYMBOLS, IDX_SYMBOLS, STOCK_LISTS, get_market_scores,
 )
 from .firebase_db import (
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
@@ -167,12 +167,42 @@ def radar(request):
 
 def radar_scores(request):
     market = request.GET.get('market', 'US')
-    symbols = SP500_SYMBOLS[:100] if market == 'US' else IDX_SYMBOLS
+    size = min(int(request.GET.get('size', 25)), 100)
+    list_key = request.GET.get('list', '')
+    if list_key and list_key in STOCK_LISTS:
+        symbols = STOCK_LISTS[list_key]['symbols'][:100]
+    elif market == 'ID':
+        symbols = IDX_SYMBOLS[:size]
+    else:
+        symbols = SP500_SYMBOLS[:size]
     try:
         scores = get_market_scores(symbols, market)
-        return JsonResponse({'stocks': scores, 'market': market})
+        return JsonResponse({'stocks': scores, 'market': market, 'size': len(symbols)})
     except Exception as e:
         return JsonResponse({'stocks': [], 'market': market, 'error': str(e)})
+
+
+def stock_lists(request):
+    categories = {}
+    for key, lst in STOCK_LISTS.items():
+        cat = lst['category']
+        if cat not in categories:
+            categories[cat] = []
+        categories[cat].append({
+            'key': key,
+            'name': lst['name'],
+            'emoji': lst['emoji'],
+            'count': len(lst['symbols']),
+        })
+    ordered = ['TRENDING', 'LISTS', 'ETF']
+    result = []
+    for cat in ordered:
+        if cat in categories:
+            result.append({'category': cat, 'lists': categories[cat]})
+    for cat in categories:
+        if cat not in ordered:
+            result.append({'category': cat, 'lists': categories[cat]})
+    return JsonResponse({'groups': result})
 
 
 def headlines(request):

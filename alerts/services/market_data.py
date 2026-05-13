@@ -54,6 +54,101 @@ SP500_SYMBOLS = [
     'TMO','TJX','USB','VZ','WBA','WELL','WM','WMT','ZTS','CBRE',
 ]
 SP500_SAMPLE = SP500_SYMBOLS[:100]
+STOCK_LISTS = {
+    'mega_cap': {
+        'name': 'USA Mega Cap', 'emoji': '🇺🇸', 'category': 'LISTS', 'symbols': [
+            'NVDA','GOOGL','AAPL','MSFT','AMZN','AVGO','TSLA','META','BRK-A','WMT',
+            'MU','LLY','JPM','AMD','INTC','XOM','V','ORCL','JNJ','COST',
+            'MA','CAT','CSCO','LRCX','CVX','NFLX','BAC','ABBV','AMAT','UNH',
+            'KO','PG','PLTR','GE','HD','MS','GS','GEV','PM','MRK',
+            'TXN','QCOM','KLAC','RTX','LIN','SNDK','WFC','C','AXP','IBM',
+            'TMUS','ADI','PEP','NEE','VZ','MCD','BA','DIS','GLW','AMGN',
+            'WDC','PANW','T','ANET','TMO','BLK','GILD','TJX','APP','DELL',
+            'DE','UNP','UBER','SCCO','SCHW','WELL','APH','MRVL','ISRG','PFE',
+            'CRM','ABT','VRT','COP','HON','CRWD','PLD','NEM','LOW','SPGI',
+            'BKNG','SBUX','LMT','DHR','PWR','PGR','MO','COF','BMY','CEG',
+        ],
+    },
+    'magnificent_7': {
+        'name': 'Magnificent 7', 'emoji': '⭐', 'category': 'TRENDING', 'symbols': [
+            'AAPL','AMZN','GOOGL','META','MSFT','NVDA','TSLA',
+        ],
+    },
+    'nasdaq_100': {
+        'name': 'NASDAQ 100', 'emoji': '💻', 'category': 'LISTS', 'symbols': [
+            'AAPL','ABNB','ADBE','ADI','ADP','ADSK','AEP','AMGN','AMZN','ANET',
+            'APP','AVGO','AXON','BIIB','BKNG','BKR','CASH','CDNS','CDW','CHTR',
+            'CMCSA','COIN','CRWD','CSX','CTAS','CTSH','DASH','DDOG','DLTR','DXCM',
+            'EA','EXC','FANG','FAST','FTNT','GEHC','GILD','GOOGL','GOOG','HON',
+            'IDXX','ILMN','INTC','INTU','ISRG','KDP','KHC','KLAC','LIN','LRCX',
+            'LULU','MAR','MCHP','MDB','MDLZ','MELI','META','MNST','MRVL','MSFT',
+            'MU','NFLX','NVDA','ODFL','ON','ORLY','PANW','PAYX','PCAR','PDD',
+            'PEP','PLTR','PYPL','QCOM','REGN','ROP','ROST','SBUX','SMCI','SNPS',
+            'SWKS','TMUS','TSLA','TTD','TTWO','TXN','VRSK','VRTX','WBD','WDAY',
+            'XEL','ZS',
+        ],
+    },
+    'sp500': {
+        'name': 'S&P 500', 'emoji': '🇺🇸', 'category': 'LISTS', 'symbols': SP500_SYMBOLS[:100],
+    },
+    'semiconductors': {
+        'name': 'Semiconductors', 'emoji': '💾', 'category': 'TRENDING', 'symbols': [
+            'NVDA','AMD','INTC','AVGO','QCOM','TXN','MU','AMAT','LRCX','KLAC',
+            'MRVL','SNPS','CDNS','MCHP','NXPI','MPWR','ANET','FTNT','GDD','ON',
+            'SWKS','MPWR','TER','ENTG','OLED','ACLX','RMBS','NOVT','AZTA','ICHR',
+            'SEMIS','POWI','LGTY','COHR','LITE','QRVO','WOLF','SMTC','SITM','MTSI',
+            'API','VKTX','SGH','SIMO','CEVA','CAMT','ITEK','ICD','ASX','UMC',
+        ],
+    },
+    'tech_hardware': {
+        'name': 'Technology Hardware', 'emoji': '🖥️', 'category': 'TRENDING', 'symbols': [
+            'AAPL','DELL','HPQ','HPE','LOGI','NTAP','STX','WDC','PSTG','SMCI',
+            'VRNT','FFIV','JNPR','MXL','NET','ZBRA','SABR','CALX','CIEN','VSAT',
+            'DBD','FLIR','EXTR','CHWY','DBX','FROG','NTNX','AVNW','UCTT','CCSI',
+            'KN','SLAB','BELFA','UIS','MCHP','ANET','VMW','XLNX','MRVL','AVGO',
+        ],
+    },
+    'comm_equipment': {
+        'name': 'Communications Equipment', 'emoji': '📡', 'category': 'TRENDING', 'symbols': [
+            'CSCO','MRVL','SWKS','FFIV','JNPR','HWM','CIEN','ZBH','CAMT','VKTX',
+            'NOK','ERIC','QUAL','AIRG','VSAT','EXTR','UDMY','SPSC','ACTG','SATS',
+            'COMM','INFN','SITM','ACMR',
+        ],
+    },
+    'electronic_equipment': {
+        'name': 'Electronic Equipment', 'emoji': '📟', 'category': 'TRENDING', 'symbols': [
+            'AMAT','LRCX','KLAC','TER','UCTT','VECO','ICHR','CCSI','MKSI','NOVT',
+            'RGCO','MTSI','FORM','ACMR','OLED','LITE','COHR','QRVO','SLAB','BELFA',
+            'WOLF','SMTC','CAMT','ENTG','SEMIS','POWI','AZTA','NEX','OSIS','MVIS',
+            'RMTI','BHE','TTMI','FLEX','PLXS','CRUS','SYNA','SIMO','ITEK','API',
+            'LGTY','IDCC','RMBS','CEVA','SITM','EMKR','DSPG','HIMX','PWAV','STM',
+        ],
+    },
+    'dividend_aristocrats': {
+        'name': 'US Dividend Aristocrats', 'emoji': '💰', 'category': 'LISTS', 'symbols': [
+            'ABBV','ABT','ADM','AFL','AMCR','ATVI','AVY','BEN','BF-B','BKR',
+            'BRO','BTI','BWX','CB','CCC','CHD','CL','CLX','CINF','COST',
+            'CVX','DOV','ECL','ED','EMR','ESS','FRT','GD','GWW','HBAN',
+            'HRL','ITW','JNJ','KMB','KO','LEG','LIN','LOW','MCD','MDT',
+            'MMM','MO','NEE','NUE','O','OMC','PEG','PG','PNW','PPT',
+            'PPG','ROP','SYY','TGT','TROW','TRV','UDR','UHS','VFC','WBA',
+            'WMT','XOM','YUM',
+        ],
+    },
+    'key_etfs': {
+        'name': 'Key ETFs', 'emoji': '🧭', 'category': 'ETF', 'symbols': [
+            'SPY','QQQ','IWM','DIA','VTI','VOO','VEA','VWO','EFA','AGG',
+            'BND','GLD','SLV','USO','XLF','XLE','XLK','XLV','XLY','XLP',
+            'XLU','XLI','XLRE','XLB','XLC','VTV','SCHD','VIG','VNQ','HYG',
+            'LQD','TIP','IEF','TLT','SHV','BIL','MTUM','QUAL','VLUE','SIZE',
+            'USMV','ACWI','IOO','PFF','MDY','IWM','IWV','SCHB','ITOT','VCEB',
+            'VWO','VIG','VGK','EWJ','FXI','EEM','EFA','GXC','RSP','MDY',
+            'IVV','VOO','VTI','SCHX','ONEQ','QQQ','IVW','IJJ','IJS','SCHA',
+            'SCHF','SCHM','FNCL','IYT','IHF','IEZ','IYC','IYE','IYW','IYR',
+        ],
+    },
+}
+
 IDX_SYMBOLS = ['BBCA.JK','BBRI.JK','TLKM.JK','BMRI.JK','ASII.JK','UNVR.JK']
 
 TOP_RATED_SYMBOLS = [

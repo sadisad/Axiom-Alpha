@@ -98,6 +98,63 @@
 
 /* Pro tip label */
 .pro-tip{display:inline-flex;align-items:center;gap:0.25rem;background:rgba(0,200,150,0.1);color:#00c896;font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;margin-left:0.4rem;}
+.size-controls{display:flex;align-items:center;gap:0.35rem;}
+.size-btn{width:26px;height:26px;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-teal);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;line-height:1;}
+.size-btn:hover{border-color:var(--brand-teal);background:rgba(86,182,198,0.1);}
+.size-btn:active{transform:scale(0.95);}
+.size-btn:disabled{opacity:0.3;cursor:not-allowed;border-color:rgba(138,203,208,0.1);}
+.size-value{font-size:0.78rem;font-weight:700;color:var(--brand-light);min-width:24px;text-align:center;}
+.size-reset{padding:0.2rem 0.5rem;border-radius:5px;border:1px solid rgba(138,203,208,0.15);background:transparent;color:var(--text-secondary);font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.size-reset:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+
+/* Select List */
+.select-list-wrap{position:relative;display:inline-block;}
+.select-list-btn{display:flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.select-list-btn:hover{border-color:var(--brand-teal);}
+.select-list-btn .list-name{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.select-list-dropdown{position:absolute;top:100%;left:0;margin-top:0.35rem;width:320px;max-height:420px;overflow-y:auto;background:rgba(15,10,60,0.98);border:1px solid rgba(138,203,208,0.2);border-radius:10px;padding:0.5rem;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:none;backdrop-filter:blur(12px);}
+.select-list-dropdown.open{display:block;}
+.sld-search{width:100%;padding:0.4rem 0.65rem;border-radius:6px;border:1px solid rgba(138,203,208,0.15);background:rgba(13,6,69,0.6);color:var(--brand-light);font-size:0.78rem;outline:none;margin-bottom:0.5rem;font-family:'Outfit',sans-serif;}
+.sld-search:focus{border-color:var(--brand-teal);}
+.sld-search::placeholder{color:rgba(138,203,208,0.4);}
+.sld-cat{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--brand-teal);padding:0.4rem 0.5rem 0.2rem;}
+.sld-item{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;border-radius:6px;cursor:pointer;transition:background 0.12s;font-size:0.78rem;color:var(--text-secondary);}
+.sld-item:hover{background:rgba(86,182,198,0.08);}
+.sld-item.active{background:rgba(86,182,198,0.12);color:var(--brand-light);}
+.sld-emoji{font-size:0.9rem;width:20px;text-align:center;}
+.sld-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--brand-light);}
+.sld-count{font-size:0.65rem;color:var(--text-secondary);background:rgba(138,203,208,0.08);padding:0.1rem 0.4rem;border-radius:3px;}
+
+/* Key Statistics */
+.keystat-bar{display:flex;gap:0.25rem;flex-wrap:wrap;margin-bottom:0.5rem;}
+.keystat-btn{padding:0.25rem 0.55rem;border-radius:5px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;color:var(--text-secondary);}
+.keystat-btn:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.keystat-btn.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
+
+/* Advanced Screener */
+.adv-toggle{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;cursor:pointer;font-size:0.78rem;font-weight:700;color:var(--text-secondary);transition:color 0.15s;padding:0.3rem 0;}
+.adv-toggle:hover{color:var(--brand-teal);}
+.adv-toggle i{transition:transform 0.2s;}
+.adv-toggle.open i{transform:rotate(90deg);}
+.adv-panel{display:none;border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;background:rgba(15,10,60,0.5);}
+.adv-panel.open{display:block;}
+.adv-strat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-bottom:0.75rem;}
+.adv-strat-card{padding:0.5rem;border-radius:6px;border:1px solid rgba(138,203,208,0.1);cursor:pointer;transition:all 0.15s;text-align:center;}
+.adv-strat-card:hover{border-color:var(--brand-teal);}
+.adv-strat-card.selected{border-color:var(--brand-teal);background:rgba(86,182,198,0.08);}
+.adv-strat-card .emoji{font-size:1.1rem;}
+.adv-strat-card .label{font-size:0.68rem;font-weight:700;color:var(--brand-light);margin-top:0.15rem;}
+.adv-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.3rem;}
+.adv-metric-btn{padding:0.3rem 0.4rem;border-radius:4px;border:1px solid rgba(138,203,208,0.08);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;transition:all 0.12s;font-family:'Outfit',sans-serif;color:var(--text-secondary);text-align:left;display:flex;align-items:center;gap:0.3rem;}
+.adv-metric-btn:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.adv-metric-btn.active{background:rgba(86,182,198,0.1);border-color:var(--brand-teal);color:var(--brand-teal);}
+.adv-metric-emoji{font-size:0.75rem;}
+.adv-benchmark-row{display:flex;align-items:center;gap:0.4rem;margin-top:0.5rem;}
+.adv-bench-toggle{padding:0.2rem 0.5rem;border-radius:4px;border:1px solid rgba(138,203,208,0.12);background:transparent;font-size:0.65rem;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all 0.12s;font-family:'Outfit',sans-serif;}
+.adv-bench-toggle:hover{border-color:var(--brand-teal);}
+.adv-bench-toggle.active{background:rgba(86,182,198,0.1);border-color:var(--brand-teal);color:var(--brand-teal);}
+
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
 @media(max-width:768px){
 .radar-hero h1{font-size:1.2rem;}
@@ -128,6 +185,17 @@
     <div class="market-toggle">
       <button class="market-btn active" data-market="US">US</button>
       <button class="market-btn" data-market="ID">ID</button>
+    </div>
+    <div class="select-list-wrap">
+      <button class="select-list-btn" id="select-list-btn">
+        <span>&#9776;</span>
+        <span class="list-name" id="list-name-display">S&P 500</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="select-list-dropdown" id="select-list-dropdown">
+        <input type="text" class="sld-search" id="list-search" placeholder="Search lists...">
+        <div id="list-items"></div>
+      </div>
     </div>
   </div>
 
@@ -163,12 +231,66 @@
     </div>
   </div>
 
+  <!-- Key Statistics -->
+  <div style="margin:0.6rem 0;">
+    <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.3rem;">Key Statistics</div>
+    <div class="keystat-bar" id="keystat-bar">
+      <button class="keystat-btn active" data-stat="returns">Short-Term Return</button>
+      <button class="keystat-btn" data-stat="longreturn">Long-Term Return</button>
+      <button class="keystat-btn" data-stat="growth">Growth</button>
+      <button class="keystat-btn" data-stat="efficiency">Efficiency</button>
+      <button class="keystat-btn" data-stat="valuation">Valuation</button>
+      <button class="keystat-btn" data-stat="yield">Yield</button>
+      <button class="keystat-btn" data-stat="singlefactor">Single Factor</button>
+      <button class="keystat-btn" data-stat="multifactor">Multi Factor</button>
+    </div>
+  </div>
+
+  <!-- Advanced Screener -->
+  <div class="adv-toggle" id="adv-toggle">
+    <i data-lucide="sliders-horizontal" style="width:14px;height:14px;"></i>
+    Advanced Screener
+    <i class="adv-arrow" style="font-size:0.65rem;">&#9654;</i>
+  </div>
+  <div class="adv-panel" id="adv-panel">
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--brand-teal);margin-bottom:0.4rem;">Strategy Presets</div>
+    <div class="adv-strat-grid" id="adv-strat-grid">
+      <div class="adv-strat-card" data-adv-strat="growth"><div class="emoji">&#127793;</div><div class="label">Growth</div></div>
+      <div class="adv-strat-card" data-adv-strat="quality_growth"><div class="emoji">&#127942;</div><div class="label">Quality+Growth</div></div>
+      <div class="adv-strat-card" data-adv-strat="quality"><div class="emoji">&#128142;</div><div class="label">Quality</div></div>
+      <div class="adv-strat-card" data-adv-strat="value"><div class="emoji">&#128176;</div><div class="label">Value</div></div>
+      <div class="adv-strat-card" data-adv-strat="value_momentum"><div class="emoji">&#128184;</div><div class="label">Value+Mom</div></div>
+      <div class="adv-strat-card" data-adv-strat="momentum"><div class="emoji">&#128200;</div><div class="label">Momentum</div></div>
+      <div class="adv-strat-card" data-adv-strat="growth_momentum"><div class="emoji">&#128168;</div><div class="label">Growth+Mom</div></div>
+      <div class="adv-strat-card" data-adv-strat="risk_shield"><div class="emoji">&#128737;&#65039;</div><div class="label">Risk Shield</div></div>
+    </div>
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.3rem;">Metrics</div>
+    <div class="adv-metric-grid" id="adv-metrics">
+      <button class="adv-metric-btn" data-metric="growth" data-group="growth"><span class="adv-metric-emoji">&#127793;</span>Growth</button>
+      <button class="adv-metric-btn" data-metric="quality" data-group="quality"><span class="adv-metric-emoji">&#128142;</span>Quality</button>
+      <button class="adv-metric-btn" data-metric="value" data-group="value"><span class="adv-metric-emoji">&#128176;</span>Value</button>
+      <button class="adv-metric-btn" data-metric="momentum" data-group="momentum"><span class="adv-metric-emoji">&#128200;</span>Momentum</button>
+      <button class="adv-metric-btn" data-metric="risk" data-group="risk"><span class="adv-metric-emoji">&#9878;&#65039;</span>Risk</button>
+    </div>
+    <div style="margin-top:0.5rem;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.3rem;">Top By Market Cap</div>
+    <div class="adv-benchmark-row">
+      <button class="adv-bench-toggle" id="bench-median">Median</button>
+      <button class="adv-bench-toggle" id="bench-benchmark">Benchmark</button>
+    </div>
+  </div>
+
   <div class="radar-controls">
     <div class="radar-search">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
       <input type="text" id="radar-search" placeholder="Search ticker or name...">
     </div>
-    <div style="font-size:0.68rem;color:var(--text-secondary);">Showing <span id="stock-count">0</span> stocks</div>
+    <div style="font-size:0.68rem;color:var(--text-secondary);">Showing <span id="stock-count">0</span> / <span id="total-count">0</span> stocks</div>
+    <div class="size-controls">
+      <button class="size-btn" id="size-minus" title="Fewer stocks">&minus;</button>
+      <span class="size-value" id="size-display">25</span>
+      <button class="size-btn" id="size-plus" title="More stocks">+</button>
+      <button class="size-reset" id="size-reset">Reset</button>
+    </div>
   </div>
 
   <div class="radar-table-wrap">
@@ -265,6 +387,8 @@ let currentStrategy = 'all';
 let currentStocks = [];
 let sortCol = 'score';
 let sortDir = 'desc';
+let currentSize = 25;
+let currentList = '';
 
 function scoreClass(v){return v>=80?'score-green':v>=50?'score-yellow':'score-red';}
 
@@ -363,13 +487,26 @@ function renderTable(stocks){
   `).join('');
 }
 
+function updateSizeUI(){
+  document.getElementById('size-display').textContent = currentSize;
+  document.getElementById('size-minus').disabled = (currentSize <= 25);
+  document.getElementById('size-plus').disabled = (currentSize >= 100);
+}
+
 function loadScores(market){
   currentStocks=[];
   renderTable([]);
-  fetch('/api/radar-scores/?market='+market)
+  const tbody=document.getElementById('radar-body');
+  tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text-secondary);"><span style="display:inline-block;width:18px;height:18px;border:2px solid rgba(138,203,208,0.2);border-top-color:var(--brand-teal);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:0.5rem;"></span>Loading...</td></tr>';
+  let url = '/api/radar-scores/?market='+market;
+  if (currentList) url += '&list=' + currentList;
+  else url += '&size=' + currentSize;
+  fetch(url)
     .then(r=>r.json())
     .then(data=>{
       currentStocks=data.stocks||[];
+      document.getElementById('total-count').textContent=currentStocks.length;
+      document.getElementById('stock-count').textContent=currentStocks.length;
       sortStocks();
       filterStocks();
     })
@@ -404,6 +541,17 @@ function filterStocks(){
 }
 
 loadScores('US');
+updateSizeUI();
+
+document.getElementById('size-plus').addEventListener('click',function(){
+  if(currentSize<100){currentSize=Math.min(currentSize+25,100);updateSizeUI();loadScores(currentMarket);}
+});
+document.getElementById('size-minus').addEventListener('click',function(){
+  if(currentSize>25){currentSize=Math.max(currentSize-25,25);updateSizeUI();loadScores(currentMarket);}
+});
+document.getElementById('size-reset').addEventListener('click',function(){
+  currentSize=25;updateSizeUI();loadScores(currentMarket);
+});
 
 document.querySelectorAll('.stab').forEach(tab=>{
   tab.addEventListener('click',function(){
@@ -421,6 +569,8 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
     this.classList.add('active');
     currentMarket=this.dataset.market;
     currentStrategy='all';
+    currentList='';
+    document.getElementById('list-name-display').textContent='S&P 500';
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     document.querySelector('.stab[data-strategy="all"]').classList.add('active');
     updateInsightCard('all');
@@ -429,6 +579,100 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
 });
 
 document.getElementById('radar-search').addEventListener('input',filterStocks);
+
+// === Select List Dropdown ===
+let listData = [];
+(function loadListData(){
+  fetch('/api/stock-lists/').then(r=>r.json()).then(data=>{
+    listData = data.groups || [];
+    renderListDropdown('');
+  }).catch(()=>{});
+})();
+
+function renderListDropdown(filter){
+  const container = document.getElementById('list-items');
+  const q = filter.toLowerCase();
+  let html = '';
+  listData.forEach(group => {
+    const filtered = group.lists.filter(l => !q || l.name.toLowerCase().includes(q) || l.emoji.includes(q));
+    if (!filtered.length) return;
+    html += '<div class="sld-cat">' + group.category + '</div>';
+    filtered.forEach(l => {
+      const isActive = currentList === l.key;
+      html += '<div class="sld-item' + (isActive ? ' active' : '') + '" data-list-key="' + l.key + '">';
+      html += '<span class="sld-emoji">' + l.emoji + '</span>';
+      html += '<span class="sld-item-name">' + l.name + '</span>';
+      html += '<span class="sld-count">' + l.count + '</span>';
+      html += '</div>';
+    });
+  });
+  container.innerHTML = html || '<div style="padding:1rem;text-align:center;color:var(--text-secondary);font-size:0.78rem;">No lists found</div>';
+  container.querySelectorAll('.sld-item').forEach(item => {
+    item.addEventListener('click', function(){
+      currentList = this.dataset.listKey;
+      const name = this.querySelector('.sld-item-name').textContent;
+      document.getElementById('list-name-display').textContent = name;
+      document.getElementById('select-list-dropdown').classList.remove('open');
+      currentSize = 100;
+      updateSizeUI();
+      loadScores(currentMarket);
+    });
+  });
+}
+
+document.getElementById('select-list-btn').addEventListener('click', function(e){
+  e.stopPropagation();
+  document.getElementById('select-list-dropdown').classList.toggle('open');
+});
+document.addEventListener('click', function(e){
+  if (!e.target.closest('.select-list-wrap')) {
+    document.getElementById('select-list-dropdown').classList.remove('open');
+  }
+});
+document.getElementById('list-search').addEventListener('input', function(){
+  renderListDropdown(this.value);
+});
+
+// === Key Statistics toggles ===
+document.querySelectorAll('.keystat-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    if (this.classList.contains('active')) {
+      this.classList.remove('active');
+    } else {
+      this.classList.add('active');
+    }
+  });
+});
+
+// === Advanced Screener toggle ===
+document.getElementById('adv-toggle').addEventListener('click', function(){
+  const panel = document.getElementById('adv-panel');
+  this.classList.toggle('open');
+  panel.classList.toggle('open');
+});
+
+// Advanced strategy preset cards
+document.querySelectorAll('.adv-strat-card').forEach(card => {
+  card.addEventListener('click', function(){
+    document.querySelectorAll('.adv-strat-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// Advanced metric toggles
+document.querySelectorAll('.adv-metric-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    this.classList.toggle('active');
+  });
+});
+
+// Benchmark toggles
+document.getElementById('bench-median').addEventListener('click', function(){
+  this.classList.toggle('active');
+});
+document.getElementById('bench-benchmark').addEventListener('click', function(){
+  this.classList.toggle('active');
+});
 
 document.querySelectorAll('.sortable').forEach(th=>{
   th.addEventListener('click',function(){
