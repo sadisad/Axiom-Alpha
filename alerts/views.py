@@ -27,8 +27,10 @@ from .services.market_data import (
     get_dashboard_gauges, get_dashboard_key_stats, get_returns_data,
     get_top_rated, get_trending_portfolios, get_strategy_picks,
     SP500_SYMBOLS, IDX_SYMBOLS, STOCK_LISTS, get_market_scores,
-    batch_stock_data,
+    batch_stock_data, compute_score, _safe_info, _fmt_mcap, _get_cached,
+    SCORES_CACHE_TTL,
 )
+from .services.broker_summary import get_broker_summary
 from .firebase_db import (
     get_watchlist, toggle_watchlist as fw_toggle_watchlist, check_in_watchlist,
     add_search_history, get_search_history,
@@ -458,11 +460,16 @@ def screener(request):
             clean_symbol = symbol.upper().strip().replace('.JK', '')
             in_watchlist = check_in_watchlist(request.user.pk, clean_symbol)
 
+    sector = ''
+    if analysis and 'error' not in analysis and analysis.get('metrics'):
+        sector = analysis['metrics'].get('Sector', '')
+
     return render(request, 'alerts/screener.html', {
         'symbol': symbol.replace('.JK', ''),
         'market': market,
         'analysis': analysis,
         'in_watchlist': in_watchlist,
+        'sector': sector,
     })
 
 
@@ -727,3 +734,59 @@ def portfolio_edit(request, pk):
     except (PortfolioItem.DoesNotExist, decimal.InvalidOperation, ValueError):
         pass
     return redirect('portfolios')
+
+
+def broker_summary(request):
+    broker_data = get_broker_summary()
+    return render(request, 'alerts/broker_summary.html', {
+        'broker_data': broker_data,
+    })
+
+
+def broker_summary_api(request):
+    data = get_broker_summary()
+    return JsonResponse(json.loads(json.dumps(data, cls=NumpyEncoder)))
+
+
+def sector_peers_api(request):
+    market = request.GET.get('market', 'US')
+    sector = request.GET.get('sector', '').strip()
+    exclude = request.GET.get('exclude', '').strip().upper()
+    if not sector:
+        return JsonResponse({'peers': []})
+    symbols = SP500_SYMBOLS if market == 'US' else IDX_SYMBOLS
+    limit = min(int(request.GET.get('limit', 8)), 20)
+
+    def fetch():
+        results = []
+        for sym in symbols:
+            sym_clean = sym.replace('.JK', '').upper()
+            if sym_clean == exclude:
+                continue
+            try:
+                info = _safe_info(sym, ['shortName', 'sector', 'industry', 'marketCap',
+                    'revenueGrowth', 'returnOnEquity', 'trailingPE', 'forwardPE',
+                    'revenueGrowthQuarterly', 'earningsGrowth', 'profitMargins',
+                    'priceToBook', 'beta'])
+                if not info or not info.get('shortName'):
+                    continue
+                sym_sector = (info.get('sector') or '').strip().lower()
+                if sector.lower() not in sym_sector and sym_sector not in sector.lower():
+                    continue
+                scores = compute_score(info)
+                results.append({
+                    'ticker': sym_clean,
+                    'name': info.get('shortName', '')[:25],
+                    'sector': info.get('sector', ''),
+                    'industry': info.get('industry', ''),
+                    'mcap': _fmt_mcap(info.get('marketCap')),
+                    'scores': scores,
+                })
+            except Exception:
+                continue
+        results.sort(key=lambda x: x['scores']['score'], reverse=True)
+        return results[:limit]
+
+    cache_key = f'peers_{market}_{sector}_{exclude}'
+    results = _get_cached(cache_key, fetch, ttl=SCORES_CACHE_TTL)
+    return JsonResponse({'peers': results})

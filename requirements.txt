@@ -2,6 +2,7 @@ django>=5.2,<6.0
 whitenoise
 yfinance
 requests
+cloudscraper
 python-dotenv
 dj-database-url
 psycopg2-binary

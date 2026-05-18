@@ -60,6 +60,37 @@
 /* Hide TV branding */
 .tv-overlay{position:absolute;bottom:0;left:0;right:0;height:32px;background:linear-gradient(transparent,#0d0645 70%);z-index:10;pointer-events:none;}
 
+/* Broker Summary */
+.bs-trade-flow{display:flex;align-items:center;gap:1rem;padding:0.75rem;background:rgba(0,0,0,0.2);border-radius:8px;}
+.bs-trade-side{text-align:center;flex:1;}
+.bs-trade-side .val{font-size:1.1rem;font-weight:900;}
+.bs-trade-side .lbl{font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;}
+.bs-trade-net{text-align:center;padding:0 1rem;border-left:1px solid rgba(138,203,208,0.1);border-right:1px solid rgba(138,203,208,0.1);}
+.bs-trade-net .val{font-size:1.1rem;font-weight:900;}
+.bs-trade-net .lbl{font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;}
+.bs-tabs{display:flex;gap:0.3rem;margin-bottom:0.5rem;}
+.bs-tab{padding:0.25rem 0.65rem;border-radius:5px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.bs-tab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.bs-tab.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
+.bs-table{width:100%;border-collapse:collapse;font-size:0.75rem;}
+.bs-table th{padding:0.35rem 0.4rem;text-align:left;color:var(--text-secondary);font-size:0.6rem;font-weight:700;text-transform:uppercase;border-bottom:1px solid rgba(138,203,208,0.1);}
+.bs-table td{padding:0.35rem 0.4rem;border-bottom:1px solid rgba(255,255,255,0.025);}
+.bs-table tbody tr:hover{background:rgba(86,182,198,0.04);}
+.bs-badge{display:inline-flex;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.68rem;font-weight:700;}
+.bs-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;min-width:50px;}
+.bs-bar-fill{height:100%;border-radius:2px;}
+.buy-bar .bs-bar-fill{background:linear-gradient(90deg,#00c896,#00e6aa);}
+.sell-bar .bs-bar-fill{background:linear-gradient(90deg,#ff6464,#ff8888);}
+.peer-cards{display:flex;gap:0.5rem;overflow-x:auto;scrollbar-width:thin;}
+.peer-cards::-webkit-scrollbar{height:3px;}
+.peer-cards::-webkit-scrollbar-thumb{background:var(--brand-teal);border-radius:2px;}
+.peer-card{min-width:155px;background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.12);border-radius:8px;padding:0.65rem 0.75rem;cursor:pointer;transition:all 0.2s;flex-shrink:0;text-decoration:none;display:block;}
+.peer-card:hover{border-color:var(--brand-teal);transform:translateY(-2px);}
+.peer-card .pc-ticker{font-weight:800;color:var(--brand-light);font-size:0.85rem;}
+.peer-card .pc-name{color:var(--text-secondary);font-size:0.65rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+.peer-card .pc-scores{display:flex;gap:0.25rem;margin-top:0.4rem;flex-wrap:wrap;}
+.peer-card .pc-score{padding:0.08rem 0.3rem;border-radius:3px;font-size:0.62rem;font-weight:700;}
+
 @media(max-width:900px){.sc-2col{grid-template-columns:1fr !important;}}
 @media(max-width:600px){.sc-panel{padding:0.65rem 0.75rem;}.m-grid{grid-template-columns:1fr;}.stock-hdr h1{font-size:1.1rem;}.factor-name{width:55px;font-size:0.65rem;}.sc-dcf-grid{grid-template-columns:1fr !important;}.tv-mobile-height{height:280px !important;}.sc{padding:0;}.sc-2col{grid-template-columns:1fr !important;}}
 </style>
@@ -123,6 +154,7 @@
       <button id="watchlist-btn" onclick="toggleWatchlist()" class="wl-btn {% if in_watchlist %}active{% endif %}" data-in-watchlist="{{ in_watchlist|yesno:'true,false' }}">
         <span id="watchlist-icon">{% if in_watchlist %}★{% else %}☆{% endif %}</span> <span id="watchlist-text">{% if in_watchlist %}Saved{% else %}Watch{% endif %}</span>
       </button>
+      <a href="{% url 'compare' %}?s1={{ symbol }}&m1={{ market }}" class="wl-btn" style="text-decoration:none;">⚡ Compare</a>
     </div>
   </div>
 
@@ -344,8 +376,46 @@
         <div class="tv-overlay"></div>
       </div>
     </div>
-  </div>
 </div>
+  </div>
+
+  <!-- Sector Peers -->
+  {% if sector %}
+  <div class="sc-panel" id="peers-section" style="margin-top:0;">
+    <div class="sc-lbl" style="margin-bottom:0.5rem;">🏢 SECTOR PEERS — {{ sector|upper }}</div>
+    <div id="peers-loading" style="display:flex;gap:0.5rem;overflow-x:auto;padding-bottom:0.25rem;">
+      <div class="skeleton" style="min-width:160px;height:80px;"></div>
+      <div class="skeleton" style="min-width:160px;height:80px;"></div>
+      <div class="skeleton" style="min-width:160px;height:80px;"></div>
+      <div class="skeleton" style="min-width:160px;height:80px;"></div>
+    </div>
+    <div id="peers-content" style="display:none;overflow-x:auto;padding-bottom:0.25rem;"></div>
+    <div id="peers-error" style="display:none;text-align:center;padding:1rem 0;color:var(--text-secondary);font-size:0.78rem;">No peers found for this sector</div>
+  </div>
+  {% endif %}
+
+  <!-- Broker Summary (IDX only) -->
+  {% if market == 'ID' %}
+  <div class="sc-panel" id="broker-summary-section" style="display:none;">
+    <div class="sc-lbl" style="margin-bottom:0.5rem;">🏦 IDX BROKER ACTIVITY — TOP FIRMS</div>
+    <div id="broker-loading" style="text-align:center;padding:1.5rem 0;color:var(--text-secondary);">
+      <div class="skeleton" style="height:120px;border-radius:8px;margin-bottom:0.5rem;"></div>
+      <div style="font-size:0.78rem;">Loading broker data...</div>
+    </div>
+    <div id="broker-content" style="display:none;">
+      <div id="broker-stats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;"></div>
+      <div class="bs-tabs" id="broker-tabs">
+        <button class="bs-tab active" onclick="switchBrokerTab('top_value',this)">By Value</button>
+        <button class="bs-tab" onclick="switchBrokerTab('top_volume',this)">By Volume</button>
+        <button class="bs-tab" onclick="switchBrokerTab('top_frequency',this)">By Frequency</button>
+      </div>
+      <div id="broker-tab-content" style="overflow-x:auto;"></div>
+    </div>
+    <div id="broker-error" style="display:none;text-align:center;padding:1rem 0;">
+      <p style="color:var(--text-secondary);font-size:0.82rem;">Broker data unavailable.</p>
+    </div>
+  </div>
+  {% endif %}
 
 {% endif %}
 {% endif %}
@@ -363,5 +433,99 @@ function toggleWatchlist(){
     else{btn.dataset.inWatchlist='false';icon.textContent='☆';text.textContent='Watch';btn.classList.remove('active');}
   });
 }
+
+{% if market == 'ID' and analysis and not analysis.error %}
+(function loadBrokerSummary(){
+  var section=document.getElementById('broker-summary-section');
+  if(!section)return;
+  section.style.display='block';
+  fetch("{% url 'broker_summary_api' %}")
+    .then(function(r){return r.json();})
+    .then(function(data){
+      document.getElementById('broker-loading').style.display='none';
+      if(data.error||!data.top_by_value){
+        document.getElementById('broker-error').style.display='block';
+        return;
+      }
+      document.getElementById('broker-content').style.display='block';
+      window._brokerData=data;
+      document.getElementById('broker-stats').innerHTML=
+        '<div class="bs-stat"><div class="val" style="color:var(--brand-light);font-size:0.95rem;">IDR '+fmtIDR(data.total_value)+'</div><div class="lbl">Total Value</div></div>'+
+        '<div class="bs-stat"><div class="val" style="color:var(--brand-light);font-size:0.95rem;">'+fmtIDR(data.total_volume)+'</div><div class="lbl">Total Volume</div></div>'+
+        '<div class="bs-stat"><div class="val" style="color:var(--brand-light);font-size:0.95rem;">'+data.total_frequency.toLocaleString()+'</div><div class="lbl">Frequency</div></div>';
+      renderBrokerTab('top_value');
+    })
+    .catch(function(){
+      document.getElementById('broker-loading').style.display='none';
+      document.getElementById('broker-error').style.display='block';
+    });
+})();
+
+function fmtIDR(v){
+  if(v>=1e12)return(v/1e12).toFixed(1)+'T';
+  if(v>=1e9)return(v/1e9).toFixed(1)+'B';
+  if(v>=1e6)return(v/1e6).toFixed(1)+'M';
+  if(v>=1e3)return(v/1e3).toFixed(1)+'K';
+  return v.toString();
+}
+
+function renderBrokerTab(tabKey){
+  var d=window._brokerData;
+  if(!d)return;
+  var list,sortBy,showPct;
+  if(tabKey==='top_value'){list=d.top_by_value;sortBy='value';showPct='value_pct';}
+  else if(tabKey==='top_volume'){list=d.top_by_volume;sortBy='volume';showPct='volume_pct';}
+  else{list=d.top_by_frequency;sortBy='frequency';showPct='freq_pct';}
+  var html='<table class="bs-table"><thead><tr><th>#</th><th>Code</th><th>Broker</th><th style="text-align:right;">Volume</th><th style="text-align:right;">Value</th><th style="text-align:right;">Freq</th><th style="text-align:right;">Share</th></tr></thead><tbody>';
+  list.slice(0,10).forEach(function(b,i){
+    var pct=b[showPct]?b[showPct].toFixed(1):'0';
+    var barW=b[showPct]?Math.min(b[showPct],100):0;
+    html+='<tr><td style="color:var(--text-secondary);">'+(i+1)+'</td><td><span class="bs-badge" style="background:rgba(86,182,198,0.12);color:var(--brand-teal);">'+b.code+'</span></td><td style="font-weight:700;color:var(--brand-light);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+b.name+'</td><td style="text-align:right;color:var(--text-secondary);">'+b.volume.toLocaleString()+'</td><td style="text-align:right;font-weight:600;color:var(--brand-light);">IDR '+fmtIDR(b.value)+'</td><td style="text-align:right;color:var(--text-secondary);">'+b.frequency.toLocaleString()+'</td><td style="text-align:right;"><div style="display:flex;align-items:center;gap:0.3rem;justify-content:flex-end;"><span style="font-weight:700;color:var(--brand-light);font-size:0.72rem;">'+pct+'%</span><div class="bs-bar value-bar" style="width:50px;"><div class="bs-bar-fill" style="width:'+barW+'%;"></div></div></div></td></tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('broker-tab-content').innerHTML=html;
+}
+
+function switchBrokerTab(tabKey,btn){
+  document.querySelectorAll('#broker-tabs .bs-tab').forEach(function(el){el.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  renderBrokerTab(tabKey);
+}
+{% endif %}
+
+{% if sector %}
+(function loadPeers(){
+  var loading=document.getElementById('peers-loading');
+  var content=document.getElementById('peers-content');
+  var err=document.getElementById('peers-error');
+  if(!loading)return;
+  fetch('/api/sector-peers/?market={{ market }}&sector={{ sector|urlencode }}&exclude={{ symbol|upper }}&limit=8')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      loading.style.display='none';
+      if(!data.peers||!data.peers.length){err.style.display='block';return;}
+      content.style.display='block';
+      var html='<div class="peer-cards">';
+      data.peers.forEach(function(p){
+        var g=p.scores.growth||0,q=p.scores.quality||0,v=p.scores.value||0,s=p.scores.score||0;
+        function sc(v){return v>=70?'background:rgba(0,200,150,0.15);color:#00c896;':v>=40?'background:rgba(255,200,0,0.12);color:#ffc800;':'background:rgba(239,68,68,0.12);color:#ff6464;';}
+        html+='<a class="peer-card" href="/screener/?symbol='+p.ticker+'&market={{ market }}">';
+        html+='<div class="pc-ticker">'+p.ticker+'</div>';
+        html+='<div class="pc-name">'+p.name+'</div>';
+        html+='<div class="pc-scores">';
+        html+='<span class="pc-score" style="'+sc(s)+'">Score '+s+'</span>';
+        html+='<span class="pc-score" style="'+sc(g)+'">G '+g+'</span>';
+        html+='<span class="pc-score" style="'+sc(q)+'">Q '+q+'</span>';
+        html+='</div></a>';
+      });
+      html+='</div>';
+      content.innerHTML=html;
+    })
+    .catch(function(){
+      loading.style.display='none';
+      err.style.display='block';
+    });
+})();
+{% endif %}
 </script>
 {% endblock %}

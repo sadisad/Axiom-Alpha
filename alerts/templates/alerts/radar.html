@@ -550,7 +550,8 @@ function loadScores(market){
       }
       document.getElementById('total-count').textContent=currentStocks.length;
       document.getElementById('stock-count').textContent=currentStocks.length;
-      sortStocks();
+      // filterStocks() sorts using current sortCol/sortDir, so no need to
+      // pre-sort currentStocks here.
       filterStocks();
     })
     .catch(()=>{
@@ -564,22 +565,20 @@ function filterStocks(){
   const q=document.getElementById('radar-search').value.toLowerCase();
   if(q) stocks=stocks.filter(s=>s.t.toLowerCase().includes(q)||s.n.toLowerCase().includes(q));
 
-  if(currentStrategy!=='all'){
-    const col=currentStrategy;
-    stocks.sort((a,b)=>{
-      const va=col==='growth'?a.g:col==='quality'?a.q:col==='value'?a.v:col==='momentum'?a.m:a.r;
-      const vb=col==='growth'?b.g:col==='quality'?b.q:col==='value'?b.v:col==='momentum'?b.m:b.r;
-      return vb-va;
-    });
-  }
-
-  if(currentStrategy==='all' && sortCol==='score') {
-    stocks.sort((a,b) => sortDir==='desc' ? b.s-a.s : a.s-b.s);
-  } else if(currentStrategy==='all') {
-    sortStocks();
-    stocks = [...currentStocks];
-    if(q) stocks=stocks.filter(s=>s.t.toLowerCase().includes(q)||s.n.toLowerCase().includes(q));
-  }
+  // Single source of truth for sort: sortCol + sortDir.
+  // Strategy tabs and Key Statistics buttons both update these and re-call filterStocks.
+  stocks.sort((a,b) => {
+    let va = getVal(a, sortCol);
+    let vb = getVal(b, sortCol);
+    if (typeof va === 'string') {
+      va = va.toLowerCase();
+      vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    }
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
 
   renderTable(stocks);
 }
@@ -602,6 +601,10 @@ document.querySelectorAll('.stab').forEach(tab=>{
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     this.classList.add('active');
     currentStrategy=this.dataset.strategy;
+    // Strategy tabs sort the table by that factor (or overall Score for "all").
+    sortCol = currentStrategy === 'all' ? 'score' : currentStrategy;
+    sortDir = 'desc';
+    updateSortArrows();
     updateInsightCard(currentStrategy);
     filterStocks();
   });
@@ -614,6 +617,9 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
     currentMarket=this.dataset.market;
     currentStrategy='all';
     currentList='';
+    sortCol = 'score';
+    sortDir = 'desc';
+    updateSortArrows();
     document.getElementById('list-name-display').textContent='S&P 500';
     document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
     document.querySelector('.stab[data-strategy="all"]').classList.add('active');
@@ -679,14 +685,36 @@ document.getElementById('list-search').addEventListener('input', function(){
   renderListDropdown(this.value);
 });
 
-// === Key Statistics toggles ===
+// === Key Statistics toggles (act as sort presets) ===
+// Map each Key Stat button to a column the radar API actually returns.
+// Several presets currently share the same column because the backend exposes
+// only G/Q/V/M/R/Score; once the API exposes more fields, extend this map.
+const KEYSTAT_TO_COL = {
+  returns:      'momentum',  // Short-Term Return → momentum proxy
+  longreturn:   'momentum',  // Long-Term Return → momentum proxy
+  growth:       'growth',
+  efficiency:   'quality',
+  valuation:    'value',
+  yield:        'value',     // closest available proxy
+  singlefactor: 'score',
+  multifactor:  'score'
+};
+const KEYSTAT_LABELS = {
+  returns:'Short-Term Return', longreturn:'Long-Term Return', growth:'Growth',
+  efficiency:'Efficiency', valuation:'Valuation', yield:'Yield',
+  singlefactor:'Single Factor', multifactor:'Multi Factor'
+};
 document.querySelectorAll('.keystat-btn').forEach(btn => {
   btn.addEventListener('click', function(){
-    if (this.classList.contains('active')) {
-      this.classList.remove('active');
-    } else {
-      this.classList.add('active');
-    }
+    document.querySelectorAll('.keystat-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const stat = this.dataset.stat;
+    const col = KEYSTAT_TO_COL[stat] || 'score';
+    sortCol = col;
+    sortDir = 'desc';
+    updateSortArrows();
+    filterStocks();
+    if (window.showToast) showToast('Sorted by ' + (KEYSTAT_LABELS[stat] || stat), 'info', 1500);
   });
 });
 

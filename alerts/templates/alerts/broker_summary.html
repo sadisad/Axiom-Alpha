@@ -1,0 +1,243 @@
+{% extends 'alerts/base.html' %}
+{% load custom_filters %}
+{% block content %}
+<style>
+.bs{display:flex;flex-direction:column;gap:0.5rem;min-width:0;width:100%;overflow-x:hidden;}
+.bs-panel{background:rgba(15,10,60,0.7);border:1px solid rgba(138,203,208,0.12);border-radius:10px;padding:0.85rem 1rem;min-width:0;overflow:hidden;}
+.bs-lbl{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:0.5rem;}
+.bs-tabs{display:flex;gap:0.3rem;margin-bottom:0.5rem;flex-wrap:wrap;}
+.bs-tab{padding:0.3rem 0.75rem;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid rgba(138,203,208,0.15);color:var(--text-secondary);background:transparent;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.bs-tab:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
+.bs-tab.active{background:var(--brand-teal);color:#0d0645;border-color:var(--brand-teal);}
+.bs-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.bs-table th{padding:0.4rem 0.5rem;text-align:left;color:var(--text-secondary);font-size:0.62rem;font-weight:700;text-transform:uppercase;border-bottom:1px solid rgba(138,203,208,0.1);}
+.bs-table td{padding:0.45rem 0.5rem;border-bottom:1px solid rgba(255,255,255,0.025);}
+.bs-table tbody tr:hover{background:rgba(86,182,198,0.04);}
+.bs-badge{display:inline-flex;padding:0.1rem 0.4rem;border-radius:3px;font-size:0.72rem;font-weight:700;}
+.bs-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden;min-width:50px;}
+.bs-bar-fill{height:100%;border-radius:2px;transition:width 0.5s;}
+.value-bar .bs-bar-fill{background:linear-gradient(90deg,#56B6C6,#8ACBD0);}
+.bs-stat{background:rgba(0,0,0,0.2);padding:0.7rem;border-radius:8px;text-align:center;}
+.bs-stat .val{font-size:1.1rem;font-weight:900;color:var(--brand-light);}
+.bs-stat .lbl{font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-top:0.1rem;}
+.bs-trade-flow{display:flex;align-items:center;gap:1rem;padding:0.75rem;background:rgba(0,0,0,0.2);border-radius:8px;}
+.bs-trade-side{text-align:center;flex:1;}
+.bs-trade-side .val{font-size:1.1rem;font-weight:900;}
+.bs-trade-side .lbl{font-size:0.6rem;color:var(--text-secondary);text-transform:uppercase;}
+.bs-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;}
+@media(max-width:900px){.bs-stats-grid{grid-template-columns:1fr 1fr;}.bs-table{font-size:0.72rem;}.bs-table th,.bs-table td{padding:0.35rem 0.3rem;}}
+@media(max-width:600px){.bs-panel{padding:0.65rem 0.75rem;}.bs-stats-grid{grid-template-columns:1fr 1fr;}.bs-trade-flow{flex-direction:column;gap:0.5rem;}}
+</style>
+
+<div class="bs">
+
+<div class="bs-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+    <div>
+      <h1 style="font-size:1.3rem;font-weight:900;color:var(--brand-light);margin:0;line-height:1.2;">🇮🇩 IDX Broker Summary</h1>
+      <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.2rem;">Exchange-wide broker activity on Indonesia Stock Exchange{% if broker_data and broker_data.date %} — {{ broker_data.date }}{% endif %}</p>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <span class="market-status" style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.2);">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#00c896;"></span>
+        <span style="color:#00c896;font-size:0.65rem;font-weight:700;">{{ broker_data.broker_count|default:"0" }} BROKERS</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+{% if broker_data %}
+  {% if broker_data.error %}
+  <div class="bs-panel" style="border-color:var(--danger);text-align:center;">
+    <p style="color:var(--danger);font-size:0.9rem;font-weight:700;">Broker Data Unavailable</p>
+    <p style="color:var(--text-secondary);font-size:0.82rem;">{{ broker_data.error }}</p>
+  </div>
+  {% else %}
+
+<!-- Stats Overview -->
+<div class="bs-stats-grid">
+  <div class="bs-stat">
+    <div class="val" style="color:var(--brand-light);">{{ broker_data.total_value_fmt }}</div>
+    <div class="lbl">Total Value (IDR)</div>
+  </div>
+  <div class="bs-stat">
+    <div class="val" style="color:var(--brand-light);">{{ broker_data.total_volume_fmt }}</div>
+    <div class="lbl">Total Volume</div>
+  </div>
+  <div class="bs-stat">
+    <div class="val" style="color:var(--brand-light);">{{ broker_data.total_frequency|floatformat:0 }}</div>
+    <div class="lbl">Total Frequency</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bs-panel">
+  <div class="bs-tabs" id="broker-tabs">
+    <button class="bs-tab active" onclick="switchBrokerTab('top_value',this)">Top by Value</button>
+    <button class="bs-tab" onclick="switchBrokerTab('top_volume',this)">Top by Volume</button>
+    <button class="bs-tab" onclick="switchBrokerTab('top_frequency',this)">Top by Frequency</button>
+  </div>
+
+  <!-- Top by Value -->
+  <div id="tab-top_value" class="broker-tab-content">
+    <div style="overflow-x:auto;">
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Code</th>
+            <th>Broker Name</th>
+            <th style="text-align:right;">Volume</th>
+            <th style="text-align:right;">Value (IDR)</th>
+            <th style="text-align:right;">Frequency</th>
+            <th style="text-align:right;">% Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in broker_data.top_by_value %}
+          <tr>
+            <td style="color:var(--text-secondary);font-weight:600;">{{ forloop.counter }}</td>
+            <td><span class="bs-badge" style="background:rgba(86,182,198,0.12);color:var(--brand-teal);">{{ b.code }}</span></td>
+            <td style="font-weight:700;color:var(--brand-light);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.name }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.volume|floatformat:0 }}</td>
+            <td style="text-align:right;font-weight:600;color:var(--brand-light);">{{ b.value|idr }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.frequency|floatformat:0 }}</td>
+            <td style="text-align:right;">
+              <div style="display:flex;align-items:center;gap:0.3rem;justify-content:flex-end;">
+                <span style="font-weight:700;color:var(--brand-light);font-size:0.72rem;">{{ b.value_pct }}%</span>
+                <div class="bs-bar value-bar" style="width:60px;"><div class="bs-bar-fill" style="width:{% if b.value_pct > 100 %}100{% else %}{{ b.value_pct }}{% endif %}%;"></div></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Top by Volume -->
+  <div id="tab-top_volume" class="broker-tab-content" style="display:none;">
+    <div style="overflow-x:auto;">
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Code</th>
+            <th>Broker Name</th>
+            <th style="text-align:right;">Volume</th>
+            <th style="text-align:right;">Value (IDR)</th>
+            <th style="text-align:right;">Frequency</th>
+            <th style="text-align:right;">% Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in broker_data.top_by_volume %}
+          <tr>
+            <td style="color:var(--text-secondary);font-weight:600;">{{ forloop.counter }}</td>
+            <td><span class="bs-badge" style="background:rgba(0,200,150,0.12);color:#00c896;">{{ b.code }}</span></td>
+            <td style="font-weight:700;color:var(--brand-light);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.name }}</td>
+            <td style="text-align:right;font-weight:600;color:#00c896;">{{ b.volume|floatformat:0 }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.value|idr }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.frequency|floatformat:0 }}</td>
+            <td style="text-align:right;">
+              <div style="display:flex;align-items:center;gap:0.3rem;justify-content:flex-end;">
+                <span style="font-weight:700;color:var(--brand-light);font-size:0.72rem;">{{ b.volume_pct }}%</span>
+                <div class="bs-bar" style="width:60px;"><div class="bs-bar-fill" style="width:{% if b.volume_pct > 100 %}100{% else %}{{ b.volume_pct }}{% endif %}%;background:linear-gradient(90deg,#00c896,#00e6aa);"></div></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Top by Frequency -->
+  <div id="tab-top_frequency" class="broker-tab-content" style="display:none;">
+    <div style="overflow-x:auto;">
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Code</th>
+            <th>Broker Name</th>
+            <th style="text-align:right;">Volume</th>
+            <th style="text-align:right;">Value (IDR)</th>
+            <th style="text-align:right;">Frequency</th>
+            <th style="text-align:right;">% Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in broker_data.top_by_frequency %}
+          <tr>
+            <td style="color:var(--text-secondary);font-weight:600;">{{ forloop.counter }}</td>
+            <td><span class="bs-badge" style="background:rgba(255,200,0,0.12);color:#ffc800;">{{ b.code }}</span></td>
+            <td style="font-weight:700;color:var(--brand-light);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.name }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.volume|floatformat:0 }}</td>
+            <td style="text-align:right;color:var(--text-secondary);">{{ b.value|idr }}</td>
+            <td style="text-align:right;font-weight:600;color:#ffc800;">{{ b.frequency|floatformat:0 }}</td>
+            <td style="text-align:right;">
+              <div style="display:flex;align-items:center;gap:0.3rem;justify-content:flex-end;">
+                <span style="font-weight:700;color:var(--brand-light);font-size:0.72rem;">{{ b.freq_pct }}%</span>
+                <div class="bs-bar" style="width:60px;"><div class="bs-bar-fill" style="width:{% if b.freq_pct > 100 %}100{% else %}{{ b.freq_pct }}{% endif %}%;background:linear-gradient(90deg,#ffc800,#ffe066);"></div></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- All Brokers -->
+<div class="bs-panel">
+  <div class="bs-lbl">📋 ALL BROKERS</div>
+  <div style="overflow-x:auto;">
+    <table class="bs-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Broker Name</th>
+          <th style="text-align:right;">Volume</th>
+          <th style="text-align:right;">Value</th>
+          <th style="text-align:right;">Freq</th>
+          <th style="text-align:right;">% Val</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in broker_data.all_brokers %}
+        <tr>
+          <td><span class="bs-badge" style="background:rgba(86,182,198,0.1);color:var(--brand-teal);">{{ b.code }}</span></td>
+          <td style="font-weight:600;color:var(--brand-light);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.name }}</td>
+          <td style="text-align:right;color:var(--text-secondary);">{{ b.volume|floatformat:0 }}</td>
+          <td style="text-align:right;font-weight:600;color:var(--brand-light);">{{ b.value|idr }}</td>
+          <td style="text-align:right;color:var(--text-secondary);">{{ b.frequency|floatformat:0 }}</td>
+          <td style="text-align:right;font-weight:700;color:var(--brand-light);">{{ b.value_pct }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endif %}
+{% else %}
+<div class="bs-panel" style="text-align:center;padding:3rem 1rem;">
+  <div style="font-size:2.5rem;margin-bottom:0.5rem;">🏦</div>
+  <h2 style="font-size:1.1rem;font-weight:800;color:var(--brand-light);margin-bottom:0.3rem;">IDX Broker Summary</h2>
+  <p style="color:var(--text-secondary);font-size:0.85rem;max-width:500px;margin:0 auto;">Loading exchange-wide broker data from IDX...</p>
+</div>
+{% endif %}
+
+</div>
+
+<script>
+function switchBrokerTab(tabId, btn) {
+  document.querySelectorAll('.broker-tab-content').forEach(function(el) { el.style.display = 'none'; });
+  document.querySelectorAll('.bs-tab').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tabId).style.display = 'block';
+  if (btn) btn.classList.add('active');
+}
+</script>
+{% endblock %}

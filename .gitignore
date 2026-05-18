@@ -34,3 +34,7 @@ staticfiles/
 .env
 .env.local
 *.key
+
+# Ignore semua file/folder yang diawali test_
+test_*
+**/test_*

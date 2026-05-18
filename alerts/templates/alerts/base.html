@@ -48,6 +48,12 @@
             --surface-border: rgba(23, 12, 121, 0.1);
             --text-primary: #1a1a2e;
             --text-secondary: #5a6072;
+            /* Override the cream "brand-light" so inline styles using it stay readable. */
+            --brand-light: #1a1a2e;
+            --brand-teal: #1e7a8c;
+            --brand-teal-light: #2a96ab;
+            --accent: #1e7a8c;
+            --accent-glow: rgba(30, 122, 140, 0.25);
             --nav-bg: rgba(255,255,255,0.97);
             --nav-border: rgba(23,12,121,0.1);
             --nav-hover: rgba(86,182,198,0.08);
@@ -59,17 +65,68 @@
                 radial-gradient(circle at 15% 50%, rgba(86, 182, 198, 0.06), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(23, 12, 121, 0.04), transparent 25%);
         }
-        html[data-theme="light"] .panel {
-            background: rgba(255,255,255,0.85);
-            border-color: rgba(23,12,121,0.08);
+        html[data-theme="light"] .panel,
+        html[data-theme="light"] [class*="panel"]:not(.adv-panel),
+        html[data-theme="light"] .insight-card,
+        html[data-theme="light"] .radar-table-wrap,
+        html[data-theme="light"] .scard,
+        html[data-theme="light"] .sc-panel,
+        html[data-theme="light"] .hm-panel {
+            background: rgba(255,255,255,0.92);
+            border-color: rgba(23,12,121,0.1);
         }
+        html[data-theme="light"] .topnav-search input,
+        html[data-theme="light"] .market-toggle,
+        html[data-theme="light"] .select-list-btn,
+        html[data-theme="light"] .size-btn,
+        html[data-theme="light"] .radar-search input,
+        html[data-theme="light"] .sld-search,
+        html[data-theme="light"] input[type="text"]:not([class*="topnav"]),
+        html[data-theme="light"] input[type="search"],
+        html[data-theme="light"] input[type="number"] {
+            background: #ffffff;
+            color: #1a1a2e;
+            border-color: rgba(23,12,121,0.15);
+        }
+        html[data-theme="light"] .topnav-search input::placeholder,
+        html[data-theme="light"] input::placeholder {
+            color: rgba(26,26,46,0.45);
+        }
+        html[data-theme="light"] .radar-table thead {
+            background: rgba(23,12,121,0.04);
+        }
+        html[data-theme="light"] .radar-table tbody tr:hover {
+            background: rgba(86,182,198,0.08);
+        }
+        html[data-theme="light"] .select-list-dropdown,
+        html[data-theme="light"] .hm-universe-dd {
+            background: #ffffff;
+            border-color: rgba(23,12,121,0.15);
+            box-shadow: 0 8px 32px rgba(23,12,121,0.12);
+        }
+        html[data-theme="light"] .toast-success { background: rgba(16,185,129,0.95); }
+        html[data-theme="light"] .toast-error { background: rgba(239,68,68,0.95); }
+        html[data-theme="light"] .toast-info { background: rgba(30,122,140,0.95); }
+        html[data-theme="light"] .toast-warning { background: rgba(245,158,11,0.95); }
+        html[data-theme="light"] .topnav-auth-signup { color: #ffffff; }
+        html[data-theme="light"] .topnav-auth-signup:hover { color: #ffffff; }
+        html[data-theme="light"] .btn { color: #ffffff; }
+        html[data-theme="light"] .btn:hover { color: var(--brand-teal); background: transparent; }
+        html[data-theme="light"] .pro-badge { color: #ffffff; }
+        /* Lucide icons inherit color via stroke=currentColor; ensure topnav text is dark */
+        html[data-theme="light"] .topnav-link { color: var(--nav-text); }
+        html[data-theme="light"] .topnav-link.active { color: var(--brand-teal); }
+        html[data-theme="light"] .hamburger span { background: #1a1a2e; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
 
+        /* NOTE: overflow-x:hidden on <html> breaks position:sticky for descendants.
+           Use overflow-x:clip on html (does not establish a new scroll container)
+           and keep hidden on body as a fallback for older browsers. */
         html {
             width: 100%;
             max-width: 100vw;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         body {
@@ -78,12 +135,18 @@
             min-height: 100vh;
             width: 100%;
             max-width: 100vw;
-            overflow-x: hidden;
+            overflow-x: clip;
             display: flex;
             flex-direction: column;
             background-image:
                 radial-gradient(circle at 15% 50%, rgba(86, 182, 198, 0.15), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(23, 12, 121, 0.5), transparent 25%);
+        }
+        /* Fallback: browsers without overflow:clip support fall back to hidden,
+           but only on body so sticky on .topnav still works. */
+        @supports not (overflow: clip) {
+            html { overflow-x: visible; }
+            body { overflow-x: hidden; }
         }
 
         /* ===== TOP NAV (Bastion-style) ===== */
@@ -315,6 +378,55 @@
             footer { flex-direction: column; text-align: center; gap: 0.5rem; }
         }
     </style>
+    <script>
+        // Utility functions defined early so child template scripts (radar, screener, etc.)
+        // can call them safely even before <body> finishes parsing.
+
+        // Lazy lucide refresh — safe even before lucide CDN finishes loading.
+        window.refreshLucide = function() {
+            if (window.lucide && typeof lucide.createIcons === 'function') {
+                try { lucide.createIcons(); } catch(e) {}
+            }
+        };
+
+        // Toast that lazily creates its container if not yet in the DOM.
+        window.showToast = function(message, type, duration) {
+            type = type || 'info';
+            duration = duration || 3000;
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                if (document.body) {
+                    document.body.appendChild(container);
+                } else {
+                    // body not parsed yet — defer
+                    document.addEventListener('DOMContentLoaded', function(){
+                        if (!document.getElementById('toast-container')) {
+                            document.body.appendChild(container);
+                        }
+                    });
+                }
+            }
+            var icons = {success:'\u2713', error:'\u2717', info:'\u2139', warning:'\u26A0'};
+            var toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.innerHTML = '<span class="toast-icon">' + (icons[type]||icons.info) + '</span><span></span><span class="toast-close">&times;</span>';
+            toast.children[1].textContent = message;
+            toast.querySelector('.toast-close').addEventListener('click', function(){
+                toast.classList.add('toast-exit');
+                setTimeout(function(){ toast.remove(); }, 250);
+            });
+            container.appendChild(toast);
+            setTimeout(function(){
+                if (toast.parentElement) {
+                    toast.classList.add('toast-exit');
+                    setTimeout(function(){ toast.remove(); }, 250);
+                }
+            }, duration);
+        };
+    </script>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -334,7 +446,7 @@
             </div>
 
             <div class="topnav-links">
-                <div class="market-status" title="US Market Status">
+                <div class="market-status" title="US market is {{ market_status_text }} (NYSE / NASDAQ trading hours: 09:30–16:00 ET, Mon–Fri)">
                     <span class="market-dot" style="background:{{ market_status_color }};"></span>
                     <span style="color:{{ market_status_color }};">{{ market_status_text }}</span>
                 </div>
@@ -411,7 +523,11 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script>
-        lucide.createIcons();
+        // refreshLucide & showToast are defined in <head> for early access by
+        // child template scripts. Run lucide once now that the static body markup
+        // (topnav icons) is in the DOM.
+        window.refreshLucide();
+
             function toggleTheme() {
                 var html = document.documentElement;
                 var isLight = html.getAttribute('data-theme') === 'light';
@@ -420,18 +536,17 @@
                 updateThemeIcon(!isLight);
             }
             function updateThemeIcon(isLight) {
-                var sun = document.getElementById('theme-icon-sun');
-                var moon = document.getElementById('theme-icon-moon');
-                if (sun && moon) {
-                    sun.style.display = isLight ? 'none' : 'inline-block';
-                    moon.style.display = isLight ? 'inline-block' : 'none';
-                }
-                var sunM = document.getElementById('theme-icon-sun-m');
-                var moonM = document.getElementById('theme-icon-moon-m');
-                if (sunM && moonM) {
-                    sunM.style.display = isLight ? 'none' : 'inline-block';
-                    moonM.style.display = isLight ? 'inline-block' : 'none';
-                }
+                // After lucide.createIcons() runs, the original <i data-lucide="sun">
+                // is replaced by an <svg> with the same id. Toggling display on the
+                // resulting node still works, but `display:'inline-block'` does not
+                // apply to <svg> reliably across browsers — use 'inline' instead.
+                ['theme-icon-sun','theme-icon-moon','theme-icon-sun-m','theme-icon-moon-m'].forEach(function(id){
+                    var el = document.getElementById(id);
+                    if (!el) return;
+                    var isSun = id.indexOf('sun') !== -1;
+                    var show = isLight ? !isSun : isSun;
+                    el.style.display = show ? 'inline' : 'none';
+                });
             }
             (function() {
                 var saved = localStorage.getItem('theme');
@@ -448,24 +563,6 @@
             nav.classList.toggle('open');
             btn.classList.toggle('open');
             document.body.classList.toggle('mobile-nav-open');
-        }
-
-        // Toast system
-        function showToast(message, type, duration) {
-            type = type || 'info';
-            duration = duration || 3000;
-            var container = document.getElementById('toast-container');
-            var icons = {success:'\u2713', error:'\u2717', info:'\u2139', warning:'\u26A0'};
-            var toast = document.createElement('div');
-            toast.className = 'toast toast-' + type;
-            toast.innerHTML = '<span class="toast-icon">' + (icons[type]||icons.info) + '</span><span>' + message + '</span><span class="toast-close" onclick="this.parentElement.classList.add(\'toast-exit\');setTimeout(function(){this.remove()}.bind(this.parentElement),250)">&times;</span>';
-            container.appendChild(toast);
-            setTimeout(function(){
-                if (toast.parentElement) {
-                    toast.classList.add('toast-exit');
-                    setTimeout(function(){ toast.remove(); }, 250);
-                }
-            }, duration);
         }
 
         // Auto-refresh prices for watchlist & portfolio

@@ -109,6 +109,30 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
 
 <div class="hub">
 
+  <!-- Market Indices Pulse -->
+  <div id="indices-pulse" style="display:flex;gap:0.5rem;overflow-x:auto;scrollbar-width:thin;padding-bottom:0.15rem;margin-bottom:0.1rem;" class="index-strip">
+    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+      <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">S&P 500</div>
+      <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="idx-spy-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="idx-spy-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
+    </div>
+    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+      <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">NASDAQ</div>
+      <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="ndx-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="ndx-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
+    </div>
+    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+      <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">DOW 30</div>
+      <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="dia-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="dia-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
+    </div>
+    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+      <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">BTC/USD</div>
+      <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="btc-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="btc-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
+    </div>
+    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+      <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">10Y YIELD</div>
+      <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="tnx-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="tnx-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
+    </div>
+  </div>
+
   <!-- Row 1: Market Scores + Strategy Picks -->
   <div class="hub-row" style="grid-template-columns:1fr 1fr;">
     <div class="panel">
@@ -487,6 +511,7 @@ function renderStrategyPicks() {
       </div>`;
     });
   }
+  if (window.refreshLucide) window.refreshLucide();
 }
 
 renderStrategyPicks();
