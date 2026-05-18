@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block title %}Alerts | Axiom Alpha{% endblock %}
 
 {% block content %}
@@ -39,7 +40,7 @@
       <div style="display:flex; align-items:center; gap:0.6rem;">
         <span style="font-size:0.85rem; font-weight:700; color:var(--brand-light);">{{ alert.symbol }}</span>
         <span style="font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:4px; font-weight:700; background:{% if alert.condition == 'above' %}rgba(16,185,129,0.15);color:#10b981{% elif alert.condition == 'below' %}rgba(239,68,68,0.15);color:#ef4444{% elif alert.condition == 'crosses_up' %}rgba(16,185,129,0.15);color:#10b981{% else %}rgba(239,68,68,0.15);color:#ef4444{% endif %};">{{ alert.get_condition_display }}</span>
-        <span style="font-size:0.8rem; color:var(--brand-light); font-weight:600;">${{ alert.target_price }}</span>
+        <span style="font-size:0.8rem; color:var(--brand-light); font-weight:600;">{{ alert.target_price|price:alert.market }}</span>
       </div>
       <form method="post" action="{% url 'alert_delete' alert.pk %}" style="display:inline;">{% csrf_token %}
         <button type="submit" style="background:none; border:1px solid rgba(239,68,68,0.3); color:var(--danger); padding:0.2rem 0.5rem; border-radius:4px; font-size:0.68rem; cursor:pointer; font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='none'">Remove</button>

@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% load custom_filters %}
 {% block title %}Portfolios | Axiom Alpha{% endblock %}
 
 {% block content %}
@@ -52,8 +53,8 @@
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem;" class="summary-grid">
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total Value</div>
-        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">${{ total_value }}</div>
-        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">Cost ${{ total_cost }}</div>
+        <div style="font-size:1.6rem; font-weight:800; color:var(--brand-light);">{{ total_value|price:portfolio_market }}</div>
+        <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.15rem;">Cost {{ total_cost|price:portfolio_market }}</div>
       </div>
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Positions</div>
@@ -61,7 +62,7 @@
       </div>
       <div class="panel" style="text-align:center;">
         <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary); margin-bottom:0.5rem;">Total P&L</div>
-        <div style="font-size:1.6rem; font-weight:800; color:{% if total_pnl_positive %}var(--success){% else %}var(--danger){% endif %};">{% if total_pnl_positive %}+{% endif %}${{ total_pnl }}</div>
+        <div style="font-size:1.6rem; font-weight:800; color:{% if total_pnl_positive %}var(--success){% else %}var(--danger){% endif %};">{% if total_pnl_positive %}+{% endif %}{{ total_pnl|price:portfolio_market }}</div>
         <div style="font-size:0.75rem; color:{% if total_pnl_positive %}var(--success){% else %}var(--danger){% endif %}; margin-top:0.15rem;">{% if total_pnl_positive %}+{% endif %}{{ total_pnl_pct }}%</div>
       </div>
     </div>
@@ -108,11 +109,11 @@
               </td>
               <td style="padding:0.55rem 0.75rem; color:var(--text-secondary); font-size:0.78rem;">{{ pos.name }}</td>
               <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light); font-weight:600;">{{ pos.quantity }}</td>
-              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light);">${{ pos.buy_price }}</td>
-              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light); font-weight:600;" data-price-val>${{ pos.current_price }}</td>
-              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light); font-weight:700;">${{ pos.current_value }}</td>
+              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light);">{{ pos.buy_price|price:pos.market }}</td>
+              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light); font-weight:600;" data-price-val>{{ pos.current_price|price:pos.market }}</td>
+              <td style="padding:0.55rem 0.75rem; text-align:right; color:var(--brand-light); font-weight:700;">{{ pos.current_value|price:pos.market }}</td>
               <td style="padding:0.55rem 0.75rem; text-align:right; font-weight:800; color:{% if pos.is_positive %}var(--success){% else %}var(--danger){% endif %};">
-                {% if pos.is_positive %}+{% endif %}${{ pos.pnl }} ({{ pos.pnl_pct }}%)
+                {% if pos.is_positive %}+{% endif %}{{ pos.pnl|price:pos.market }} ({{ pos.pnl_pct }}%)
               </td>
               <td style="padding:0.55rem 0.5rem; text-align:right; white-space:nowrap;">
                 <button onclick="openEditModal('{{ pos.id }}','{{ pos.symbol }}','{{ pos.quantity }}','{{ pos.buy_price }}')" style="background:none; border:1px solid rgba(138,203,208,0.3); color:var(--brand-teal); padding:0.2rem 0.45rem; border-radius:4px; font-size:0.68rem; cursor:pointer; font-family:'Outfit',sans-serif; margin-right:0.15rem;" onmouseover="this.style.background='rgba(86,182,198,0.1)'" onmouseout="this.style.background='none'">Edit</button>

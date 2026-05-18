@@ -81,4 +81,6 @@ class PriceAlert(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.symbol} {self.condition} ${self.target_price}"
+        symbol_display = f'{self.symbol}.JK' if self.market == 'ID' else self.symbol
+        prefix = 'IDR' if self.market == 'ID' else '$'
+        return f"{self.user.username} - {symbol_display} {self.condition} {prefix}{self.target_price}"

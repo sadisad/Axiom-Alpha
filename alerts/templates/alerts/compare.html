@@ -223,13 +223,13 @@
         <div class="section-header">🔢 DCF Valuation</div>
         <div class="metric-row">
             <span class="metric-label">Current Price</span>
-            <span class="metric-val">${{ analysis1.dcf.current_price|default:"-" }}</span>
-            <span class="metric-val">${{ analysis2.dcf.current_price|default:"-" }}</span>
+            <span class="metric-val">{{ analysis1.dcf.current_price|default:"-"|price:m1 }}</span>
+            <span class="metric-val">{{ analysis2.dcf.current_price|default:"-"|price:m2 }}</span>
         </div>
         <div class="metric-row">
             <span class="metric-label">Intrinsic Value (DCF)</span>
-            <span class="metric-val {% if analysis1.dcf.is_undervalued %}better{% else %}worse{% endif %}">${{ analysis1.dcf.intrinsic_value|default:"-" }}</span>
-            <span class="metric-val {% if analysis2.dcf.is_undervalued %}better{% else %}worse{% endif %}">${{ analysis2.dcf.intrinsic_value|default:"-" }}</span>
+            <span class="metric-val {% if analysis1.dcf.is_undervalued %}better{% else %}worse{% endif %}">{{ analysis1.dcf.intrinsic_value|default:"-"|price:m1 }}</span>
+            <span class="metric-val {% if analysis2.dcf.is_undervalued %}better{% else %}worse{% endif %}">{{ analysis2.dcf.intrinsic_value|default:"-"|price:m2 }}</span>
         </div>
         <div class="metric-row">
             <span class="metric-label">Upside %</span>

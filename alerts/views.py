@@ -326,6 +326,12 @@ def portfolios(request):
         context['total_pnl'] = round(total_pnl, 2)
         context['total_pnl_pct'] = round((total_pnl / total_cost * 100) if total_cost else 0, 2)
         context['total_pnl_positive'] = total_pnl >= 0
+        # Currency for the totals row: use ID if all positions are IDX,
+        # otherwise default to US display (mixed portfolios get USD totals
+        # which technically aren't accurate without FX conversion — flagged
+        # as a known limitation for a future enhancement).
+        markets = {item['market'] for item in portfolio_items}
+        context['portfolio_market'] = 'ID' if markets == {'ID'} else 'US'
         allocation = []
         for item in portfolio_items:
             if total_value > 0:
