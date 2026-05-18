@@ -182,27 +182,35 @@
     </div>
   </div>
 
-  <!-- Factor Scores -->
-  <div style="margin-top:0.75rem;">
-    {% if analysis.metrics.Revenue_Growth %}
-    <div class="factor-row"><span class="factor-name">Growth</span><div class="factor-bar"><div class="factor-fill" style="width:{% if '-' in analysis.metrics.Revenue_Growth|stringformat:'s' %}15{% else %}{{ analysis.metrics.Revenue_Growth|stringformat:'s'|cut:'%' }}{% endif %}%;background:linear-gradient(90deg,#00c896,#00e6aa);"></div></div><span class="factor-val" style="color:#00c896;">{{ analysis.metrics.Revenue_Growth }}</span></div>
-    {% endif %}
-    {% if analysis.metrics.ROE %}
-    <div class="factor-row"><span class="factor-name">Quality</span><div class="factor-bar"><div class="factor-fill" style="width:{% if '-' in analysis.metrics.ROE|stringformat:'s' %}10{% else %}{{ analysis.metrics.ROE|stringformat:'s'|cut:'%' }}{% endif %}%;background:linear-gradient(90deg,#56B6C6,#8ACBD0);"></div></div><span class="factor-val" style="color:#56B6C6;">{{ analysis.metrics.ROE }}</span></div>
-    {% endif %}
-    {% if analysis.metrics.P_E %}
-    <div class="factor-row"><span class="factor-name">Value</span>
-      <div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.relative.is_relatively_undervalued %}75{% else %}30{% endif %}%;background:linear-gradient(90deg,#ffc800,#ffe066);"></div></div>
-      <span class="factor-val" style="color:#ffc800;">{{ analysis.metrics.P_E }}</span>
+    <!-- Factor Radar — uses 0-100 scores from compute_score() so bars are
+         comparable across stocks. Raw metric values shown next to each bar. -->
+    <div style="margin-top:0.75rem;">
+      <div class="factor-row">
+        <span class="factor-name">Growth</span>
+        <div class="factor-bar"><div class="factor-fill" style="width:{{ analysis.factor_scores.growth|default:50 }}%;background:linear-gradient(90deg,#00c896,#00e6aa);"></div></div>
+        <span class="factor-val" style="color:#00c896;">{{ analysis.factor_scores.growth|default:'-' }}</span>
+      </div>
+      <div class="factor-row">
+        <span class="factor-name">Quality</span>
+        <div class="factor-bar"><div class="factor-fill" style="width:{{ analysis.factor_scores.quality|default:50 }}%;background:linear-gradient(90deg,#56B6C6,#8ACBD0);"></div></div>
+        <span class="factor-val" style="color:#56B6C6;">{{ analysis.factor_scores.quality|default:'-' }}</span>
+      </div>
+      <div class="factor-row">
+        <span class="factor-name">Value</span>
+        <div class="factor-bar"><div class="factor-fill" style="width:{{ analysis.factor_scores.value|default:50 }}%;background:linear-gradient(90deg,#ffc800,#ffe066);"></div></div>
+        <span class="factor-val" style="color:#ffc800;">{{ analysis.factor_scores.value|default:'-' }}</span>
+      </div>
+      <div class="factor-row">
+        <span class="factor-name">Momentum</span>
+        <div class="factor-bar"><div class="factor-fill" style="width:{{ analysis.factor_scores.momentum|default:50 }}%;background:linear-gradient(90deg,#ff6464,#ff8888);"></div></div>
+        <span class="factor-val" style="color:#ff6464;">{{ analysis.factor_scores.momentum|default:'-' }}</span>
+      </div>
+      <div class="factor-row">
+        <span class="factor-name">Risk</span>
+        <div class="factor-bar"><div class="factor-fill" style="width:{{ analysis.factor_scores.risk|default:50 }}%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div>
+        <span class="factor-val" style="color:#8b5cf6;">{{ analysis.factor_scores.risk|default:'-' }}</span>
+      </div>
     </div>
-    {% endif %}
-    {% if analysis.dcf and analysis.dcf.upside_percent %}
-    <div class="factor-row"><span class="factor-name">Momentum</span><div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.dcf.is_undervalued %}{{ analysis.dcf.upside_percent|floatformat:0 }}{% else %}10{% endif %}%;background:linear-gradient(90deg,#ff6464,#ff8888);"></div></div><span class="factor-val" style="color:{% if analysis.dcf.is_undervalued %}var(--success){% else %}#ff6464{% endif %};">{{ analysis.dcf.upside_percent }}%</span></div>
-    {% endif %}
-    {% if analysis.metrics.Beta %}
-    <div class="factor-row"><span class="factor-name">Risk</span><div class="factor-bar"><div class="factor-fill" style="width:{% if analysis.metrics.Beta == '-' %}50{% else %}{{ analysis.metrics.Beta }}{% endif %}%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div><span class="factor-val" style="color:#8b5cf6;">{{ analysis.metrics.Beta }}</span></div>
-    {% endif %}
-  </div>
 </div>
 
 <!-- Strategy Verdict -->

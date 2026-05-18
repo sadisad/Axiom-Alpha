@@ -232,5 +232,22 @@ def get_fundamental_analysis(ticker_symbol):
         "domain": domain,
         "dcf": dcf,
         "relative": relative,
-        "metrics": advanced_metrics
+        "metrics": advanced_metrics,
+        "factor_scores": _factor_scores_safe(ticker_symbol),
     }
+
+
+def _factor_scores_safe(ticker_symbol):
+    """Compute Growth/Quality/Value/Momentum/Risk scores (0-100) for the
+    Factor Radar widget. Falls back to 50 across the board on any failure
+    so the UI always has data to render."""
+    try:
+        from .market_data import compute_score
+        info = yf.Ticker(ticker_symbol).info or {}
+        try:
+            hist = yf.Ticker(ticker_symbol).history(period='1mo', auto_adjust=False)
+        except Exception:
+            hist = None
+        return compute_score(info, hist)
+    except Exception:
+        return {'growth': 50, 'quality': 50, 'value': 50, 'momentum': 50, 'risk': 50, 'score': 50}
