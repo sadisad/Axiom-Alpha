@@ -1012,6 +1012,31 @@ def healthz(request):
     return JsonResponse({'status': 'ok', 'service': 'axiom-alpha'})
 
 
+def technicals_api(request):
+    """Compute technical indicators (SMA, Super Trend, RSI, ADX, CCI, %R, ROC, UO, Stoch)
+    for the given symbol. Cached 5 minutes per (symbol, market)."""
+    from django.core.cache import cache
+    symbol = (request.GET.get('symbol', '') or '').strip().upper()
+    market = (request.GET.get('market', 'US') or 'US').strip().upper()
+    if not symbol:
+        return JsonResponse({'error': 'symbol required'}, status=400)
+    if market not in ('US', 'ID'):
+        market = 'US'
+    cache_key = f'technicals:{market}:{symbol}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse(cached)
+    from .services.technicals import get_technical_analysis
+    try:
+        payload = get_technical_analysis(symbol, market)
+    except Exception as e:
+        logger.warning(f'technicals failed for {symbol}/{market}: {e}')
+        return JsonResponse({'error': str(e)}, status=500)
+    if 'error' not in payload:
+        cache.set(cache_key, payload, timeout=300)
+    return JsonResponse(payload)
+
+
 def service_worker(request):
     """Serve the service worker from the site root so it can control the whole origin.
 

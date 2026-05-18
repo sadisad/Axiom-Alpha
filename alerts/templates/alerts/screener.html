@@ -369,20 +369,40 @@
       </div>
     </div>
 
-    <div class="sc-panel" style="padding:0;overflow:hidden;height:340px;position:relative;">
-      <div style="padding:0.5rem 0.85rem 0.3rem;border-bottom:1px solid rgba(138,203,208,0.08);">
+    <div class="sc-panel" id="technicals-panel" style="padding:0;overflow:hidden;position:relative;">
+      <div style="padding:0.5rem 0.85rem 0.3rem;border-bottom:1px solid rgba(138,203,208,0.08);display:flex;justify-content:space-between;align-items:center;">
         <div class="sc-lbl" style="margin:0;">🔬 TECHNICAL ANALYSIS</div>
+        <span id="technicals-price" style="font-size:0.75rem;color:var(--text-secondary);"></span>
       </div>
-      <div style="height:300px;">
-        <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
-          <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-          <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js">
-          {"interval":"1D","width":"100%","isTransparent":true,"height":"100%","symbol":"{{ analysis.tv_symbol }}","showIntervalTabs":true,"displayMode":"multiple","locale":"en","colorTheme":"dark"}
-          </script>
+      <div id="technicals-body" style="padding:0.6rem 0.85rem 0.85rem;">
+        <div id="technicals-loading" style="text-align:center;padding:1.5rem 0;color:var(--text-secondary);">
+          <span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(138,203,208,0.3);border-top-color:var(--brand-teal);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:0.4rem;"></span>
+          Computing indicators…
         </div>
-        <div class="tv-overlay"></div>
+        <div id="technicals-content" style="display:none;"></div>
+        <div id="technicals-error" style="display:none;color:var(--text-secondary);font-size:0.82rem;text-align:center;padding:1rem 0;">Technical analysis unavailable for this symbol.</div>
       </div>
     </div>
+    <style>
+      @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+      .ta-section{margin-bottom:0.85rem;}
+      .ta-section:last-child{margin-bottom:0;}
+      .ta-section-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--brand-teal);margin-bottom:0.4rem;}
+      .ta-counts{display:flex;gap:0.4rem;margin-bottom:0.5rem;flex-wrap:wrap;}
+      .ta-count{padding:0.2rem 0.55rem;border-radius:5px;font-size:0.72rem;font-weight:700;display:inline-flex;align-items:center;gap:0.3rem;}
+      .ta-count.bear{background:rgba(239,68,68,0.12);color:#ff6464;}
+      .ta-count.neu{background:rgba(138,203,208,0.1);color:var(--text-secondary);}
+      .ta-count.bull{background:rgba(0,200,150,0.12);color:#00c896;}
+      .ta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.35rem 0.75rem;}
+      .ta-item{display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0.55rem;border-radius:5px;background:rgba(15,10,60,0.5);border:1px solid rgba(138,203,208,0.06);font-size:0.78rem;}
+      .ta-item-name{color:var(--text-secondary);font-weight:600;}
+      .ta-item-val{font-weight:700;color:var(--brand-light);}
+      .ta-item-sig{font-size:0.66rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:3px;margin-left:0.4rem;}
+      .ta-sig-Buy{background:rgba(0,200,150,0.15);color:#00c896;}
+      .ta-sig-Sell{background:rgba(239,68,68,0.12);color:#ff6464;}
+      .ta-sig-Neutral{background:rgba(138,203,208,0.1);color:var(--text-secondary);}
+    </style>
+  </div>
 </div>
   </div>
 
@@ -450,6 +470,49 @@ function toggleWatchlist(){
     if (window.showToast) showToast('Failed to update watchlist', 'error', 3000);
   });
 }
+
+// === Technical Analysis loader (uses /api/technicals/) ===
+{% if analysis and not analysis.error %}
+(function loadTechnicals(){
+  var loading = document.getElementById('technicals-loading');
+  var content = document.getElementById('technicals-content');
+  var err = document.getElementById('technicals-error');
+  var priceEl = document.getElementById('technicals-price');
+  if (!loading) return;
+  fetch('/api/technicals/?symbol={{ symbol }}&market={{ market }}')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      loading.style.display = 'none';
+      if (d.error) { err.style.display = 'block'; return; }
+      if (priceEl) priceEl.textContent = d.symbol + ' \u2014 $' + (d.price || '-').toLocaleString();
+      function section(title, block){
+        var c = block.counts;
+        var html = '<div class="ta-section"><div class="ta-section-title">' + title + '</div>';
+        html += '<div class="ta-counts">';
+        html += '<span class="ta-count bear">Bearish (' + c.bearish + ')</span>';
+        html += '<span class="ta-count neu">Neutral (' + c.neutral + ')</span>';
+        html += '<span class="ta-count bull">Bullish (' + c.bullish + ')</span>';
+        html += '</div><div class="ta-grid">';
+        block.items.forEach(function(it){
+          var v = it.value === null || it.value === undefined ? '-' :
+                  (typeof it.value === 'number' ? it.value.toFixed(2) : it.value);
+          html += '<div class="ta-item"><span class="ta-item-name">' + it.name + '</span>';
+          html += '<span><span class="ta-item-val">' + v + '</span>';
+          html += '<span class="ta-item-sig ta-sig-' + it.signal + '">' + it.signal + '</span></span></div>';
+        });
+        html += '</div></div>';
+        return html;
+      }
+      content.innerHTML = section('Trend Following', d.trend_following) +
+                          section('Oscillators', d.oscillators);
+      content.style.display = 'block';
+    })
+    .catch(function(){
+      loading.style.display = 'none';
+      err.style.display = 'block';
+    });
+})();
+{% endif %}
 
 {% if market == 'ID' and analysis and not analysis.error %}
 (function loadBrokerSummary(){

@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/market-status/', views.market_status, name='market_status'),
     path('api/indices/', views.indices_api, name='indices_api'),
     path('api/symbol-search/', views.symbol_search, name='symbol_search'),
+    path('api/technicals/', views.technicals_api, name='technicals_api'),
     path('api/broker-summary/', views.broker_summary_api, name='broker_summary_api'),
     path('api/sector-peers/', views.sector_peers_api, name='sector_peers_api'),
     path('screener/', views.screener, name='screener'),
