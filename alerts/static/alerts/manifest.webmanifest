@@ -1,0 +1,26 @@
+{
+  "name": "Axiom Alpha",
+  "short_name": "Axiom",
+  "description": "Institutional-grade stock analysis, radar, screener, and portfolio tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d0645",
+  "theme_color": "#170C79",
+  "lang": "en",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/static/alerts/images/AxiomAlpha-logo-transparent.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/alerts/images/AxiomAlpha-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
