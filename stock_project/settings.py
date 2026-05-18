@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 try:
     from dotenv import load_dotenv
@@ -22,17 +23,28 @@ except ImportError:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-import os
-
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-iw=7b4f9@znl%(v7@k1!vg=z00ac9_!i=-*k0!@#d=+9-g=mh^')
+# === Core security ===
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+# In production, refuse to start without an explicit secret key. The dev
+# fallback is gated behind DEBUG so production deployments fail loudly.
+_DEFAULT_SECRET = 'django-insecure-iw=7b4f9@znl%(v7@k1!vg=z00ac9_!i=-*k0!@#d=+9-g=mh^'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', _DEFAULT_SECRET if DEBUG else '')
+if not SECRET_KEY:
+    raise RuntimeError(
+        'DJANGO_SECRET_KEY environment variable is required when DEBUG=False. '
+        'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
+    )
+
+# Default to localhost-only when ALLOWED_HOSTS is not configured. Wildcard "*"
+# is dangerous in production and should require an explicit opt-in.
+_default_hosts = '*' if DEBUG else 'localhost,127.0.0.1'
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', _default_hosts).split(',') if h.strip()]
+
+# Trust proxies behind which we run (e.g. Cloudflare, Vercel) when given a
+# comma-separated list of origins like "https://app.example.com,https://www.example.com".
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 
 
 # Application definition
@@ -168,6 +180,69 @@ CACHES = {
             'MAX_ENTRIES': 500,
         },
     }
+}
+
+
+# === Production hardening ===
+# Active only when DEBUG=False so dev workflows aren't disrupted.
+if not DEBUG:
+    # HTTPS / cookies — assume the deployment terminates TLS in front of us.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True') == 'True'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # SameSite=Lax is sufficient for CSRF and breaks fewer integrations than Strict.
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # Django reads CSRF cookie from JS for fetch()
+
+    # HSTS — only enable when the site is already 100% HTTPS, otherwise users
+    # may be locked out of the http fallback. Off by default; opt in via env.
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+    SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
+
+    # Browser sniffing protections.
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
+
+
+# === Logging ===
+# Structured-ish console logging. JSON formatter is left as a TODO since adding
+# python-json-logger is a tradeoff between dependency and value.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} :: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'alerts': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
 
 # Triggering reload for static files
