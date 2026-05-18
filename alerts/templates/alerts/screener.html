@@ -8,9 +8,12 @@
 
 /* Search */
 .sc-search{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
-.sc-search input{flex:1;min-width:180px;padding:0.55rem 1rem 0.55rem 2.5rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.92rem;outline:none;transition:border-color 0.15s;}
+.sc-search input{flex:1;min-width:180px;padding:0.55rem 1rem 0.55rem 2.5rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.92rem;outline:none;transition:border-color 0.15s;font-family:'Outfit',sans-serif;}
+.sc-search input::placeholder{color:rgba(138,203,208,0.4);}
 .sc-search input:focus{border-color:var(--brand-teal);}
-.sc-search select{padding:0.55rem 0.8rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.9rem;outline:none;}
+.sc-search select{padding:0.55rem 0.8rem;border-radius:8px;border:1px solid rgba(138,203,208,0.15);background:rgba(23,12,121,0.5);color:var(--brand-light);font-size:0.9rem;outline:none;font-family:'Outfit',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2356B6C6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 0.6rem center;padding-right:2rem;}
+.sc-search select:focus{border-color:var(--brand-teal);}
+.sc-search select option{background:#0d0645;color:var(--brand-light);}
 .sc-tags{display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.4rem;}
 .sc-tag{padding:0.2rem 0.55rem;border:1px solid rgba(138,203,208,0.15);border-radius:14px;font-size:0.72rem;font-weight:600;color:var(--brand-light);text-decoration:none;background:rgba(23,12,121,0.4);transition:all 0.15s;}
 .sc-tag:hover{border-color:var(--brand-teal);color:var(--brand-teal);}
@@ -100,9 +103,9 @@
 
 <!-- Search -->
 <div class="sc-panel">
-  <form method="GET" action="{% url 'screener' %}" id="screener-form" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+  <form method="GET" action="{% url 'screener' %}" id="screener-form" class="sc-search" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
     <div style="flex:1;min-width:180px;position:relative;">
-      <i data-lucide="search" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);width:15px;height:15px;"></i>
+      <i data-lucide="search" style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--brand-teal);width:15px;height:15px;pointer-events:none;z-index:1;"></i>
       <input type="text" id="symbol-input" name="symbol" value="{{ symbol|default:'' }}" autocomplete="off" placeholder="Search stocks (e.g. AAPL, BBCA)">
     </div>
     <select name="market" id="market-select">
