@@ -35,6 +35,18 @@ staticfiles/
 .env.local
 *.key
 
-# Ignore semua file/folder yang diawali test_
-test_*
-**/test_*
+# Pytest / ad-hoc test scripts
+# We ignore *exploratory* test scripts at the project root (test_all.py,
+# test_broker2.py, etc.) but keep the official pytest files tracked so the
+# test suite can run in CI.
+/test_*.py
+/*_test.py
+/test/
+/tests/
+
+# Whitelist the official Django/pytest config & app tests:
+!pytest.ini
+!conftest.py
+!**/conftest.py
+!**/tests.py
+!alerts/tests.py
