@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/prices/', views.prices_api, name='prices_api'),
     path('api/market-status/', views.market_status, name='market_status'),
     path('api/indices/', views.indices_api, name='indices_api'),
+    path('api/symbol-search/', views.symbol_search, name='symbol_search'),
     path('api/broker-summary/', views.broker_summary_api, name='broker_summary_api'),
     path('api/sector-peers/', views.sector_peers_api, name='sector_peers_api'),
     path('screener/', views.screener, name='screener'),
@@ -32,4 +33,9 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
+    # SEO + ops
+    path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),
+    path('healthz', views.healthz, name='healthz'),
+    path('sw.js', views.service_worker, name='service_worker'),
 ]

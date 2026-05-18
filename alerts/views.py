@@ -125,11 +125,38 @@ class LoginForm(forms.Form):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
+
+    # Simple per-IP rate limit on POST: max 8 attempts per 5 minutes.
+    # Uses Django cache, so it works with locmem in dev and shared cache (e.g.
+    # Redis) in production. Returns 429 with a friendly message when exceeded.
+    if request.method == 'POST':
+        from django.core.cache import cache
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
+             or request.META.get('REMOTE_ADDR', 'unknown')
+        key = f'login_attempts:{ip}'
+        attempts = cache.get(key, 0)
+        if attempts >= 8:
+            return render(request, 'registration/login.html', {
+                'form': LoginForm(),
+                'rate_limited': True,
+                'retry_after_minutes': 5,
+            }, status=429)
+        # Increment first; reset on success below.
+        cache.set(key, attempts + 1, timeout=300)
+
     if request.method == 'POST':
         form = LoginForm(request.POST, request=request)
         if form.is_valid():
             user = form.cleaned_data['user']
             login(request, user)
+            # Clear rate-limit counter on successful login.
+            try:
+                from django.core.cache import cache
+                ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
+                     or request.META.get('REMOTE_ADDR', 'unknown')
+                cache.delete(f'login_attempts:{ip}')
+            except Exception:
+                pass
             return redirect('dashboard')
     else:
         form = LoginForm()
@@ -606,6 +633,60 @@ def prices_api(request):
     return JsonResponse({'prices': prices})
 
 
+def symbol_search(request):
+    """Lightweight symbol search for autocomplete dropdowns.
+
+    Searches known SP500 + IDX symbol lists. Names come from the radar score
+    cache when available (no extra network call); otherwise the symbol itself
+    is shown. Capped at 10 results, debounced on the client side.
+    """
+    from django.core.cache import cache
+    q = (request.GET.get('q', '') or '').strip().upper()
+    if len(q) < 1:
+        return JsonResponse({'results': []})
+
+    # Build a name lookup table from any radar-scores payloads currently cached.
+    # This piggybacks on data already paid for; no extra yfinance calls.
+    name_map = {}
+    for market in ('US', 'ID'):
+        for size in (25, 50, 75, 100):
+            payload = cache.get(f'radar_scores:{market}::') or cache.get(f'radar_scores:{market}:{size}:')
+            if payload and payload.get('stocks'):
+                for s in payload['stocks']:
+                    if s.get('t') and s.get('n'):
+                        name_map.setdefault(s['t'], s['n'])
+
+    results = []
+    seen = set()
+    # Match against ticker first (prefix preferred), then name.
+    candidates = []
+    for sym in SP500_SYMBOLS:
+        candidates.append((sym, 'US'))
+    for sym in IDX_SYMBOLS:
+        candidates.append((sym.replace('.JK', ''), 'ID'))
+
+    # Prefix matches first
+    prefix_hits = []
+    name_hits = []
+    other_hits = []
+    for sym, market in candidates:
+        if sym in seen:
+            continue
+        seen.add(sym)
+        name = name_map.get(sym, '')
+        if sym.startswith(q):
+            prefix_hits.append((sym, market, name))
+        elif q in sym:
+            other_hits.append((sym, market, name))
+        elif name and q in name.upper():
+            name_hits.append((sym, market, name))
+
+    for sym, market, name in (prefix_hits + name_hits + other_hits)[:10]:
+        results.append({'symbol': sym, 'market': market, 'name': name})
+
+    return JsonResponse({'results': results, 'query': q})
+
+
 def indices_api(request):
     """Public endpoint that returns live quotes for the dashboard index strip.
     Symbols are hard-coded since they are part of the page chrome, not user input."""
@@ -622,8 +703,17 @@ def indices_api(request):
     out = {}
     for s in symbols:
         d = data.get(s) or {}
+        price_str = d.get('price', '-')
+        # ^TNX is reported as 43.0 meaning 4.30% — divide by 10 and append %.
+        if s == '^TNX':
+            raw = d.get('current_price') or d.get('price_raw') or 0
+            try:
+                pct = float(raw) / 10.0
+                price_str = f'{pct:.2f}%'
+            except (TypeError, ValueError):
+                price_str = '-'
         out[s] = {
-            'price': d.get('price', '-'),
+            'price': price_str,
             'change': d.get('change', 0),
             'is_positive': d.get('is_positive', True),
         }
@@ -861,3 +951,81 @@ def sector_peers_api(request):
     payload = {'peers': results}
     cache.set(cache_key, payload, timeout=600)
     return JsonResponse(payload)
+
+
+# === SEO and ops endpoints ===
+
+def robots_txt(request):
+    """Tells search-engine crawlers what to index. Disallows API and auth pages."""
+    from django.http import HttpResponse
+    lines = [
+        'User-agent: *',
+        'Disallow: /api/',
+        'Disallow: /login/',
+        'Disallow: /register/',
+        'Disallow: /logout/',
+        'Disallow: /portfolio/',
+        'Disallow: /watchtower/',
+        'Disallow: /alerts/',
+        'Allow: /',
+        '',
+        f'Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml',
+    ]
+    return HttpResponse('\n'.join(lines), content_type='text/plain; charset=utf-8')
+
+
+def sitemap_xml(request):
+    """Static sitemap covering public pages plus a curated set of popular tickers."""
+    from django.http import HttpResponse
+    from django.urls import reverse
+    base = f'{request.scheme}://{request.get_host()}'
+    public_pages = [
+        ('dashboard', 'daily', '1.0'),
+        ('radar', 'daily', '0.9'),
+        ('compare', 'weekly', '0.8'),
+        ('maps', 'daily', '0.8'),
+        ('headlines', 'hourly', '0.7'),
+        ('about', 'monthly', '0.5'),
+    ]
+    urls = []
+    for name, freq, prio in public_pages:
+        try:
+            urls.append((base + reverse(name), freq, prio))
+        except Exception:
+            continue
+    # Popular tickers — useful for indexing per-stock pages.
+    popular = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN', 'TSLA',
+               'AMD', 'INTC', 'JPM', 'BBCA', 'BBRI', 'TLKM', 'ASII']
+    for sym in popular:
+        market = 'ID' if sym in ('BBCA', 'BBRI', 'TLKM', 'ASII') else 'US'
+        urls.append((f'{base}{reverse("screener")}?symbol={sym}&market={market}', 'daily', '0.6'))
+    body = ['<?xml version="1.0" encoding="UTF-8"?>',
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for loc, freq, prio in urls:
+        body.append(f'  <url><loc>{loc}</loc><changefreq>{freq}</changefreq><priority>{prio}</priority></url>')
+    body.append('</urlset>')
+    return HttpResponse('\n'.join(body), content_type='application/xml; charset=utf-8')
+
+
+def healthz(request):
+    """Liveness probe for monitoring. Returns 200 with minimal info; no DB queries."""
+    return JsonResponse({'status': 'ok', 'service': 'axiom-alpha'})
+
+
+def service_worker(request):
+    """Serve the service worker from the site root so it can control the whole origin.
+
+    A SW served from /static/alerts/sw.js would be limited to that path; serving
+    from /sw.js (or with Service-Worker-Allowed header) lets it scope to "/".
+    """
+    from django.http import HttpResponse
+    from django.contrib.staticfiles import finders
+    path = finders.find('alerts/sw.js')
+    if not path:
+        return HttpResponse('// service worker not found', status=404, content_type='application/javascript')
+    with open(path, 'rb') as f:
+        content = f.read()
+    resp = HttpResponse(content, content_type='application/javascript')
+    resp['Service-Worker-Allowed'] = '/'
+    resp['Cache-Control'] = 'no-cache'
+    return resp
