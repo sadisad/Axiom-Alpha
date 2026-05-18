@@ -1,5 +1,8 @@
 {% extends 'alerts/base.html' %}
 {% block title %}{% if symbol %}{{ symbol }} Analysis{% else %}Screener{% endif %} | Axiom Alpha{% endblock %}
+{% block og_title %}{% if analysis and not analysis.error %}{{ analysis.symbol }} — {{ analysis.company_name }} | Axiom Alpha{% else %}Screener | Axiom Alpha{% endif %}{% endblock %}
+{% block og_description %}{% if analysis and not analysis.error %}{{ analysis.company_name }}{% if analysis.metrics.Sector %} · {{ analysis.metrics.Sector }}{% endif %}{% if analysis.dcf.is_undervalued %} · DCF says undervalued{% endif %}. Run a fundamental analysis on {{ analysis.symbol }} with Axiom Alpha.{% else %}Search and analyze any US or Indonesian stock with institutional-grade fundamental data.{% endif %}{% endblock %}
+{% block og_type %}{% if analysis and not analysis.error %}article{% else %}website{% endif %}{% endblock %}
 {% block content %}
 <style>
 .sc{display:flex;flex-direction:column;gap:0.5rem;min-width:0;width:100%;overflow-x:hidden;}

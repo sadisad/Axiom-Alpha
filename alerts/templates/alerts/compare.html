@@ -1,6 +1,8 @@
 {% extends 'alerts/base.html' %}
 {% load custom_filters %}
 {% block title %}Compare | Axiom Alpha{% endblock %}
+{% block og_title %}{% if analysis1 and analysis2 %}{{ analysis1.symbol }} vs {{ analysis2.symbol }} | Axiom Alpha{% else %}Stock Comparison | Axiom Alpha{% endif %}{% endblock %}
+{% block og_description %}{% if analysis1 and analysis2 %}Side-by-side analysis of {{ analysis1.company_name }} ({{ analysis1.symbol }}) and {{ analysis2.company_name }} ({{ analysis2.symbol }}).{% else %}Compare two stocks side-by-side: valuations, profitability, momentum, and DCF intrinsic value.{% endif %}{% endblock %}
 
 {% block content %}
 <style>
@@ -71,7 +73,7 @@
     </div>
 
     <!-- Search Form -->
-    <form method="GET" action="{% url 'compare' %}" style="margin-bottom:2rem;">
+    <form method="GET" action="{% url 'compare' %}" id="compare-form" style="margin-bottom:2rem;">
         <div style="display:grid; grid-template-columns:1fr auto 1fr auto; gap:1rem; align-items:center;" class="compare-form-grid">
             <div style="display:flex; gap:0.5rem;">
                 <input type="text" name="s1" value="{{ s1 }}" placeholder="Symbol 1 (e.g. AAPL)"
@@ -90,7 +92,7 @@
                     <option value="ID" {% if m2 == 'ID' %}selected{% endif %}>ID</option>
                 </select>
             </div>
-            <button type="submit" class="btn" style="padding:0.9rem 2rem; font-size:1rem;">Compare</button>
+            <button type="submit" id="compare-submit" class="btn" style="padding:0.9rem 2rem; font-size:1rem;">Compare</button>
         </div>
         <div style="display:flex; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap;">
             <span style="color:var(--text-secondary); font-size:0.85rem; align-self:center;">Quick:</span>
@@ -99,6 +101,38 @@
             <a href="?s1=BBCA&m1=ID&s2=BBRI&m2=ID" style="font-size:0.82rem; padding:0.3rem 0.75rem; border:1px solid var(--surface-border); border-radius:20px; color:var(--brand-teal); text-decoration:none;">BBCA vs BBRI</a>
         </div>
     </form>
+
+    <!-- Inline loading skeleton shown after form submit while server fetches both stocks -->
+    <div id="compare-loading" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;" class="compare-grid">
+            <div class="skeleton" style="height:350px;"></div>
+            <div class="skeleton" style="height:350px;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem;" class="compare-grid">
+            <div class="skeleton" style="height:200px;"></div>
+            <div class="skeleton" style="height:200px;"></div>
+        </div>
+        <p style="text-align:center;color:var(--text-secondary);font-size:0.85rem;">
+            <span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(138,203,208,0.3);border-top-color:var(--brand-teal);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:0.4rem;"></span>
+            Crunching numbers for both stocks…
+        </p>
+    </div>
+    <script>
+    (function(){
+        var f = document.getElementById('compare-form');
+        var loading = document.getElementById('compare-loading');
+        if (!f || !loading) return;
+        f.addEventListener('submit', function(){
+            // Hide existing results so the user sees the skeleton, not stale content.
+            var grids = document.querySelectorAll('.compare-grid:not(#compare-loading .compare-grid)');
+            grids.forEach(function(g){ g.style.display = 'none'; });
+            loading.style.display = 'block';
+            var btn = document.getElementById('compare-submit');
+            if (btn) { btn.disabled = true; btn.textContent = 'Comparing\u2026'; }
+        });
+    })();
+    </script>
+    <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
 
     {% if analysis1 and analysis2 %}
 

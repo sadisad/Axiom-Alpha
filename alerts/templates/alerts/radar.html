@@ -1,6 +1,8 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
 {% block title %}Radar | Axiom Alpha{% endblock %}
+{% block og_title %}Stock Radar — Screen by Growth, Quality, Value, Momentum, Risk{% endblock %}
+{% block og_description %}Rank S&P 500 and IDX stocks across five scoring strategies. Compounders, value plays, momentum leaders, all in one searchable table.{% endblock %}
 {% block content %}
 <style>
 .radar-page{max-width:1400px;margin:0 auto;padding:0 0.5rem;min-width:0;width:100%;overflow-x:hidden;}
@@ -71,7 +73,7 @@
 .market-toggle button{padding:0.3rem 0.65rem;border:none;border-radius:5px;font-size:0.74rem;font-weight:600;cursor:pointer;transition:all 0.15s;background:transparent;color:var(--text-secondary);min-height:34px;}
 .market-toggle button.active{background:var(--brand-teal);color:#0d0645;}
 
-.radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow-x:auto;background:rgba(15,10,60,0.5);-webkit-overflow-scrolling:touch;}
+.radar-table-wrap{border:1px solid rgba(138,203,208,0.08);border-radius:8px;overflow-x:auto;background:rgba(15,10,60,0.5);-webkit-overflow-scrolling:touch;position:relative;}
 .radar-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
 .radar-table thead{background:rgba(23,12,121,0.6);}
 .radar-table th{padding:0.5rem 0.45rem;text-align:left;color:var(--text-secondary);font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(138,203,208,0.08);white-space:nowrap;}
@@ -79,6 +81,30 @@
 .radar-table td{padding:0.45rem 0.45rem;border-bottom:1px solid rgba(255,255,255,0.02);color:var(--brand-light);white-space:nowrap;}
 .radar-table tbody tr{transition:background 0.12s;}
 .radar-table tbody tr:hover{background:rgba(86,182,198,0.05);}
+
+/* Sticky first two columns (rank + ticker) on mobile horizontal scroll.
+   Desktop has enough horizontal space, so we apply this only at <= 768px. */
+@media (max-width: 768px) {
+    .radar-table th:nth-child(1),
+    .radar-table td:nth-child(1) {
+        position: sticky; left: 0; z-index: 2;
+        background: rgba(15,10,60,0.95); backdrop-filter: blur(4px);
+    }
+    .radar-table thead th:nth-child(1) { background: rgba(23,12,121,0.95); }
+    .radar-table th:nth-child(2),
+    .radar-table td:nth-child(2) {
+        position: sticky; left: 32px; z-index: 2;
+        background: rgba(15,10,60,0.95); backdrop-filter: blur(4px);
+        box-shadow: 2px 0 6px rgba(0,0,0,0.15);
+    }
+    .radar-table thead th:nth-child(2) { background: rgba(23,12,121,0.95); }
+    html[data-theme="light"] .radar-table th:nth-child(1),
+    html[data-theme="light"] .radar-table td:nth-child(1),
+    html[data-theme="light"] .radar-table th:nth-child(2),
+    html[data-theme="light"] .radar-table td:nth-child(2) {
+        background: rgba(255,255,255,0.97);
+    }
+}
 .ticker-link{color:var(--brand-teal);text-decoration:none;font-weight:700;cursor:pointer;}
 .ticker-link:hover{text-decoration:underline;}
 .score-pill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:0.12rem 0.4rem;border-radius:4px;font-weight:800;font-size:0.72rem;}
@@ -418,13 +444,33 @@ const STRATEGIES = {
 };
 
 const MCAP_ORDER = {'T':4,'B':3,'M':2,'K':1,'-':0};
-let currentMarket = 'US';
-let currentStrategy = 'all';
+// Restore state from URL query string so deep links and refresh preserve view.
+const URL_PARAMS = new URLSearchParams(window.location.search);
+let currentMarket = (URL_PARAMS.get('market') === 'ID') ? 'ID' : 'US';
+let currentStrategy = ['all','growth','quality','value','momentum','risk'].includes(URL_PARAMS.get('strategy'))
+    ? URL_PARAMS.get('strategy') : 'all';
 let currentStocks = [];
-let sortCol = 'score';
-let sortDir = 'desc';
-let currentSize = 25;
-let currentList = '';
+let sortCol = ['ticker','name','mcap','growth','quality','value','momentum','risk','score'].includes(URL_PARAMS.get('sort'))
+    ? URL_PARAMS.get('sort') : 'score';
+let sortDir = (URL_PARAMS.get('dir') === 'asc') ? 'asc' : 'desc';
+let currentSize = (function(){
+    var n = parseInt(URL_PARAMS.get('size'), 10);
+    return (n >= 25 && n <= 100 && n % 25 === 0) ? n : 25;
+})();
+let currentList = URL_PARAMS.get('list') || '';
+
+function syncUrlState(){
+    var p = new URLSearchParams();
+    if (currentMarket !== 'US') p.set('market', currentMarket);
+    if (currentStrategy !== 'all') p.set('strategy', currentStrategy);
+    if (sortCol !== 'score') p.set('sort', sortCol);
+    if (sortDir !== 'desc') p.set('dir', sortDir);
+    if (currentSize !== 25) p.set('size', currentSize);
+    if (currentList) p.set('list', currentList);
+    var qs = p.toString();
+    var url = window.location.pathname + (qs ? '?' + qs : '');
+    window.history.replaceState({}, '', url);
+}
 
 function scoreClass(v){return v>=80?'score-green':v>=50?'score-yellow':'score-red';}
 
@@ -582,9 +628,28 @@ function filterStocks(){
   });
 
   renderTable(stocks);
+  syncUrlState();
 }
 
-loadScores('US');
+// Restore UI state from URL params, then load.
+(function initFromUrl(){
+  // Market button
+  document.querySelectorAll('.market-btn').forEach(function(b){
+    var active = b.dataset.market === currentMarket;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  // Strategy tab
+  document.querySelectorAll('.stab').forEach(function(t){
+    var active = t.dataset.strategy === currentStrategy;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  updateInsightCard(currentStrategy);
+  updateSortArrows();
+})();
+
+loadScores(currentMarket);
 updateSizeUI();
 
 document.getElementById('size-plus').addEventListener('click',function(){

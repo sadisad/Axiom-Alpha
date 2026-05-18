@@ -1,5 +1,7 @@
 {% extends 'alerts/base.html' %}
 {% block title %}Hub | Axiom Alpha{% endblock %}
+{% block og_title %}Axiom Alpha Hub — Daily market intelligence{% endblock %}
+{% block og_description %}Live indices, strategy picks, top returns, market heatmap, financial news and economic calendar — all in one dashboard.{% endblock %}
 {% block content %}
 <style>
 .hub { display:flex; flex-direction:column; gap:0.6rem; min-width:0; width:100%; }
@@ -113,23 +115,23 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
 
   <!-- Market Indices Pulse -->
   <div id="indices-pulse" style="display:flex;gap:0.5rem;overflow-x:auto;scrollbar-width:thin;padding-bottom:0.15rem;margin-bottom:0.1rem;" class="index-strip">
-    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+    <div class="index-card" title="SPDR S&P 500 ETF — tracks the S&P 500 large-cap US index." style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
       <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">S&P 500</div>
       <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="idx-spy-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="idx-spy-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
     </div>
-    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+    <div class="index-card" title="Invesco QQQ Trust — tracks the Nasdaq 100 (top 100 non-financial Nasdaq stocks)." style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
       <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">NASDAQ</div>
       <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="ndx-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="ndx-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
     </div>
-    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+    <div class="index-card" title="SPDR Dow Jones Industrial Average ETF — tracks the 30 largest US blue chips." style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
       <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">DOW 30</div>
       <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="dia-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="dia-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
     </div>
-    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+    <div class="index-card" title="Bitcoin spot price in US dollars." style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
       <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">BTC/USD</div>
       <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="btc-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="btc-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
     </div>
-    <div class="index-card" style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
+    <div class="index-card" title="10-Year US Treasury yield. Higher = bonds offer better return; often inversely correlated with stock prices." style="background:rgba(23,12,121,0.4);border:1px solid rgba(138,203,208,0.1);border-radius:8px;padding:0.45rem 0.85rem;min-width:130px;flex-shrink:0;">
       <div style="font-size:0.6rem;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">10Y YIELD</div>
       <div style="display:flex;align-items:baseline;gap:0.4rem;"><span id="tnx-price" style="font-size:0.95rem;font-weight:800;color:var(--brand-light);">--</span><span id="tnx-change" style="font-size:0.72rem;font-weight:700;">--</span></div>
     </div>

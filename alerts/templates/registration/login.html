@@ -67,7 +67,11 @@
     <form id="login-form" method="post" style="display:flex;flex-direction:column;gap:1.25rem;">
       {% csrf_token %}
 
-      {% if form.errors %}
+      {% if rate_limited %}
+      <div style="background:rgba(245,158,11,0.1);border:1px solid var(--warning);padding:0.75rem;border-radius:8px;color:var(--warning);font-size:0.85rem;">
+        Too many login attempts. Please wait {{ retry_after_minutes }} minutes before trying again.
+      </div>
+      {% elif form.errors %}
       <div style="background:rgba(239,68,68,0.1);border:1px solid var(--danger);padding:0.75rem;border-radius:8px;color:var(--danger);font-size:0.85rem;">
         Invalid username or password. Please try again.
       </div>
