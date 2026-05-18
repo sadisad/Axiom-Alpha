@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% block title %}Radar | Axiom Alpha{% endblock %}
 {% block content %}
 <style>
 .radar-page{max-width:1400px;margin:0 auto;padding:0 0.5rem;min-width:0;width:100%;overflow-x:hidden;}
@@ -217,30 +218,30 @@
   </div>
 
   <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;flex-wrap:wrap;min-width:0;">
-    <div class="market-toggle">
-      <button class="market-btn active" data-market="US">US</button>
-      <button class="market-btn" data-market="ID">ID</button>
+    <div class="market-toggle" role="group" aria-label="Market selector">
+      <button class="market-btn active" data-market="US" aria-label="United States market" aria-pressed="true">US</button>
+      <button class="market-btn" data-market="ID" aria-label="Indonesia market" aria-pressed="false">ID</button>
     </div>
     <div class="select-list-wrap">
-      <button class="select-list-btn" id="select-list-btn" style="width:100%;">
-        <span>&#9776;</span>
+      <button class="select-list-btn" id="select-list-btn" style="width:100%;" aria-label="Select stock list" aria-haspopup="listbox" aria-expanded="false">
+        <span aria-hidden="true">&#9776;</span>
         <span class="list-name" id="list-name-display">S&P 500</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="select-list-dropdown" id="select-list-dropdown">
-        <input type="text" class="sld-search" id="list-search" placeholder="Search lists...">
+      <div class="select-list-dropdown" id="select-list-dropdown" role="listbox">
+        <input type="text" class="sld-search" id="list-search" placeholder="Search lists..." aria-label="Search stock lists">
         <div id="list-items"></div>
       </div>
     </div>
   </div>
 
-  <div class="strategy-row" id="strategy-tabs">
-    <a class="stab active" data-strategy="all">Axiom+</a>
-    <a class="stab" data-strategy="growth">Growth</a>
-    <a class="stab" data-strategy="quality">Quality</a>
-    <a class="stab" data-strategy="value">Value</a>
-    <a class="stab" data-strategy="momentum">Momentum</a>
-    <a class="stab" data-strategy="risk">Risk Shield</a>
+  <div class="strategy-row" id="strategy-tabs" role="tablist" aria-label="Scoring strategies">
+    <button type="button" class="stab active" data-strategy="all" role="tab" aria-selected="true">Axiom+</button>
+    <button type="button" class="stab" data-strategy="growth" role="tab" aria-selected="false">Growth</button>
+    <button type="button" class="stab" data-strategy="quality" role="tab" aria-selected="false">Quality</button>
+    <button type="button" class="stab" data-strategy="value" role="tab" aria-selected="false">Value</button>
+    <button type="button" class="stab" data-strategy="momentum" role="tab" aria-selected="false">Momentum</button>
+    <button type="button" class="stab" data-strategy="risk" role="tab" aria-selected="false">Risk Shield</button>
   </div>
 
   <!-- Strategy Insight Card -->
@@ -332,16 +333,16 @@
     <table class="radar-table" id="radar-table">
       <thead>
         <tr>
-          <th style="width:32px;">#</th>
-          <th class="sortable" data-col="ticker">Ticker <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="name">Name <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="mcap">MCap <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="growth">Growth <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="quality">Quality <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="value">Value <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="momentum">Mom <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="risk">Risk <span class="sort-arrow"></span></th>
-          <th class="sortable" data-col="score">Score <span class="sort-arrow"></span></th>
+          <th style="width:32px;" scope="col">#</th>
+          <th class="sortable" data-col="ticker" scope="col" tabindex="0" role="button" aria-label="Sort by ticker">Ticker <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="name" scope="col" tabindex="0" role="button" aria-label="Sort by name">Name <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="mcap" scope="col" tabindex="0" role="button" aria-label="Sort by market cap">MCap <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="growth" scope="col" tabindex="0" role="button" aria-label="Sort by growth score">Growth <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="quality" scope="col" tabindex="0" role="button" aria-label="Sort by quality score">Quality <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="value" scope="col" tabindex="0" role="button" aria-label="Sort by value score">Value <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="momentum" scope="col" tabindex="0" role="button" aria-label="Sort by momentum score">Mom <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="risk" scope="col" tabindex="0" role="button" aria-label="Sort by risk score">Risk <span class="sort-arrow" aria-hidden="true"></span></th>
+          <th class="sortable" data-col="score" scope="col" tabindex="0" role="button" aria-label="Sort by overall score">Score <span class="sort-arrow" aria-hidden="true"></span></th>
         </tr>
       </thead>
       <tbody id="radar-body"></tbody>
@@ -598,8 +599,12 @@ document.getElementById('size-reset').addEventListener('click',function(){
 
 document.querySelectorAll('.stab').forEach(tab=>{
   tab.addEventListener('click',function(){
-    document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.stab').forEach(t=>{
+      t.classList.remove('active');
+      t.setAttribute('aria-selected','false');
+    });
     this.classList.add('active');
+    this.setAttribute('aria-selected','true');
     currentStrategy=this.dataset.strategy;
     // Strategy tabs sort the table by that factor (or overall Score for "all").
     sortCol = currentStrategy === 'all' ? 'score' : currentStrategy;
@@ -612,8 +617,12 @@ document.querySelectorAll('.stab').forEach(tab=>{
 
 document.querySelectorAll('.market-btn').forEach(btn=>{
   btn.addEventListener('click',function(){
-    document.querySelectorAll('.market-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.market-btn').forEach(b=>{
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed','false');
+    });
     this.classList.add('active');
+    this.setAttribute('aria-pressed','true');
     currentMarket=this.dataset.market;
     currentStrategy='all';
     currentList='';
@@ -621,14 +630,25 @@ document.querySelectorAll('.market-btn').forEach(btn=>{
     sortDir = 'desc';
     updateSortArrows();
     document.getElementById('list-name-display').textContent='S&P 500';
-    document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
-    document.querySelector('.stab[data-strategy="all"]').classList.add('active');
+    document.querySelectorAll('.stab').forEach(t=>{
+      t.classList.remove('active');
+      t.setAttribute('aria-selected','false');
+    });
+    var allTab = document.querySelector('.stab[data-strategy="all"]');
+    allTab.classList.add('active');
+    allTab.setAttribute('aria-selected','true');
     updateInsightCard('all');
     loadScores(currentMarket);
   });
 });
 
-document.getElementById('radar-search').addEventListener('input',filterStocks);
+document.getElementById('radar-search').addEventListener('input', (function(){
+  var t;
+  return function(){
+    clearTimeout(t);
+    t = setTimeout(filterStocks, 200);
+  };
+})());
 
 // === Select List Dropdown ===
 let listData = [];
@@ -674,11 +694,15 @@ function renderListDropdown(filter){
 
 document.getElementById('select-list-btn').addEventListener('click', function(e){
   e.stopPropagation();
-  document.getElementById('select-list-dropdown').classList.toggle('open');
+  var dd = document.getElementById('select-list-dropdown');
+  var open = dd.classList.toggle('open');
+  this.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
 document.addEventListener('click', function(e){
   if (!e.target.closest('.select-list-wrap')) {
     document.getElementById('select-list-dropdown').classList.remove('open');
+    var btn = document.getElementById('select-list-btn');
+    if (btn) btn.setAttribute('aria-expanded','false');
   }
 });
 document.getElementById('list-search').addEventListener('input', function(){
@@ -749,8 +773,8 @@ document.getElementById('bench-benchmark').addEventListener('click', function(){
 });
 
 document.querySelectorAll('.sortable').forEach(th=>{
-  th.addEventListener('click',function(){
-    const col=this.dataset.col;
+  function activate(){
+    const col=th.dataset.col;
     if(sortCol===col){
       sortDir = sortDir==='desc' ? 'asc' : 'desc';
     } else {
@@ -758,8 +782,14 @@ document.querySelectorAll('.sortable').forEach(th=>{
       sortDir = (col==='ticker' || col==='name') ? 'asc' : 'desc';
     }
     updateSortArrows();
-    sortStocks();
     filterStocks();
+  }
+  th.addEventListener('click', activate);
+  th.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      activate();
+    }
   });
 });
 </script>

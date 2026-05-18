@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load custom_filters %}
+{% block title %}Compare | Axiom Alpha{% endblock %}
 
 {% block content %}
 <style>
@@ -104,17 +105,17 @@
     <!-- Charts Side by Side -->
     <div class="compare-grid" style="margin-bottom:2rem;">
         <div class="glass-card" style="padding:0; overflow:hidden; height:350px;">
-            <div class="tradingview-widget-container" style="height:100%;width:100%">
+            <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
                 <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js">
                 { "symbol": "{{ analysis1.tv_symbol }}", "interval": "D", "theme": "dark", "style": "1", "locale": "en", "hide_side_toolbar": true, "allow_symbol_change": false, "save_image": false, "hide_legend": true, "width": "100%", "height": "100%" }
                 </script>
             </div>
         </div>
         <div class="glass-card" style="padding:0; overflow:hidden; height:350px;">
-            <div class="tradingview-widget-container" style="height:100%;width:100%">
+            <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
                 <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js">
                 { "symbol": "{{ analysis2.tv_symbol }}", "interval": "D", "theme": "dark", "style": "1", "locale": "en", "hide_side_toolbar": true, "allow_symbol_change": false, "save_image": false, "hide_legend": true, "width": "100%", "height": "100%" }
                 </script>
             </div>
@@ -204,10 +205,17 @@
     </div>
 
     {% else %}
-    <div class="glass-card" style="text-align:center; padding:4rem 2rem;">
-        <i data-lucide="git-compare" style="width:64px;height:64px;color:var(--brand-teal);margin-bottom:1.5rem;opacity:0.5;"></i>
-        <h2 style="color:var(--brand-light);margin-bottom:0.75rem;">Compare Any Two Stocks</h2>
-        <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">Enter two stock symbols above to get a comprehensive side-by-side analysis.</p>
+    <div class="glass-card" style="text-align:center; padding:3rem 2rem;">
+        <i data-lucide="git-compare" style="width:56px;height:56px;color:var(--brand-teal);margin-bottom:1.25rem;opacity:0.5;"></i>
+        <h2 style="color:var(--brand-light);margin-bottom:0.5rem;font-size:1.25rem;">Compare Any Two Stocks</h2>
+        <p style="color:var(--text-secondary); max-width:500px; margin:0 auto 1.5rem;font-size:0.85rem;">Enter two stock symbols above to get a comprehensive side-by-side analysis.</p>
+        <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;font-size:0.8rem;">
+            <span style="color:var(--text-secondary);font-weight:600;margin-right:0.25rem;">Try:</span>
+            <a href="?symbol1=AAPL&market1=US&symbol2=MSFT&market2=US" style="padding:0.3rem 0.7rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(86,182,198,0.05);color:var(--brand-teal);text-decoration:none;font-weight:600;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand-teal)';this.style.background='rgba(86,182,198,0.12)'" onmouseout="this.style.borderColor='rgba(138,203,208,0.2)';this.style.background='rgba(86,182,198,0.05)'">AAPL vs MSFT</a>
+            <a href="?symbol1=NVDA&market1=US&symbol2=AMD&market2=US" style="padding:0.3rem 0.7rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(86,182,198,0.05);color:var(--brand-teal);text-decoration:none;font-weight:600;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand-teal)';this.style.background='rgba(86,182,198,0.12)'" onmouseout="this.style.borderColor='rgba(138,203,208,0.2)';this.style.background='rgba(86,182,198,0.05)'">NVDA vs AMD</a>
+            <a href="?symbol1=GOOGL&market1=US&symbol2=META&market2=US" style="padding:0.3rem 0.7rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(86,182,198,0.05);color:var(--brand-teal);text-decoration:none;font-weight:600;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand-teal)';this.style.background='rgba(86,182,198,0.12)'" onmouseout="this.style.borderColor='rgba(138,203,208,0.2)';this.style.background='rgba(86,182,198,0.05)'">GOOGL vs META</a>
+            <a href="?symbol1=BBCA&market1=ID&symbol2=BBRI&market2=ID" style="padding:0.3rem 0.7rem;border-radius:6px;border:1px solid rgba(138,203,208,0.2);background:rgba(86,182,198,0.05);color:var(--brand-teal);text-decoration:none;font-weight:600;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--brand-teal)';this.style.background='rgba(86,182,198,0.12)'" onmouseout="this.style.borderColor='rgba(138,203,208,0.2)';this.style.background='rgba(86,182,198,0.05)'">BBCA vs BBRI</a>
+        </div>
     </div>
     {% endif %}
 </div>

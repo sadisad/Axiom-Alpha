@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% block title %}Alerts | Axiom Alpha{% endblock %}
 
 {% block content %}
 <div style="max-width:900px; margin:0 auto;">
@@ -9,9 +10,9 @@
   </div>
 
   <div class="panel" style="padding:0; overflow:hidden; min-height:600px;">
-    <div class="tradingview-widget-container" style="height:100%; width:100%;">
+    <div class="tradingview-widget-container" data-tv-lazy style="height:100%; width:100%;">
       <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+      <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-events.js">
       {
       "colorTheme": "dark",
       "isTransparent": true,
@@ -46,8 +47,13 @@
     </div>
     {% endfor %}
     {% else %}
-    <div style="text-align:center; padding:1.5rem 0; color:var(--text-secondary);">
-      <p style="font-size:0.82rem;">No active alerts. Create one to get notified.</p>
+    <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); border:1px dashed rgba(138,203,208,0.15); border-radius:8px;">
+      <i data-lucide="bell-off" style="width:36px; height:36px; opacity:0.4; margin-bottom:0.5rem;"></i>
+      <p style="font-size:0.88rem; font-weight:600; color:var(--brand-light); margin-bottom:0.3rem;">No active alerts</p>
+      <p style="font-size:0.75rem; margin-bottom:1rem;">Get notified the moment a stock hits your target price.</p>
+      <button onclick="document.getElementById('alert-modal').style.display='flex'" class="btn" style="padding:0.4rem 1rem; font-size:0.78rem;">
+        <i data-lucide="plus" style="width:14px; height:14px;"></i> Create your first alert
+      </button>
     </div>
     {% endif %}
   </div>
@@ -73,8 +79,13 @@
     </div>
     {% endfor %}
     {% else %}
-    <div style="text-align:center; padding:2rem 0; color:var(--text-secondary);">
-      <p style="font-size:0.85rem;">Add stocks to your watchlist from the Radar</p>
+    <div style="text-align:center; padding:2rem 1rem; color:var(--text-secondary); border:1px dashed rgba(138,203,208,0.15); border-radius:8px;">
+      <i data-lucide="star" style="width:36px; height:36px; opacity:0.4; margin-bottom:0.5rem;"></i>
+      <p style="font-size:0.88rem; font-weight:600; color:var(--brand-light); margin-bottom:0.3rem;">Watchlist is empty</p>
+      <p style="font-size:0.75rem; margin-bottom:1rem;">Save stocks you want to track. Click ☆ on any stock detail page to add it.</p>
+      <a href="{% url 'radar' %}" class="btn" style="padding:0.4rem 1rem; font-size:0.78rem; text-decoration:none;">
+        <i data-lucide="radar" style="width:14px; height:14px;"></i> Browse Radar
+      </a>
     </div>
     {% endif %}
   </div>

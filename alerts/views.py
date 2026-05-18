@@ -168,8 +168,20 @@ def radar(request):
 
 def radar_scores(request):
     market = request.GET.get('market', 'US')
-    size = min(int(request.GET.get('size', 25)), 100)
+    try:
+        size = min(max(int(request.GET.get('size', 25)), 1), 100)
+    except (TypeError, ValueError):
+        size = 25
     list_key = request.GET.get('list', '')
+
+    # Cache hot results in-process. Key includes the inputs that affect output.
+    # 90s TTL is short enough to feel "live" but cuts ~90% of yfinance load.
+    from django.core.cache import cache
+    cache_key = f'radar_scores:{market}:{size}:{list_key}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse(cached)
+
     if list_key and list_key in STOCK_LISTS:
         symbols = STOCK_LISTS[list_key]['symbols'][:100]
     elif market == 'ID':
@@ -178,12 +190,19 @@ def radar_scores(request):
         symbols = SP500_SYMBOLS[:size]
     try:
         scores = get_market_scores(symbols, market)
-        return JsonResponse({'stocks': scores, 'market': market, 'size': len(symbols)})
+        payload = {'stocks': scores, 'market': market, 'size': len(symbols)}
+        cache.set(cache_key, payload, timeout=90)
+        return JsonResponse(payload)
     except Exception as e:
+        # Don't cache errors — let next request retry.
         return JsonResponse({'stocks': [], 'market': market, 'error': str(e)})
 
 
 def stock_lists(request):
+    from django.core.cache import cache
+    cached = cache.get('stock_lists:groups')
+    if cached is not None:
+        return JsonResponse(cached)
     categories = {}
     for key, lst in STOCK_LISTS.items():
         cat = lst['category']
@@ -203,7 +222,10 @@ def stock_lists(request):
     for cat in categories:
         if cat not in ordered:
             result.append({'category': cat, 'lists': categories[cat]})
-    return JsonResponse({'groups': result})
+    payload = {'groups': result}
+    # Static data — cache 1 hour.
+    cache.set('stock_lists:groups', payload, timeout=3600)
+    return JsonResponse(payload)
 
 
 def headlines(request):
@@ -558,6 +580,14 @@ def prices_api(request):
     while len(markets) < len(symbols):
         markets.append('US')
     pairs = list(zip(symbols, markets[:len(symbols)]))
+
+    # Cache by sorted pair list so order-different requests share results.
+    from django.core.cache import cache
+    cache_key = 'prices:' + ','.join(sorted(f'{s}:{m}' for s, m in pairs))
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse({'prices': cached})
+
     stock_data = batch_stock_data(pairs)
     prices = {}
     for sym in symbols:
@@ -570,7 +600,36 @@ def prices_api(request):
                 'is_positive': d.get('is_positive', True),
                 'current_price': d.get('current_price', 0),
             }
+    # 25s TTL — slightly less than client refresh interval to keep prices fresh
+    # while still cutting most yfinance round-trips.
+    cache.set(cache_key, prices, timeout=25)
     return JsonResponse({'prices': prices})
+
+
+def indices_api(request):
+    """Public endpoint that returns live quotes for the dashboard index strip.
+    Symbols are hard-coded since they are part of the page chrome, not user input."""
+    from django.core.cache import cache
+    cached = cache.get('indices:dashboard')
+    if cached is not None:
+        return JsonResponse(cached)
+
+    # SPY = S&P 500 ETF, QQQ = Nasdaq 100 ETF, DIA = Dow 30 ETF,
+    # BTC-USD = Bitcoin USD, ^TNX = 10Y Treasury yield index.
+    symbols = ['SPY', 'QQQ', 'DIA', 'BTC-USD', '^TNX']
+    pairs = [(s, 'US') for s in symbols]
+    data = batch_stock_data(pairs)
+    out = {}
+    for s in symbols:
+        d = data.get(s) or {}
+        out[s] = {
+            'price': d.get('price', '-'),
+            'change': d.get('change', 0),
+            'is_positive': d.get('is_positive', True),
+        }
+    payload = {'indices': out}
+    cache.set('indices:dashboard', payload, timeout=30)
+    return JsonResponse(payload)
 
 
 def market_status(request):
@@ -755,7 +814,17 @@ def sector_peers_api(request):
     if not sector:
         return JsonResponse({'peers': []})
     symbols = SP500_SYMBOLS if market == 'US' else IDX_SYMBOLS
-    limit = min(int(request.GET.get('limit', 8)), 20)
+    try:
+        limit = min(max(int(request.GET.get('limit', 8)), 1), 20)
+    except (TypeError, ValueError):
+        limit = 8
+
+    # Sector composition is relatively stable. Cache 10 minutes.
+    from django.core.cache import cache
+    cache_key = f'sector_peers:{market}:{sector.lower()}:{exclude}:{limit}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse(cached)
 
     def fetch():
         results = []
@@ -787,6 +856,8 @@ def sector_peers_api(request):
         results.sort(key=lambda x: x['scores']['score'], reverse=True)
         return results[:limit]
 
-    cache_key = f'peers_{market}_{sector}_{exclude}'
-    results = _get_cached(cache_key, fetch, ttl=SCORES_CACHE_TTL)
-    return JsonResponse({'peers': results})
+    cache_key_internal = f'peers_{market}_{sector}_{exclude}'
+    results = _get_cached(cache_key_internal, fetch, ttl=SCORES_CACHE_TTL)
+    payload = {'peers': results}
+    cache.set(cache_key, payload, timeout=600)
+    return JsonResponse(payload)

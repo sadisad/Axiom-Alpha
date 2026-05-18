@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% block title %}Portfolios | Axiom Alpha{% endblock %}
 
 {% block content %}
 <style>
@@ -132,9 +133,9 @@
         <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary);">Portfolio Performance</div>
       </div>
       <div style="height:350px;">
-        <div class="tradingview-widget-container" style="height:100%; width:100%;">
+        <div class="tradingview-widget-container" data-tv-lazy style="height:100%; width:100%;">
           <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+          <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js">
           {"symbol":"{% if chart_symbol %}{{ chart_symbol }}{% else %}AMEX:SPY{% endif %}","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
           </script>
         </div>

@@ -1,4 +1,5 @@
 {% extends 'alerts/base.html' %}
+{% block title %}Hub | Axiom Alpha{% endblock %}
 {% block content %}
 <style>
 .hub { display:flex; flex-direction:column; gap:0.6rem; min-width:0; width:100%; }
@@ -33,7 +34,8 @@
 
 /* Returns table */
 .returns-tabs { display:flex; gap:0.3rem; flex-wrap:wrap; }
-.rtab { padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem; font-weight:700; cursor:pointer; border:1px solid rgba(138,203,208,0.15); color:var(--text-secondary); background:transparent; transition:all 0.15s; }
+.rtab { padding:0.2rem 0.55rem; border-radius:5px; font-size:0.7rem; font-weight:700; cursor:pointer; border:1px solid rgba(138,203,208,0.15); color:var(--text-secondary); background:transparent; transition:all 0.15s; font-family:'Outfit',sans-serif; }
+.rtab:hover { border-color:var(--brand-teal); color:var(--brand-teal); }
 .rtab.active { background:var(--brand-teal); color:#0d0645; border-color:var(--brand-teal); }
 .returns-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
 .ret-col-title { font-size:0.62rem; font-weight:700; padding:0.25rem 0.45rem; border-radius:4px; margin-bottom:0.35rem; display:inline-flex; align-items:center; gap:0.3rem; }
@@ -192,11 +194,11 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
     <div class="panel">
       <div class="sec-head">
         <div class="panel-title" style="margin:0;">⚡ STRATEGY PICKS</div>
-        <div style="display:flex; gap:0.25rem; flex-wrap:wrap;">
-          <span class="rtab active" onclick="filterStrategy('compounders',this)">Compounders</span>
-          <span class="rtab" onclick="filterStrategy('hypergrowth',this)">Hypergrowth</span>
-          <span class="rtab" onclick="filterStrategy('value',this)">Value</span>
-          <span class="rtab" onclick="filterStrategy('momentum',this)">Momentum</span>
+        <div style="display:flex; gap:0.25rem; flex-wrap:wrap;" role="tablist" aria-label="Strategy filter">
+          <button type="button" class="rtab active" onclick="filterStrategy('compounders',this)" role="tab" aria-selected="true">Compounders</button>
+          <button type="button" class="rtab" onclick="filterStrategy('hypergrowth',this)" role="tab" aria-selected="false">Hypergrowth</button>
+          <button type="button" class="rtab" onclick="filterStrategy('value',this)" role="tab" aria-selected="false">Value</button>
+          <button type="button" class="rtab" onclick="filterStrategy('momentum',this)" role="tab" aria-selected="false">Momentum</button>
         </div>
       </div>
       <div class="strategy-cards" id="strategy-cards"></div>
@@ -282,11 +284,11 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
     <div class="panel">
       <div class="sec-head">
         <div class="panel-title" style="margin:0;">📊 TRENDING PORTFOLIOS</div>
-        <div style="display:flex; gap:0.25rem;">
-          <span class="rtab active" onclick="activateTab(this)">Top</span>
-          <span class="rtab" onclick="activateTab(this)">USA</span>
-          <span class="rtab" onclick="activateTab(this)">Europe</span>
-          <span class="rtab" onclick="activateTab(this)">Global</span>
+        <div style="display:flex; gap:0.25rem;" role="tablist" aria-label="Region filter">
+          <button type="button" class="rtab active" onclick="activateTab(this)" role="tab" aria-selected="true">Top</button>
+          <button type="button" class="rtab" onclick="activateTab(this)" role="tab" aria-selected="false">USA</button>
+          <button type="button" class="rtab" onclick="activateTab(this)" role="tab" aria-selected="false">Europe</button>
+          <button type="button" class="rtab" onclick="activateTab(this)" role="tab" aria-selected="false">Global</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
@@ -313,26 +315,17 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
           </tbody>
         </table>
       </div>
-      <div style="margin-top:0.5rem; border-radius:8px; overflow:hidden; border:1px solid rgba(138,203,208,0.08); height:200px; position:relative;">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-          <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-          {"symbol":"AMEX:SPY","width":"100%","height":"100%","locale":"en","dateRange":"12M","colorTheme":"dark","isTransparent":true,"autosize":true,"largeChartUrl":""}
-          </script>
-        </div>
-        <div class="tv-overlay"></div>
-      </div>
     </div>
 
     <div class="panel">
       <div class="sec-head">
         <div class="panel-title" style="margin:0;">📈 TOTAL RETURNS</div>
-        <div class="returns-tabs">
-          <span class="rtab active" data-period="1W" onclick="switchReturns('1W',this)">1W</span>
-          <span class="rtab" data-period="1M" onclick="switchReturns('1M',this)">1M</span>
-          <span class="rtab" data-period="3M" onclick="switchReturns('3M',this)">3M</span>
-          <span class="rtab" data-period="YTD" onclick="switchReturns('YTD',this)">YTD</span>
-          <span class="rtab" data-period="1Y" onclick="switchReturns('1Y',this)">1Y</span>
+        <div class="returns-tabs" role="tablist" aria-label="Returns period">
+          <button type="button" class="rtab active" data-period="1W" onclick="switchReturns('1W',this)" role="tab" aria-selected="true">1W</button>
+          <button type="button" class="rtab" data-period="1M" onclick="switchReturns('1M',this)" role="tab" aria-selected="false">1M</button>
+          <button type="button" class="rtab" data-period="3M" onclick="switchReturns('3M',this)" role="tab" aria-selected="false">3M</button>
+          <button type="button" class="rtab" data-period="YTD" onclick="switchReturns('YTD',this)" role="tab" aria-selected="false">YTD</button>
+          <button type="button" class="rtab" data-period="1Y" onclick="switchReturns('1Y',this)" role="tab" aria-selected="false">1Y</button>
         </div>
       </div>
       <div class="returns-grid">
@@ -414,9 +407,9 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
         <div class="panel-title" style="margin:0;">🗺️ US MARKET HEATMAP</div>
       </div>
       <div style="height:300px; position:relative;">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
+          <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js">
           {"exchanges":[],"dataSource":"SPX500","grouping":"sector","blockSize":"market_cap_basic","blockColor":"change","locale":"en","colorTheme":"dark","hasTopBar":false,"isZoomEnabled":true,"hasSymbolTooltip":true,"width":"100%","height":"100%"}
           </script>
         </div>
@@ -428,9 +421,9 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
         <div class="panel-title" style="margin:0;">📰 FINANCIAL NEWS</div>
       </div>
       <div style="height:300px; position:relative;">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
           <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+          <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js">
           {"feedMode":"all_symbols","isTransparent":true,"displayMode":"regular","width":"100%","height":"100%","colorTheme":"dark","locale":"en"}
           </script>
         </div>
@@ -445,9 +438,9 @@ iframe[src*="tradingview"] { margin-bottom: -32px; }
       <div class="panel-title" style="margin:0;">📅 ECONOMIC CALENDAR — US & INDONESIA</div>
     </div>
     <div style="height:260px; position:relative;">
-      <div class="tradingview-widget-container" style="height:100%;width:100%">
+      <div class="tradingview-widget-container" data-tv-lazy style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+        <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-events.js">
         {"colorTheme":"dark","isTransparent":true,"width":"100%","height":"100%","locale":"en","importanceFilter":"-1,0,1","countryFilter":"us,id"}
         </script>
       </div>
@@ -542,19 +535,31 @@ function renderReturns(period) {
 }
 
 function switchReturns(period, el) {
-  el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.parentElement.querySelectorAll('.rtab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
   el.classList.add('active');
+  el.setAttribute('aria-selected','true');
   renderReturns(period);
 }
 
 function activateTab(el) {
-  el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.parentElement.querySelectorAll('.rtab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
   el.classList.add('active');
+  el.setAttribute('aria-selected','true');
 }
 
 function filterStrategy(strategy, el) {
-  el.parentElement.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.parentElement.querySelectorAll('.rtab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
   el.classList.add('active');
+  el.setAttribute('aria-selected','true');
   document.querySelectorAll('#strategy-cards .scard').forEach(c => {
     c.style.display = c.dataset.strategy === strategy ? '' : 'none';
   });
@@ -569,5 +574,39 @@ document.addEventListener('click', function(e) {
     document.getElementById('universe-menu').style.display = 'none';
   }
 });
+
+// === Live market indices strip ===
+(function(){
+  var MAP = {
+    'SPY':     {priceId:'idx-spy-price', changeId:'idx-spy-change'},
+    'QQQ':     {priceId:'ndx-price',     changeId:'ndx-change'},
+    'DIA':     {priceId:'dia-price',     changeId:'dia-change'},
+    'BTC-USD': {priceId:'btc-price',     changeId:'btc-change'},
+    '^TNX':    {priceId:'tnx-price',     changeId:'tnx-change'},
+  };
+  function paint(d){
+    if (!d || !d.indices) return;
+    Object.keys(MAP).forEach(function(sym){
+      var slot = MAP[sym], q = d.indices[sym];
+      if (!q) return;
+      var pe = document.getElementById(slot.priceId);
+      var ce = document.getElementById(slot.changeId);
+      if (pe) pe.textContent = q.price || '--';
+      if (ce) {
+        var change = q.change || 0;
+        var sign = change >= 0 ? '+' : '';
+        ce.textContent = (q.is_positive ? '\u25B2 ' : '\u25BC ') + sign + change + '%';
+        ce.style.color = q.is_positive ? 'var(--success)' : 'var(--danger)';
+      }
+    });
+  }
+  function load(){
+    if (document.hidden) return;
+    fetch('/api/indices/').then(function(r){return r.json();}).then(paint).catch(function(){});
+  }
+  load();
+  setInterval(load, 30000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
+})();
 </script>
 {% endblock %}

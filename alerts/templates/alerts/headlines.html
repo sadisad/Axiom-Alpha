@@ -1,5 +1,6 @@
 {% extends 'alerts/base.html' %}
 {% load static %}
+{% block title %}Headlines | Axiom Alpha{% endblock %}
 
 {% block content %}
 <div style="max-width:900px; margin:0 auto;">
@@ -9,9 +10,9 @@
   </div>
 
   <div class="panel" style="padding:0; overflow:hidden; min-height:600px;">
-    <div class="tradingview-widget-container" style="height:100%; width:100%;">
+    <div class="tradingview-widget-container" data-tv-lazy style="height:100%; width:100%;">
       <div class="tradingview-widget-container__widget" style="height:100%; width:100%;"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+      <script class="tv-config" type="application/json" data-src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js">
       {
       "feedMode": "all_symbols",
       "isTransparent": true,

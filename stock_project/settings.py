@@ -155,4 +155,19 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'dashboard'
 
+# Cache for hot read endpoints (radar scores, stock lists, sector peers, prices).
+# Local-memory cache is per-process; for multi-worker deployments switch to Redis
+# by changing BACKEND to 'django.core.cache.backends.redis.RedisCache' and setting
+# LOCATION to the Redis URL.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'axiom-default',
+        'TIMEOUT': 60,
+        'OPTIONS': {
+            'MAX_ENTRIES': 500,
+        },
+    }
+}
+
 # Triggering reload for static files

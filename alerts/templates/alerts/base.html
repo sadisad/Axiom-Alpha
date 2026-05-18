@@ -13,11 +13,11 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Axiom Alpha | Pro Trading Terminal">
     <meta name="twitter:description" content="Institutional-grade stock analysis and portfolio intelligence.">
-    <title>Axiom Alpha | Pro Trading</title>
+    <title>{% block title %}Axiom Alpha | Pro Trading{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'alerts/images/favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'alerts/images/AxiomAlpha-logo-transparent.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <style>
         :root {
             --brand-dark: #170C79;
@@ -119,6 +119,25 @@
         html[data-theme="light"] .hamburger span { background: #1a1a2e; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        /* Accessible focus ring for keyboard users.
+           :focus-visible only appears for keyboard focus, not mouse clicks. */
+        :focus { outline: none; }
+        :focus-visible {
+            outline: 2px solid var(--brand-teal);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        [role="button"]:focus-visible,
+        [role="tab"]:focus-visible {
+            outline: 2px solid var(--brand-teal);
+            outline-offset: 2px;
+        }
 
         /* NOTE: overflow-x:hidden on <html> breaks position:sticky for descendants.
            Use overflow-x:clip on html (does not establish a new scroll container)
@@ -448,7 +467,13 @@
             <div class="topnav-links">
                 <div class="market-status" title="US market is {{ market_status_text }} (NYSE / NASDAQ trading hours: 09:30–16:00 ET, Mon–Fri)">
                     <span class="market-dot" style="background:{{ market_status_color }};"></span>
+                    <span style="font-size:0.6rem;color:var(--text-secondary);font-weight:600;">US</span>
                     <span style="color:{{ market_status_color }};">{{ market_status_text }}</span>
+                </div>
+                <div class="market-status" title="IDX market is {{ idx_market_status_text }} (Indonesia Stock Exchange trading hours: 09:00–16:00 WIB, Mon–Fri)">
+                    <span class="market-dot" style="background:{{ idx_market_status_color }};"></span>
+                    <span style="font-size:0.6rem;color:var(--text-secondary);font-weight:600;">ID</span>
+                    <span style="color:{{ idx_market_status_color }};">{{ idx_market_status_text }}</span>
                 </div>
                 <div class="topnav-divider"></div>
                 <a href="{% url 'radar' %}" class="topnav-link {% if request.resolver_match.url_name == 'radar' %}active{% endif %}"><i data-lucide="radar" style="width:15px;height:15px;"></i> Radar</a>
@@ -564,8 +589,30 @@
             btn.classList.toggle('open');
             document.body.classList.toggle('mobile-nav-open');
         }
+        // Auto-close mobile nav when a link is clicked.
+        (function(){
+            var nav = document.getElementById('mobile-nav');
+            if (!nav) return;
+            nav.addEventListener('click', function(e){
+                var a = e.target.closest('a');
+                if (a && !a.hasAttribute('onclick')) {
+                    nav.classList.remove('open');
+                    var btn = document.getElementById('hamburger-btn');
+                    if (btn) btn.classList.remove('open');
+                    document.body.classList.remove('mobile-nav-open');
+                }
+            });
+        })();
+        // Sync theme across tabs.
+        window.addEventListener('storage', function(e){
+            if (e.key !== 'theme') return;
+            var isLight = e.newValue === 'light';
+            document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+            updateThemeIcon(isLight);
+        });
 
-        // Auto-refresh prices for watchlist & portfolio
+        // Auto-refresh prices for watchlist & portfolio.
+        // Visibility-aware: pauses when tab is hidden, resumes when visible.
         function initAutoRefresh() {
             var priceEls = document.querySelectorAll('[data-price-symbol]');
             if (!priceEls.length) return;
@@ -575,9 +622,14 @@
                 symbols.push(el.dataset.priceSymbol);
                 markets.push(el.dataset.priceMarket || 'US');
             });
-            setInterval(function() {
+            var REFRESH_MS = 30000;
+            var failures = 0;
+            var timer = null;
+            function tick() {
+                if (document.hidden) return; // skip when tab is in background
                 var url = '/api/prices/?symbols=' + symbols.join(',') + '&markets=' + markets.join(',');
                 fetch(url).then(function(r){return r.json();}).then(function(data) {
+                    failures = 0;
                     if (!data.prices) return;
                     Object.keys(data.prices).forEach(function(sym) {
                         var p = data.prices[sym];
@@ -602,10 +654,71 @@
                             }
                         });
                     });
-                }).catch(function(){});
-            }, 30000);
+                }).catch(function(){
+                    // Exponential backoff on failures, capped at 5 minutes.
+                    failures++;
+                    if (failures >= 3) {
+                        clearInterval(timer);
+                        var backoff = Math.min(REFRESH_MS * Math.pow(2, failures - 2), 300000);
+                        timer = setInterval(tick, backoff);
+                    }
+                });
+            }
+            timer = setInterval(tick, REFRESH_MS);
+            // Refresh immediately when tab becomes visible after being hidden.
+            document.addEventListener('visibilitychange', function(){
+                if (!document.hidden) tick();
+            });
         }
         document.addEventListener('DOMContentLoaded', initAutoRefresh);
+
+        // === Lazy-load TradingView widgets ===
+        // Markup pattern (use this in templates):
+        //   <div class="tradingview-widget-container" data-tv-lazy>
+        //     <div class="tradingview-widget-container__widget"></div>
+        //     <script class="tv-config" type="application/json"
+        //             data-src="https://s3.tradingview.com/external-embedding/embed-widget-XYZ.js">
+        //       {"symbol":"NASDAQ:AAPL", ...}
+        //     <\/script>
+        //   </div>
+        // The real script tag is only injected when the container scrolls
+        // near the viewport, saving network and CPU on initial page load.
+        (function(){
+            function activate(container){
+                var cfg = container.querySelector('script.tv-config');
+                if (!cfg || cfg.dataset.tvActivated) return;
+                cfg.dataset.tvActivated = '1';
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.async = true;
+                // textContent must be set before src so TV's loader sees the config.
+                s.textContent = cfg.textContent;
+                s.src = cfg.dataset.src;
+                cfg.parentNode.replaceChild(s, cfg);
+            }
+            function init(){
+                var lazyEls = document.querySelectorAll('[data-tv-lazy]');
+                if (!lazyEls.length) return;
+                if (!('IntersectionObserver' in window)) {
+                    lazyEls.forEach(activate);
+                    return;
+                }
+                var io = new IntersectionObserver(function(entries){
+                    entries.forEach(function(e){
+                        if (e.isIntersecting) {
+                            activate(e.target);
+                            io.unobserve(e.target);
+                        }
+                    });
+                }, { rootMargin: '300px 0px' });
+                lazyEls.forEach(function(el){ io.observe(el); });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
     </script>
 </body>
 </html>
